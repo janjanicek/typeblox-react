@@ -30,6 +30,7 @@ export default function Editor() {
 
   // Update a block's content
   const handleUpdateBlock = (blockId: string, newContent: string) => {
+    console.log("handleUpdateBlock", blockId, newContent);
     const updatedBlocks = blocks.map((block) =>
       block.id === blockId ? { ...block, content: newContent } : block,
     );
@@ -80,7 +81,7 @@ export default function Editor() {
 
   return (
     <div className="mx-auto mt-10 max-w-3xl p-4">
-      <h1 className="text-2xl font-bold mb-4">Typor Block Editor</h1>
+      <h1 className="text-2xl font-bold mb-4">Typedom Block Editor</h1>
 
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext

@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import BlockRow from "./BlockRow";
 import { Block } from "./utils/types";
+import { FormattingProvider } from "./utils/FormattingContext";
 
 interface SortableItemProps {
   block: Block;
@@ -17,6 +18,9 @@ const SortableItem: React.FC<SortableItemProps> = ({
   onRemoveBlock,
 }) => {
   const { id, type, content } = block;
+
+  // Create a RefObject specifically for HTMLElement
+  const contentRef = useRef<HTMLElement>(null!); // Use a non-null assertion (!)
 
   const {
     attributes,
@@ -34,16 +38,34 @@ const SortableItem: React.FC<SortableItemProps> = ({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes}>
-      <BlockRow
-        blockId={id}
-        type={type}
-        content={content}
-        dragListeners={listeners}
+    <div
+      ref={(node) => {
+        setNodeRef(node); // Attach the sortable node reference
+        if (node) contentRef.current = node as HTMLElement; // Explicitly set contentRef
+      }}
+      style={style}
+      {...attributes}
+    >
+      <FormattingProvider
+        blockId={block.id}
         onUpdate={onUpdateBlock}
-        onAddBelow={onAddBlockBelow}
-        onRemove={onRemoveBlock}
-      />
+        createSelectedElement={(range) => {
+          const wrapper = document.createElement("span");
+          wrapper.className = "selected";
+          wrapper.appendChild(range.extractContents());
+          range.insertNode(wrapper);
+        }}
+      >
+        <BlockRow
+          blockId={id}
+          type={type}
+          content={content}
+          dragListeners={listeners}
+          onUpdate={onUpdateBlock}
+          onAddBelow={onAddBlockBelow}
+          onRemove={onRemoveBlock}
+        />
+      </FormattingProvider>
     </div>
   );
 };

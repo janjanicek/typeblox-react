@@ -1,27 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { HexColorPicker } from "react-colorful";
+import ContextualMenu from "./components/ContextualMenu";
 import Icon from "./components/Icon";
+import useBlockStore from "./stores/BlockStore";
+import { AVAILABLE_FONTS } from "./utils/constants";
+import { useFormatting } from "./utils/FormattingContext";
 
 interface ToolbarProps {
   textMenuPosition: { top: number; left: number };
-  applyFormatting: (tagName: string, style?: Record<string, string>) => void;
-  detectStyle: () => {
-    color: string | null;
-    backgroundColor: string | null;
-    isBold: boolean;
-    isItalic: boolean;
-    isUnderline: boolean;
-    isStrikeout: boolean;
-    fontFamily: string | null;
-  };
   saveSelection: () => void;
   restoreSelection: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
   textMenuPosition,
-  applyFormatting,
-  detectStyle,
   saveSelection,
   restoreSelection,
 }) => {
@@ -36,20 +28,31 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const [isUnderline, setIsUnderline] = useState<boolean>(false);
   const [isStrikeout, setIsStrikeout] = useState<boolean>(false);
 
+  const { applyFormatting, unapplyFormatting, detectStyle } = useFormatting();
+  const { detectedStyles, setDetectedStyles } = useBlockStore();
+
   // Update color pickers when the detected style changes
   useEffect(() => {
-    const styles = detectStyle();
+    console.log(detectedStyles);
 
-    if (styles.color) setSelectedColor(styles.color);
-    if (styles.backgroundColor) setSelectedBgColor(styles.backgroundColor);
-    if (styles.fontFamily) setSelectedFont(styles.fontFamily); // Fetch the font from styles
+    if (detectedStyles.color) setSelectedColor(detectedStyles.color);
+    if (detectedStyles.backgroundColor)
+      setSelectedBgColor(detectedStyles.backgroundColor);
+    if (
+      detectedStyles.fontFamily &&
+      detectedStyles.fontFamily.indexOf("sans-serif") === -1
+    ) {
+      setSelectedFont(detectedStyles.fontFamily);
+    } else {
+      setSelectedFont("arial");
+    }
 
     // Update other detected styles (e.g., bold, italic, underline, strikeout)
-    setIsBold(styles.isBold);
-    setIsItalic(styles.isItalic);
-    setIsUnderline(styles.isUnderline);
-    setIsStrikeout(styles.isStrikeout);
-  }, []);
+    setIsBold(detectedStyles.isBold);
+    setIsItalic(detectedStyles.isItalic);
+    setIsUnderline(detectedStyles.isUnderline);
+    setIsStrikeout(detectedStyles.isStrikeout);
+  }, [detectedStyles]);
 
   const handleColorChange = (color: string) => {
     restoreSelection(); // Restore the saved selection
@@ -66,6 +69,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const handleFontChange = (font: string) => {
     restoreSelection(); // Restore the saved selection
     setSelectedFont(font);
+    console.log(selectedFont);
     applyFormatting("span", { fontFamily: font }); // Apply background color immediately
   };
 
@@ -84,9 +88,15 @@ const Toolbar: React.FC<ToolbarProps> = ({
     setShowBgColorPicker(!showBgColorPicker);
   };
 
+  const fontOptions = AVAILABLE_FONTS.map((font: string) => ({
+    label: font,
+    onClick: () => handleFontChange(font.toLowerCase()),
+    style: { fontFamily: font },
+  }));
+
   return (
     <div
-      className="menu-container flex absolute bg-white border border-gray-300 shadow-lg rounded p-2"
+      className="menu-container flex gap-1 absolute bg-white border border-gray-300 shadow-lg rounded p-2"
       style={{
         top: `${textMenuPosition.top}px`,
         left: `${textMenuPosition.left}px`,
@@ -98,27 +108,47 @@ const Toolbar: React.FC<ToolbarProps> = ({
       {/* Formatting Buttons */}
       <button
         className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-          isBold ? "bg-gray-700 text-white" : ""
+          isBold ? "bg-gray-300 text-white" : ""
         }`}
-        onClick={() => applyFormatting("b")}
+        onClick={() => {
+          !isBold ? applyFormatting("b") : unapplyFormatting("b");
+          setDetectedStyles(detectStyle());
+        }}
       >
         <Icon src="/icons/bold.svg" />
       </button>
       <button
         className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-          isItalic ? "bg-gray-700 text-white" : ""
+          isItalic ? "bg-gray-300 text-white" : ""
         }`}
-        onClick={() => applyFormatting("i")}
+        onClick={() => {
+          !isItalic ? applyFormatting("i") : unapplyFormatting("i");
+          setDetectedStyles(detectStyle());
+        }}
       >
         <Icon src="/icons/italic.svg" />
       </button>
       <button
         className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-          isUnderline ? "bg-gray-700 text-white" : ""
+          isUnderline ? "bg-gray-300 text-white" : ""
         }`}
-        onClick={() => applyFormatting("u")}
+        onClick={() => {
+          !isUnderline ? applyFormatting("u") : unapplyFormatting("u");
+          setDetectedStyles(detectStyle());
+        }}
       >
         <Icon src="/icons/underline.svg" />
+      </button>
+      <button
+        className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
+          isStrikeout ? "bg-gray-300 text-white" : ""
+        }`}
+        onClick={() => {
+          !isStrikeout ? applyFormatting("s") : unapplyFormatting("s");
+          setDetectedStyles(detectStyle());
+        }}
+      >
+        <Icon src="/icons/strikethrough.svg" />
       </button>
 
       {/* Font Size */}
@@ -126,43 +156,15 @@ const Toolbar: React.FC<ToolbarProps> = ({
         className="px-2 py-1 border-0 rounded hover:bg-gray-100"
         onClick={toggleFontSelectionPicker}
       >
-        Font
+        <span style={{ textTransform: "capitalize" }}>{selectedFont}</span>
       </button>
-      {showSelectFont && (
-        <div className="absolute left-10 top-0 bg-white border border-gray-300 shadow-lg p-2 z-10">
-          <p
-            onClick={() => {
-              setShowSelectFont(false);
-              handleFontChange("arial");
-            }}
-            className="block"
-            style={{ fontFamily: "arial" }}
-          >
-            Arial
-          </p>
-          <p
-            onClick={() => {
-              setShowSelectFont(false);
-              handleFontChange("courier");
-            }}
-            style={{ fontFamily: "courier" }}
-            className="block"
-          >
-            Courier
-          </p>
 
-          <p
-            onClick={() => {
-              setShowSelectFont(false);
-              handleFontChange("times new roman");
-            }}
-            style={{ fontFamily: "times new roman" }}
-            className="block"
-          >
-            Times New Roman
-          </p>
-        </div>
-      )}
+      <ContextualMenu
+        isVisible={showSelectFont}
+        position={{ top: 50, left: 200 }}
+        options={fontOptions}
+        onClose={() => setShowSelectFont(false)}
+      />
 
       {/* Text Color Picker */}
       <button
@@ -172,7 +174,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         <Icon src="/icons/palette.svg" />
       </button>
       {showTextColorPicker && (
-        <div className="absolute mt-5 z-10">
+        <div className="absolute mt-5 z-10" style={{ top: 30, left: 250 }}>
           <HexColorPicker color={selectedColor} onChange={handleColorChange} />
           <div className="mt-1 text-xs text-gray-500">
             Selected: {selectedColor}
@@ -188,7 +190,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         <Icon src="/icons/highlight.svg" />
       </button>
       {showBgColorPicker && (
-        <div className="absolute mt-5 z-10">
+        <div className="absolute mt-5 z-10" style={{ top: 30, left: 300 }}>
           <HexColorPicker
             color={selectedBgColor}
             onChange={handleBgColorChange}

@@ -1,7 +1,9 @@
-import React, { useState, useRef, useEffect, FC } from "react";
+import { useState, useRef, useEffect, FC } from "react";
 import Toolbar from "./Toolbar";
-import { toCssStyle } from "./utils/utils";
 import Icon from "./components/Icon";
+import ContextualMenu from "./components/ContextualMenu";
+import { useFormatting } from "./utils/FormattingContext";
+import useBlockStore from "./stores/BlockStore";
 
 interface BlockRowProps {
   blockId: string;
@@ -31,6 +33,10 @@ const BlockRow: FC<BlockRowProps> = ({
   const contentRef = useRef<HTMLDivElement | null>(null);
   const savedSelection = useRef<Range | null>(null);
 
+  const { createSelectedElement, detectStyle } = useFormatting();
+
+  const { setDetectedStyles } = useBlockStore();
+
   useEffect(() => {
     if (
       content &&
@@ -41,6 +47,10 @@ const BlockRow: FC<BlockRowProps> = ({
       contentRef.current.innerHTML = content;
     }
   }, [content, type]);
+
+  useEffect(() => {
+    setDetectedStyles(detectStyle());
+  }, [setDetectedStyles, detectStyle]);
 
   const saveSelection = () => {
     const selection = window.getSelection();
@@ -60,6 +70,7 @@ const BlockRow: FC<BlockRowProps> = ({
   const handleTextSelection = () => {
     removeSelectedWrapper();
     const selection = window.getSelection();
+    console.log("handleTextSelection", selection);
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
 
@@ -83,13 +94,6 @@ const BlockRow: FC<BlockRowProps> = ({
       createSelectedElement(range);
       setShowTextMenu(true);
     }
-  };
-
-  const createSelectedElement = (range: Range) => {
-    const wrapper = document.createElement("span");
-    wrapper.className = "selected";
-    wrapper.appendChild(range.extractContents());
-    range.insertNode(wrapper);
   };
 
   const removeSelectedWrapper = () => {
@@ -121,146 +125,6 @@ const BlockRow: FC<BlockRowProps> = ({
       document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, []);
-
-  const detectStyle = () => {
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      let currentNode = range.startContainer as Element;
-
-      // Default styles
-      const detectedStyles = {
-        color: null as string | null,
-        backgroundColor: null as string | null,
-        isBold: false,
-        isItalic: false,
-        isUnderline: false,
-        isStrikeout: false,
-        fontFamily: null as string | null,
-      };
-
-      // Traverse up the DOM tree
-      while (currentNode && currentNode.nodeType === Node.ELEMENT_NODE) {
-        // Stop when reaching the `p[data-typos-editor]` element
-        if (currentNode.matches("p[data-typos-editor]")) {
-          break;
-        }
-
-        const computedStyle = window.getComputedStyle(currentNode as Element);
-
-        // Detect color
-        if (!detectedStyles.color) {
-          detectedStyles.color = computedStyle.color || null;
-        }
-
-        // Detect background color
-        if (!detectedStyles.backgroundColor) {
-          detectedStyles.backgroundColor =
-            computedStyle.backgroundColor || null;
-        }
-
-        // Detect font-family
-        if (!detectedStyles.fontFamily) {
-          detectedStyles.fontFamily = computedStyle.fontFamily || null;
-        }
-
-        // Detect bold (font-weight >= 700)
-        if (!detectedStyles.isBold && computedStyle.fontWeight === "bold") {
-          detectedStyles.isBold = true;
-        }
-
-        // Detect italic
-        if (!detectedStyles.isItalic && computedStyle.fontStyle === "italic") {
-          detectedStyles.isItalic = true;
-        }
-
-        // Detect underline
-        if (
-          !detectedStyles.isUnderline &&
-          computedStyle.textDecoration.includes("underline")
-        ) {
-          detectedStyles.isUnderline = true;
-        }
-
-        // Detect strikeout
-        if (
-          !detectedStyles.isStrikeout &&
-          computedStyle.textDecoration.includes("line-through")
-        ) {
-          detectedStyles.isStrikeout = true;
-        }
-
-        // Move up to the parent node
-        currentNode = currentNode.parentElement!;
-      }
-
-      return detectedStyles;
-    }
-
-    // Return default styles if no selection is found
-    return {
-      color: null,
-      backgroundColor: null,
-      isBold: false,
-      isItalic: false,
-      isUnderline: false,
-      isStrikeout: false,
-      fontFamily: null,
-    };
-  };
-
-  const applyFormatting = (
-    tagName: string,
-    style: Record<string, string> = {},
-  ) => {
-    restoreSelection();
-
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-
-    const range = selection.getRangeAt(0);
-    const selectedElement = document.querySelector(".selected");
-
-    if (!selectedElement) {
-      createSelectedElement(range);
-      contentRef.current?.normalize();
-      onUpdate(blockId, contentRef.current?.innerHTML || "");
-      return;
-    }
-
-    let matchingParent: HTMLElement | null = null;
-    if (style) {
-      const leadingStyle = Object.keys(style)[0];
-      const styleKey = toCssStyle(leadingStyle);
-      matchingParent = selectedElement.closest<HTMLElement>(
-        `${tagName}[style*=${styleKey}]`,
-      );
-    }
-
-    if (matchingParent) {
-      Object.keys(style).forEach((key) => {
-        (matchingParent as HTMLElement).style[key as any] = style[key];
-      });
-      return;
-    }
-
-    const wrapper = document.createElement(tagName);
-    Object.keys(style).forEach((key: any) => {
-      wrapper.style[key] = style[key];
-    });
-
-    const parentElement = selectedElement.parentElement;
-    if (parentElement) {
-      parentElement.replaceChild(wrapper, selectedElement);
-      wrapper.appendChild(selectedElement);
-    } else {
-      selectedElement.replaceWith(wrapper);
-      wrapper.appendChild(selectedElement);
-    }
-
-    contentRef.current?.normalize();
-    onUpdate(blockId, contentRef.current?.innerHTML || "");
-  };
 
   return (
     <div
@@ -296,57 +160,36 @@ const BlockRow: FC<BlockRowProps> = ({
         </button>
       </div>
 
-      {showPlusMenu && (
-        <div className="absolute left-10 top-0 bg-white border border-gray-300 shadow-lg p-2 z-10">
-          <p
-            className="cursor-pointer hover:bg-gray-100 p-1"
-            onClick={() => {
-              setShowPlusMenu(false);
-              onAddBelow(blockId, "text");
-            }}
-          >
-            Add Text Block
-          </p>
-          <p
-            className="cursor-pointer hover:bg-gray-100 p-1"
-            onClick={() => {
-              setShowPlusMenu(false);
-              onAddBelow(blockId, "code");
-            }}
-          >
-            Add Code Block
-          </p>
-          <p
-            className="cursor-pointer hover:bg-gray-100 p-1"
-            onClick={() => {
-              setShowPlusMenu(false);
-              onAddBelow(blockId, "image");
-            }}
-          >
-            Add Image Block
-          </p>
-        </div>
-      )}
+      <ContextualMenu
+        isVisible={showPlusMenu}
+        position={{ top: 40, left: 20 }}
+        options={[
+          {
+            label: "Add Text Block",
+            onClick: () => onAddBelow(blockId, "text"),
+          },
+          {
+            label: "Add Code Block",
+            onClick: () => onAddBelow(blockId, "code"),
+          },
+          {
+            label: "Add Image Block",
+            onClick: () => onAddBelow(blockId, "image"),
+          },
+        ]}
+        onClose={() => setShowPlusMenu(false)}
+      />
 
-      {showDragMenu && (
-        <div className="absolute left-10 top-0 bg-white border border-gray-300 shadow-lg p-2 z-10">
-          <p
-            className="cursor-pointer hover:bg-gray-100 p-1"
-            onClick={() => {
-              setShowDragMenu(false);
-              onRemove(blockId);
-            }}
-          >
-            Remove block
-          </p>
-        </div>
-      )}
+      <ContextualMenu
+        isVisible={showDragMenu}
+        position={{ top: 40, left: 50 }}
+        options={[{ label: "Remove Block", onClick: () => onRemove(blockId) }]}
+        onClose={() => setShowDragMenu(false)}
+      />
 
       {showTextMenu && (
         <Toolbar
           textMenuPosition={textMenuPosition}
-          applyFormatting={applyFormatting}
-          detectStyle={detectStyle}
           saveSelection={saveSelection}
           restoreSelection={restoreSelection}
         />
@@ -355,10 +198,11 @@ const BlockRow: FC<BlockRowProps> = ({
       {type === "text" || type === "code" ? (
         <div
           ref={contentRef}
-          data-typos-editor="block"
+          data-typedom-editor="block"
+          data-typedom-id={blockId}
           contentEditable
           suppressContentEditableWarning
-          className="flex-1 outline-none border border-transparent px-2"
+          className="typedom flex-1 outline-none border border-transparent px-2"
           onBlur={() => onUpdate(blockId, contentRef.current?.innerHTML || "")}
           onKeyUp={handleTextSelection}
           onMouseUp={handleTextSelection}
