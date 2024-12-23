@@ -1,10 +1,7 @@
 // Editor.jsx
 import React, { useState } from "react";
 // dnd-kit imports
-import {
-  DndContext,
-  closestCenter,
-} from "@dnd-kit/core";
+import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
@@ -12,15 +9,17 @@ import {
 } from "@dnd-kit/sortable";
 
 import SortableItem from "./SortableItem";
+import { Block } from "./utils/types";
 
 export default function Editor() {
-  const [blocks, setBlocks] = useState([
-    { id: "1", type: "text", content: "Welcome to our custom block editor!" },
-    { id: "2", type: "text", content: "This editor supports text, code, and image blocks." },
+  const [blocks, setBlocks] = useState<Block[]>([
+    { id: "1", type: "text", content: "This is a text block." },
+    { id: "2", type: "code", content: "// This is a code block." },
+    { id: "3", type: "image", content: null },
   ]);
 
   // Handle drag-and-drop reordering
-  const handleDragEnd = (event) => {
+  const handleDragEnd = (event: any) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -30,9 +29,9 @@ export default function Editor() {
   };
 
   // Update a block's content
-  const handleUpdateBlock = (blockId, newContent) => {
+  const handleUpdateBlock = (blockId: string, newContent: string) => {
     const updatedBlocks = blocks.map((block) =>
-      block.id === blockId ? { ...block, content: newContent } : block
+      block.id === blockId ? { ...block, content: newContent } : block,
     );
     setBlocks(updatedBlocks);
 
@@ -43,21 +42,23 @@ export default function Editor() {
     //  console.log("Editor Content:", combinedHTML);
   };
 
-  // Add a new block of the specified type
-  const handleAddBlockBelow = (currentBlockId, newType) => {
+  const handleAddBlockBelow = (
+    currentBlockId: string,
+    newType: "text" | "code" | "image", // Restrict newType to specific block types
+  ) => {
     setBlocks((prev) => {
       const index = prev.findIndex((b) => b.id === currentBlockId);
       if (index === -1) return prev;
 
-      const newBlock = {
-        id: Date.now().toString(),
+      const newBlock: Block = {
+        id: Date.now().toString(), // Generate a unique ID for the new block
         type: newType,
         content:
           newType === "code"
             ? "// Your code here..."
             : newType === "image"
-            ? null // Image blocks don't need initial content
-            : "New block...",
+              ? null // Image blocks don't need initial content
+              : "New block...",
       };
 
       const newBlocks = [...prev];
@@ -66,14 +67,22 @@ export default function Editor() {
     });
   };
 
+  const handleRemoveBlock = (blockId: string) => {
+    setBlocks((prev) => {
+      const index = prev.findIndex((b) => b.id === blockId);
+      if (index === -1) return prev; // If the block doesn't exist, return the previous state
+
+      const newBlocks = [...prev];
+      newBlocks.splice(index, 1); // Remove the block at the found index
+      return newBlocks;
+    });
+  };
+
   return (
     <div className="mx-auto mt-10 max-w-3xl p-4">
-      <h1 className="text-2xl font-bold mb-4">Block Editor</h1>
+      <h1 className="text-2xl font-bold mb-4">Typor Block Editor</h1>
 
-      <DndContext
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
+      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext
           items={blocks.map((b) => b.id)}
           strategy={verticalListSortingStrategy}
@@ -84,6 +93,7 @@ export default function Editor() {
               block={block}
               onUpdateBlock={handleUpdateBlock}
               onAddBlockBelow={handleAddBlockBelow}
+              onRemoveBlock={handleRemoveBlock}
             />
           ))}
         </SortableContext>

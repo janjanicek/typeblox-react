@@ -1,14 +1,21 @@
-// TextBlock.jsx
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from "react";
 
-function TextBlock({
+interface TextBlockProps {
+  blockId: string;
+  type: "text" | "heading";
+  content: string;
+  onUpdate: (blockId: string, content: string) => void;
+  onAddBlockBelow: (blockId: string, type: "text" | "heading") => void;
+}
+
+const TextBlock: React.FC<TextBlockProps> = ({
   blockId,
   type,
   content,
   onUpdate,
   onAddBlockBelow,
-}) {
-  const ref = useRef(null);
+}) => {
+  const ref = useRef<HTMLDivElement | null>(null);
 
   // For hover-based "+" menu
   const [hovered, setHovered] = useState(false);
@@ -34,14 +41,14 @@ function TextBlock({
   return (
     <div
       style={{
-        position: 'relative',
-        marginBottom: '8px',
-        border: '1px solid #ccc',
-        background: '#fff',
-        padding: '8px',
-        paddingLeft: '40px',  // Reserve space so the plus icon is inside the container
-        minHeight: '50px',
-        cursor: 'text',
+        position: "relative",
+        marginBottom: "8px",
+        border: "1px solid #ccc",
+        background: "#fff",
+        padding: "8px",
+        paddingLeft: "40px", // Reserve space so the plus icon is inside the container
+        minHeight: "50px",
+        cursor: "text",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => {
@@ -55,11 +62,9 @@ function TextBlock({
         contentEditable
         suppressContentEditableWarning
         onInput={handleInput}
-        // Do *not* set `dangerouslySetInnerHTML` here again, because
-        // we handle it in the useEffect above.
         style={{
-          outline: 'none',
-          minHeight: '30px',
+          outline: "none",
+          minHeight: "30px",
         }}
       />
 
@@ -67,15 +72,15 @@ function TextBlock({
       {hovered && (
         <button
           style={{
-            position: 'absolute',
-            left: '8px',   // Move inside the bounding box (was -30px before)
-            top: '8px',
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
-            border: '1px solid #999',
-            background: '#fff',
-            cursor: 'pointer',
+            position: "absolute",
+            left: "8px", // Move inside the bounding box (was -30px before)
+            top: "8px",
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            border: "1px solid #999",
+            background: "#fff",
+            cursor: "pointer",
           }}
           onClick={() => setShowMenu(true)}
         >
@@ -87,28 +92,28 @@ function TextBlock({
       {showMenu && (
         <div
           style={{
-            position: 'absolute',
-            left: '40px',
-            top: '8px',
-            background: '#fff',
-            border: '1px solid #ccc',
-            padding: '4px 8px',
+            position: "absolute",
+            left: "40px",
+            top: "8px",
+            background: "#fff",
+            border: "1px solid #ccc",
+            padding: "4px 8px",
             zIndex: 10,
           }}
         >
           <p
-            style={{ margin: '4px 0', cursor: 'pointer' }}
+            style={{ margin: "4px 0", cursor: "pointer" }}
             onClick={() => {
-              onAddBlockBelow(blockId, 'text');
+              onAddBlockBelow(blockId, "text");
               closeMenu();
             }}
           >
             + Text Block
           </p>
           <p
-            style={{ margin: '4px 0', cursor: 'pointer' }}
+            style={{ margin: "4px 0", cursor: "pointer" }}
             onClick={() => {
-              onAddBlockBelow(blockId, 'heading');
+              onAddBlockBelow(blockId, "heading");
               closeMenu();
             }}
           >
@@ -118,6 +123,6 @@ function TextBlock({
       )}
     </div>
   );
-}
+};
 
 export default TextBlock;
