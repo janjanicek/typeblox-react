@@ -1,10 +1,10 @@
-import React, { createContext, ReactNode, useContext, useRef } from "react";
+import React, { createContext, ReactNode, useContext } from "react";
+import { CLASSES } from "./constants";
 import { toCssStyle } from "./utils";
 
 interface FormattingContextProps {
   applyFormatting: (tagName: string, style?: Record<string, string>) => void;
   unapplyFormatting: (tagName: string, styleKey?: string | null) => void;
-  saveSelection: () => void;
   detectStyle: () => {
     color: string | null;
     backgroundColor: string | null;
@@ -14,14 +14,13 @@ interface FormattingContextProps {
     isStrikeout: boolean;
     fontFamily: string | null;
   };
-  restoreSelection: () => void;
   createSelectedElement: (range: Range) => void;
+  removeSelectedWrapper: (blockElement: HTMLElement | null) => void;
 }
 
 interface FormattingProviderProps {
   blockId: string;
   onUpdate: (blockId: string, content: string) => void;
-  createSelectedElement: (range: Range) => void;
   children: ReactNode; // Add this line to define children
 }
 
@@ -42,22 +41,26 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
   children,
   onUpdate,
 }) => {
-  const savedSelection = useRef<Range | null>(null);
-
   const contentElement = document.querySelector(
     `[data-typedom-id="${blockId}"]`,
   );
 
-  const createSelectedElement = (range: Range) => {
+  const createSelectedElement = (): void => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || !contentElement) return;
+
+    const range = selection.getRangeAt(0);
+    if (!range) return;
+
+    // Create a wrapper element
     const wrapper = document.createElement("span");
-    wrapper.className = "selected";
+    wrapper.className = CLASSES.selected;
     wrapper.appendChild(range.extractContents());
     range.insertNode(wrapper);
   };
 
   const selectAllTextInSelectedElement = (): void => {
-    // Get the `.selected` element
-    const selectedElement = document.querySelector(".selected") as HTMLElement;
+    const selectedElement = getSelectedElement();
 
     if (!selectedElement) {
       console.warn("No .selected element found.");
@@ -82,28 +85,25 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
     }
   };
 
-  const saveSelection = () => {
-    const selection = window.getSelection();
-    console.warn(selection);
-    if (selection && selection.rangeCount > 0) {
-      savedSelection.current = selection.getRangeAt(0);
-    }
-  };
+  const removeSelectedWrapper = (blockElement: HTMLElement | null) => {
+    if (!blockElement) return;
 
-  const restoreSelection = () => {
-    const selection = window.getSelection();
-    selection?.removeAllRanges();
-    if (savedSelection.current) {
-      selection?.addRange(savedSelection.current);
-    }
+    const selectedElements = blockElement.querySelectorAll(
+      `.${CLASSES.selected}`,
+    );
+    selectedElements.forEach((element) => {
+      const parent = element.parentNode;
+      while (element.firstChild) {
+        parent?.insertBefore(element.firstChild, element);
+      }
+      parent?.removeChild(element);
+    });
   };
 
   const detectStyle = () => {
-    // const selection = window.getSelection();
-    const selection = document.querySelector(".selected");
+    const selection = window.getSelection()?.focusNode;
     if (selection) {
-      // const range = selection.getRangeAt(0);
-      let currentNode = selection as Element;
+      let currentNode = selection.parentElement as HTMLElement;
 
       // Default styles
       const detectedStyles = {
@@ -122,7 +122,8 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
           break;
         }
 
-        const computedStyle = window.getComputedStyle(currentNode as Element);
+        const computedStyle = window.getComputedStyle(currentNode);
+        const currentHTMLElement = currentNode;
 
         // Detect color
         if (!detectedStyles.color) {
@@ -130,9 +131,12 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
         }
 
         // Detect background color
-        if (!detectedStyles.backgroundColor) {
+        if (
+          !detectedStyles.backgroundColor &&
+          currentHTMLElement.style?.backgroundColor
+        ) {
           detectedStyles.backgroundColor =
-            computedStyle.backgroundColor || null;
+            currentHTMLElement.style.backgroundColor;
         }
 
         // Detect font-family
@@ -192,13 +196,11 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
     tagName: string,
     style: Record<string, string> = {},
   ) => {
-    console.log("applyFormatting", tagName, style);
-
     if (!contentElement) return;
-    const selectedElement = document.querySelector(".selected");
+
+    const selectedElement = getSelectedElement(contentElement);
 
     if (!selectedElement) {
-      // contentElement?.normalize();
       onUpdate(blockId, contentElement?.innerHTML || "");
       return;
     }
@@ -243,24 +245,33 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
     selectAllTextInSelectedElement();
   };
 
+  const getSelectedElement = (
+    wrapper: Element | Document = document,
+  ): HTMLElement | null => {
+    return wrapper.querySelector(`.${CLASSES.selected}`);
+  };
+
   const unapplyFormatting = (
     tagName: string,
     styleKey: string | null = null,
   ) => {
-    restoreSelection();
-
-    console.log("unapplyFormatting", tagName);
-
-    const selectedElement = document.querySelector(".selected");
-    if (!selectedElement) return;
+    const selectedElement = getSelectedElement(document);
+    if (!selectedElement) {
+      return;
+    }
 
     const matchingParent = selectedElement.closest(tagName);
-    if (matchingParent) {
-      const parentElement = matchingParent.parentElement;
-      while (matchingParent.firstChild) {
-        parentElement?.insertBefore(matchingParent.firstChild, matchingParent);
-      }
-      parentElement?.removeChild(matchingParent);
+    const isMatchingSelection =
+      selectedElement.textContent === matchingParent?.textContent;
+
+    if (selectedElement?.innerHTML.trim() === "" && matchingParent) {
+      splitContentBySelected();
+      selectAllTextInSelectedElement();
+      return;
+    }
+
+    if (matchingParent && isMatchingSelection) {
+      removeMatchingParent(matchingParent);
       onUpdate(blockId, contentElement?.innerHTML || "");
       selectAllTextInSelectedElement();
       return;
@@ -272,11 +283,65 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
       );
       if (closestStyledElement) {
         closestStyledElement.style.removeProperty(styleKey);
-        contentElement?.normalize();
         onUpdate(blockId, contentElement?.innerHTML || "");
         selectAllTextInSelectedElement();
       }
     }
+  };
+
+  const splitContentBySelected = (): void => {
+    const selected = getSelectedElement();
+
+    if (!selected) {
+      console.error("No element with class 'selected' found");
+      return;
+    }
+    const parent = selected.parentElement;
+
+    if (!parent) {
+      console.error("Selected element has no parent");
+      return;
+    }
+
+    // Create fragments for "before" and "after" content
+    const beforeFragment = document.createDocumentFragment();
+    const afterFragment = document.createDocumentFragment();
+
+    // Move siblings before the selected element to the beforeFragment
+    while (selected.previousSibling) {
+      beforeFragment.insertBefore(
+        selected.previousSibling,
+        beforeFragment.firstChild,
+      );
+    }
+
+    // Move siblings after the selected element to the afterFragment
+    while (selected.nextSibling) {
+      afterFragment.appendChild(selected.nextSibling);
+    }
+
+    // Split the parent element by inserting the fragments
+    const parentCloneBefore = parent.cloneNode(false) as HTMLElement;
+    const parentCloneAfter = parent.cloneNode(false) as HTMLElement;
+
+    parentCloneBefore.appendChild(beforeFragment);
+    parentCloneAfter.appendChild(afterFragment);
+
+    // Insert the "before" and "after" content into the DOM
+    parent.parentNode?.insertBefore(parentCloneBefore, parent);
+    parent.parentNode?.insertBefore(selected, parent);
+    parent.parentNode?.insertBefore(parentCloneAfter, parent);
+
+    // Remove the original parent
+    parent.remove();
+  };
+
+  const removeMatchingParent = (matchingParent: Element) => {
+    const parentElement = matchingParent.parentElement;
+    while (matchingParent.firstChild) {
+      parentElement?.insertBefore(matchingParent.firstChild, matchingParent);
+    }
+    parentElement?.removeChild(matchingParent);
   };
 
   return (
@@ -284,10 +349,9 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
       value={{
         applyFormatting,
         unapplyFormatting,
-        saveSelection,
-        restoreSelection,
         createSelectedElement,
         detectStyle,
+        removeSelectedWrapper,
       }}
     >
       {children}

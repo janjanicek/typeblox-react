@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, FC } from "react";
+import Icon from "./Icon";
 
 interface ContextualMenuProps {
   isVisible: boolean;
@@ -7,6 +8,7 @@ interface ContextualMenuProps {
     label: string;
     onClick: () => void;
     style?: React.CSSProperties; // Add support for inline styles
+    icon?: string;
   }[];
   onClose: () => void;
 }
@@ -49,13 +51,14 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
       {options.map((option, index) => (
         <p
           key={index}
-          className="cursor-pointer hover:bg-gray-100 p-1"
+          className="flex cursor-pointer hover:bg-gray-100 p-2"
           style={option.style}
           onClick={() => {
             onClose();
             option.onClick();
           }}
         >
+          {option.icon && <Icon src={option.icon} className="mr-3" />}
           {option.label}
         </p>
       ))}

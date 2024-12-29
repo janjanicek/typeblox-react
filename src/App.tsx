@@ -6,7 +6,11 @@ import Editor from "./Editor";
 function App() {
   return (
     <div>
-      <Editor />
+      <Editor
+        init={{
+          toolbar: "bold italic underline strikethrough | font | color bgColor",
+        }}
+      />
     </div>
   );
 }

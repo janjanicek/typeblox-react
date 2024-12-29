@@ -1,13 +1,13 @@
 import React, { useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import BlockRow from "./BlockRow";
-import { Block } from "./utils/types";
+import { Block, BlockType } from "./utils/types";
 import { FormattingProvider } from "./utils/FormattingContext";
 
 interface SortableItemProps {
   block: Block;
   onUpdateBlock: (blockId: string, content: string) => void;
-  onAddBlockBelow: (blockId: string, type: "text" | "code" | "image") => void;
+  onAddBlockBelow: (blockId: string, type: BlockType) => void;
   onRemoveBlock: (blockId: string) => void;
 }
 
@@ -46,16 +46,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
       style={style}
       {...attributes}
     >
-      <FormattingProvider
-        blockId={block.id}
-        onUpdate={onUpdateBlock}
-        createSelectedElement={(range) => {
-          const wrapper = document.createElement("span");
-          wrapper.className = "selected";
-          wrapper.appendChild(range.extractContents());
-          range.insertNode(wrapper);
-        }}
-      >
+      <FormattingProvider blockId={block.id} onUpdate={onUpdateBlock}>
         <BlockRow
           blockId={id}
           type={type}

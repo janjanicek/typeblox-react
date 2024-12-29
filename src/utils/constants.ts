@@ -6,3 +6,7 @@ export const AVAILABLE_FONTS = [
   "Tahoma",
   "Impact",
 ];
+
+export const CLASSES = {
+  selected: "typedom-selected",
+};

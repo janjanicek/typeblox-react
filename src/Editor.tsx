@@ -1,7 +1,14 @@
 // Editor.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 // dnd-kit imports
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import {
+  DndContext,
+  closestCenter,
+  useSensor,
+  MouseSensor,
+  KeyboardSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
@@ -9,14 +16,32 @@ import {
 } from "@dnd-kit/sortable";
 
 import SortableItem from "./SortableItem";
-import { Block } from "./utils/types";
+import { Block, BlockType } from "./utils/types";
+import useEditorStore from "./stores/EditorStore";
+import "./styles/Editor.scss";
 
-export default function Editor() {
+interface EditorProps {
+  init: {
+    toolbar: string;
+    plugins?: string[];
+    height?: number;
+  };
+}
+
+const Editor: React.FC<EditorProps> = ({ init }) => {
   const [blocks, setBlocks] = useState<Block[]>([
-    { id: "1", type: "text", content: "This is a text block." },
-    { id: "2", type: "code", content: "// This is a code block." },
-    { id: "3", type: "image", content: null },
+    { id: "1", type: "headline1", content: "This is headline." },
+    { id: "2", type: "text", content: "This is a text block." },
+    { id: "3", type: "code", content: "// This is a code block." },
+    { id: "4", type: "image", content: null },
   ]);
+
+  const { setToolbarSettings } = useEditorStore();
+
+  useEffect(() => {
+    const addedDividers = init.toolbar.replace(/\|/g, "divider");
+    setToolbarSettings(addedDividers.split(" "));
+  }, [init.toolbar, setToolbarSettings]);
 
   // Handle drag-and-drop reordering
   const handleDragEnd = (event: any) => {
@@ -30,7 +55,6 @@ export default function Editor() {
 
   // Update a block's content
   const handleUpdateBlock = (blockId: string, newContent: string) => {
-    console.log("handleUpdateBlock", blockId, newContent);
     const updatedBlocks = blocks.map((block) =>
       block.id === blockId ? { ...block, content: newContent } : block,
     );
@@ -45,7 +69,7 @@ export default function Editor() {
 
   const handleAddBlockBelow = (
     currentBlockId: string,
-    newType: "text" | "code" | "image", // Restrict newType to specific block types
+    newType: BlockType, // Restrict newType to specific block types
   ) => {
     setBlocks((prev) => {
       const index = prev.findIndex((b) => b.id === currentBlockId);
@@ -54,18 +78,17 @@ export default function Editor() {
       const newBlock: Block = {
         id: Date.now().toString(), // Generate a unique ID for the new block
         type: newType,
-        content:
-          newType === "code"
-            ? "// Your code here..."
-            : newType === "image"
-              ? null // Image blocks don't need initial content
-              : "New block...",
+        content: getDefaultContent(),
       };
 
       const newBlocks = [...prev];
       newBlocks.splice(index + 1, 0, newBlock);
       return newBlocks;
     });
+  };
+
+  const getDefaultContent = () => {
+    return "Write your content here...";
   };
 
   const handleRemoveBlock = (blockId: string) => {
@@ -79,11 +102,21 @@ export default function Editor() {
     });
   };
 
-  return (
-    <div className="mx-auto mt-10 max-w-3xl p-4">
-      <h1 className="text-2xl font-bold mb-4">Typedom Block Editor</h1>
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10,
+    },
+  });
+  const keyboardSensor = useSensor(KeyboardSensor);
+  const sensors = useSensors(mouseSensor, keyboardSensor);
 
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+  return (
+    <div className="mx-auto mt-10 max-w-3xl p-4" id="typedom-editor">
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+        sensors={sensors}
+      >
         <SortableContext
           items={blocks.map((b) => b.id)}
           strategy={verticalListSortingStrategy}
@@ -101,4 +134,6 @@ export default function Editor() {
       </DndContext>
     </div>
   );
-}
+};
+
+export default Editor;
