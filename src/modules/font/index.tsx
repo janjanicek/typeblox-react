@@ -1,7 +1,7 @@
 import React from "react";
 import ContextualMenu from "../../components/ContextualMenu";
 import useBlockStore from "../../stores/BlockStore";
-import { AVAILABLE_FONTS } from "../../utils/constants";
+import { AVAILABLE_FONTS } from "../../.core/constants";
 import { useFormatting } from "../../utils/FormattingContext";
 
 export const Font: React.FC = () => {

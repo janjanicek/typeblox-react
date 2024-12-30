@@ -4,7 +4,7 @@ import Icon from "./components/Icon";
 import ContextualMenu from "./components/ContextualMenu";
 import { useFormatting } from "./utils/FormattingContext";
 import useBlockStore from "./stores/BlockStore";
-import { BlockType } from "./utils/types";
+import { BlockType } from "./.core/types";
 import React from "react";
 import { sanitizeHTML } from "./utils/utils";
 
@@ -59,12 +59,8 @@ const BlockRow: FC<BlockRowProps> = ({
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
 
-      setTextMenuPosition({
-        top: textMenuPosition.top,
-        left: rect.left / 2,
-      });
+      if (contentRef.current) positionMenuAboveSelection(contentRef.current);
 
       const parentNode = range.commonAncestorContainer.parentNode;
       if (parentNode && !selection.isCollapsed) {
@@ -75,6 +71,30 @@ const BlockRow: FC<BlockRowProps> = ({
       }
 
       setShowToolbar(false);
+    }
+  };
+
+  const positionMenuAboveSelection = (parentRef: HTMLElement) => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      const parentRect = parentRef.getBoundingClientRect(); // Get the parent container's bounding box
+
+      // Calculate menu position relative to the parent container
+      const top = rect.top - parentRect.top;
+      const left = rect.left - parentRect.left + rect.width / 2;
+
+      // Apply constraints so the menu doesn't go outside the parent container
+      const constrainedTop = Math.max(top, 0); // Prevent menu from going above the parent
+      const constrainedLeft = Math.max(left, 0); // Prevent menu from going off the left side
+      const constrainedRight = Math.min(left, parentRect.width); // Prevent menu from going off the right side
+
+      setTextMenuPosition({
+        top: constrainedTop,
+        left: Math.min(constrainedLeft, constrainedRight),
+      });
     }
   };
 

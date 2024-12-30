@@ -3,11 +3,12 @@ import React, { useEffect, useState } from "react";
 // dnd-kit imports
 import {
   DndContext,
-  closestCenter,
   useSensor,
   MouseSensor,
   KeyboardSensor,
   useSensors,
+  DragOverlay,
+  closestCenter,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -16,7 +17,8 @@ import {
 } from "@dnd-kit/sortable";
 
 import SortableItem from "./SortableItem";
-import { Block, BlockType } from "./utils/types";
+import { Block, BlockType } from "./.core/types";
+import { typedom } from "./.core";
 import useEditorStore from "./stores/EditorStore";
 import "./styles/Editor.scss";
 
@@ -26,17 +28,19 @@ interface EditorProps {
     plugins?: string[];
     height?: number;
   };
+  content: string;
+  onChange: (updatedHTMLString: string) => void;
 }
 
-const Editor: React.FC<EditorProps> = ({ init }) => {
-  const [blocks, setBlocks] = useState<Block[]>([
-    { id: "1", type: "headline1", content: "This is headline." },
-    { id: "2", type: "text", content: "This is a text block." },
-    { id: "3", type: "code", content: "// This is a code block." },
-    { id: "4", type: "image", content: null },
-  ]);
+const Editor: React.FC<EditorProps> = ({ init, content, onChange }) => {
+  typedom.init({
+    HTMLString: content,
+  });
 
+  const [blocks, setBlocks] = useState<Block[]>(typedom.getBlocks());
   const { setToolbarSettings } = useEditorStore();
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
 
   useEffect(() => {
     const addedDividers = init.toolbar.replace(/\|/g, "divider");
@@ -46,25 +50,69 @@ const Editor: React.FC<EditorProps> = ({ init }) => {
   // Handle drag-and-drop reordering
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    setActiveId(null);
+    setOverId(null);
+
+    if (!over || active.id === over.id) {
+      return;
+    }
 
     const oldIndex = blocks.findIndex((b) => b.id === active.id);
     const newIndex = blocks.findIndex((b) => b.id === over.id);
     setBlocks((prev) => arrayMove(prev, oldIndex, newIndex));
+    updateContent();
   };
 
-  // Update a block's content
+  const handleDragOver = (event: any) => {
+    const { active, over } = event;
+
+    if (!over) {
+      setOverId(null);
+      return;
+    }
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) {
+      // Not moving
+      setOverId(activeId);
+      return;
+    }
+
+    const activeIndex = blocks.findIndex((block) => block.id === activeId);
+    const overIndex = blocks.findIndex((block) => block.id === overId);
+
+    if (activeIndex > overIndex) {
+      // Moving up
+      setOverId(overId);
+    } else {
+      // Moving down
+      const nextBlock = blocks[overIndex + 1];
+      setOverId(nextBlock ? nextBlock.id : overId);
+    }
+  };
+
+  const handleDragStart = (event: any) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
+    setOverId(null); // Reset the drop target
+  };
+
   const handleUpdateBlock = (blockId: string, newContent: string) => {
+    // Update the block content
     const updatedBlocks = blocks.map((block) =>
       block.id === blockId ? { ...block, content: newContent } : block,
     );
     setBlocks(updatedBlocks);
+    updateContent();
+  };
 
-    // Combine all blocks into a single HTML string with <p> wrappers
-    // const combinedHTML = updatedBlocks
-    //   .map((block) => `<p>${block.content}</p>`)
-    //   .join("");
-    //  console.log("Editor Content:", combinedHTML);
+  const updateContent = () => {
+    typedom.update(onChange, blocks);
   };
 
   const handleAddBlockBelow = (
@@ -85,6 +133,7 @@ const Editor: React.FC<EditorProps> = ({ init }) => {
       newBlocks.splice(index + 1, 0, newBlock);
       return newBlocks;
     });
+    updateContent();
   };
 
   const getDefaultContent = () => {
@@ -100,6 +149,7 @@ const Editor: React.FC<EditorProps> = ({ init }) => {
       newBlocks.splice(index, 1); // Remove the block at the found index
       return newBlocks;
     });
+    updateContent();
   };
 
   const mouseSensor = useSensor(MouseSensor, {
@@ -115,8 +165,12 @@ const Editor: React.FC<EditorProps> = ({ init }) => {
       <DndContext
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
+        onDragStart={handleDragStart}
+        onDragCancel={handleDragCancel}
+        onDragOver={handleDragOver}
         sensors={sensors}
       >
+        {/* Sortable context for the blocks */}
         <SortableContext
           items={blocks.map((b) => b.id)}
           strategy={verticalListSortingStrategy}
@@ -128,9 +182,27 @@ const Editor: React.FC<EditorProps> = ({ init }) => {
               onUpdateBlock={handleUpdateBlock}
               onAddBlockBelow={handleAddBlockBelow}
               onRemoveBlock={handleRemoveBlock}
+              isOver={block.id === overId}
             />
           ))}
         </SortableContext>
+        <DragOverlay>
+          {activeId &&
+            (() => {
+              const activeBlock = blocks.find((item) => item.id === activeId);
+
+              return activeBlock ? (
+                <SortableItem
+                  key={activeBlock.id}
+                  block={activeBlock}
+                  onUpdateBlock={handleUpdateBlock}
+                  onAddBlockBelow={handleAddBlockBelow}
+                  onRemoveBlock={handleRemoveBlock}
+                  isDragging={true}
+                />
+              ) : null;
+            })()}
+        </DragOverlay>
       </DndContext>
     </div>
   );

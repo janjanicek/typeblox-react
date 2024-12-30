@@ -1,14 +1,23 @@
 {
   "compilerOptions": {
     "target": "ES6",
-    "module": "ESNext",
+    "module": "CommonJS",
     "jsx": "react-jsx", // Enables JSX support in TypeScript
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "./",
+    "paths": {
+      "*": ["src/*"]
+    }
   },
-  "include": ["src"],
+  "include": [
+    "src",
+    "src/.core",
+    "src/.core/types.ts",
+    "src/.core/constants.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

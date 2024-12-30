@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, useContext } from "react";
-import { CLASSES } from "./constants";
+import { CLASSES } from "../.core/constants";
 import { toCssStyle } from "./utils";
 
 interface FormattingContextProps {
@@ -101,7 +101,7 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
   };
 
   const detectStyle = () => {
-    const selection = window.getSelection()?.focusNode;
+    const selection = getSelectedElement();
     if (selection) {
       let currentNode = selection.parentElement as HTMLElement;
 
@@ -216,7 +216,11 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
         `${tagName}[style*=${styleKey}]`,
       );
 
-      if (matchingParentStyle) {
+      if (
+        matchingParentStyle &&
+        matchingParentStyle.textContent?.trim() ===
+          selectedElement?.textContent?.trim()
+      ) {
         Object.keys(style).forEach((key) => {
           (matchingParentStyle as HTMLElement).style[key as any] = style[key];
         });
