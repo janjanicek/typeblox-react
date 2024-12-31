@@ -1,10 +1,17 @@
 import React, { useEffect, JSX } from "react";
-import { Bold, Color, Font, Italic, Strikethrough, Underline } from "./modules";
-import { BgColor } from "./modules/bgColor";
-import { Divider } from "./modules/divider";
-import useBlockStore from "./stores/BlockStore";
-import useEditorStore from "./stores/EditorStore";
-import { rgbToHex } from "./utils/utils";
+import {
+  Bold,
+  Color,
+  Font,
+  Italic,
+  Strikethrough,
+  Underline,
+} from "../modules";
+import { BgColor } from "../modules/bgColor";
+import { Divider } from "../modules/divider";
+import useBlockStore from "../stores/BlockStore";
+import useEditorStore from "../stores/EditorStore";
+import { rgbToHex } from "../.core/utils";
 
 interface ToolbarProps {
   textMenuPosition: { top: number; left: number };

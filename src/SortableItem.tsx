@@ -30,7 +30,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
 
   const style: React.CSSProperties = {
     opacity: isDragging ? 0.5 : 1,
-    borderTop: isOver ? "3px solid black" : 0,
+    borderTop: isOver ? "2px solid black" : 0,
     transition,
   };
 

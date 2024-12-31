@@ -21,6 +21,7 @@ import { Block, BlockType } from "./.core/types";
 import { typedom } from "./.core";
 import useEditorStore from "./stores/EditorStore";
 import "./styles/Editor.scss";
+import { BLOCKS_SETTINGS } from "./.core/constants";
 
 interface EditorProps {
   init: {
@@ -126,7 +127,7 @@ const Editor: React.FC<EditorProps> = ({ init, content, onChange }) => {
       const newBlock: Block = {
         id: Date.now().toString(), // Generate a unique ID for the new block
         type: newType,
-        content: getDefaultContent(),
+        content: getDefaultContent(newType),
       };
 
       const newBlocks = [...prev];
@@ -136,8 +137,8 @@ const Editor: React.FC<EditorProps> = ({ init, content, onChange }) => {
     updateContent();
   };
 
-  const getDefaultContent = () => {
-    return "Write your content here...";
+  const getDefaultContent = (type: BlockType) => {
+    return BLOCKS_SETTINGS[type].defaultContent;
   };
 
   const handleRemoveBlock = (blockId: string) => {

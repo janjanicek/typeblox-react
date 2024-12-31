@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, FC, useCallback } from "react";
-import Toolbar from "./Toolbar";
-import Icon from "./components/Icon";
-import ContextualMenu from "./components/ContextualMenu";
+import Toolbar from "./components/Toolbar";
 import { useFormatting } from "./utils/FormattingContext";
 import useBlockStore from "./stores/BlockStore";
 import { BlockType } from "./.core/types";
 import React from "react";
-import { sanitizeHTML } from "./utils/utils";
+import { sanitizeHTML } from "./.core/utils";
+import BlockMenu from "./components/BlockMenu";
+import { BLOCKS_SETTINGS } from "./.core/constants";
 
 interface BlockRowProps {
   blockId: string;
@@ -27,8 +27,6 @@ const BlockRow: FC<BlockRowProps> = ({
   onAddBelow,
   onRemove,
 }) => {
-  const [showPlusMenu, setShowPlusMenu] = useState(false);
-  const [showDragMenu, setShowDragMenu] = useState(false);
   const [showToolbar, setShowToolbar] = useState(false);
   const [textMenuPosition, setTextMenuPosition] = useState({ top: 5, left: 0 });
 
@@ -153,125 +151,16 @@ const BlockRow: FC<BlockRowProps> = ({
   };
 
   const getWrapperType = () => {
-    switch (type) {
-      case "code":
-        return "code";
-      case "headline1":
-        return "h1";
-      case "headline2":
-        return "h2";
-      case "headline3":
-        return "h3";
-      default:
-        break;
-    }
+    const tagName = BLOCKS_SETTINGS[type].tag;
+    if (tagName) return tagName;
     return "div";
   };
 
   const WrapperElement = getWrapperType();
 
-  return (
-    <div className="group relative flex items-start gap-2 py-2">
-      <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={() => setShowPlusMenu(!showPlusMenu)}
-          className="w-6 h-6 flex items-center justify-center border border-0 rounded-full bg-white text-gray-700 hover:bg-gray-50"
-        >
-          <Icon src="/icons/plus.svg" />
-        </button>
-        <button
-          onClick={() => {
-            setTimeout(() => setShowDragMenu(!showDragMenu), 100);
-          }}
-          {...dragListeners}
-          className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing border border-0 bg-white"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            className="w-4 h-4"
-          >
-            <circle cx="5" cy="5" r="1" />
-            <circle cx="5" cy="12" r="1" />
-            <circle cx="5" cy="19" r="1" />
-            <circle cx="12" cy="5" r="1" />
-            <circle cx="12" cy="12" r="1" />
-            <circle cx="12" cy="19" r="1" />
-          </svg>
-        </button>
-      </div>
-
-      <ContextualMenu
-        isVisible={showPlusMenu}
-        position={{ top: 40, left: 0 }}
-        options={[
-          {
-            label: "Text",
-            onClick: () => onAddBelow(blockId, "text"),
-            icon: "icons/align-left.svg",
-          },
-          {
-            label: "Headline 1",
-            onClick: () => onAddBelow(blockId, "headline1"),
-            icon: "icons/h-1.svg",
-          },
-          {
-            label: "Headline 2",
-            onClick: () => onAddBelow(blockId, "headline2"),
-            icon: "icons/h-2.svg",
-          },
-          {
-            label: "Headline 3",
-            onClick: () => onAddBelow(blockId, "headline3"),
-            icon: "icons/h-3.svg",
-          },
-          {
-            label: "Code",
-            onClick: () => onAddBelow(blockId, "code"),
-            icon: "icons/code.svg",
-          },
-          {
-            label: "Image",
-            onClick: () => onAddBelow(blockId, "image"),
-            icon: "icons/photo.svg",
-          },
-        ]}
-        onClose={() => setShowPlusMenu(false)}
-      />
-
-      <ContextualMenu
-        isVisible={showDragMenu}
-        position={{ top: 40, left: 20 }}
-        options={[
-          {
-            label: "Remove Block",
-            onClick: () => onRemove(blockId),
-            icon: "icons/trash.svg",
-          },
-        ]}
-        onClose={() => setShowDragMenu(false)}
-      />
-
-      {showToolbar && <Toolbar textMenuPosition={textMenuPosition} />}
-
-      {["text", "code", "headline1", "headline2", "headline3"].includes(
-        type,
-      ) ? (
-        React.createElement(WrapperElement, {
-          ref: contentRef,
-          "data-typedom-editor": "block",
-          "data-typedom-id": blockId,
-          contentEditable: true,
-          suppressContentEditableWarning: true,
-          className:
-            "typedom flex-1 outline-none border border-transparent px-2",
-          onBlur: () => onUpdate(blockId, contentRef.current?.innerHTML || ""),
-          onPaste: handlePaste,
-          onKeyUp: handleTextSelection,
-          onMouseUp: handleTextSelection,
-        })
-      ) : type === "image" ? (
+  const renderContent = () => {
+    if (type === "image") {
+      return (
         <div className="flex-1">
           {content ? (
             <img
@@ -291,8 +180,38 @@ const BlockRow: FC<BlockRowProps> = ({
             />
           )}
         </div>
-      ) : null}
-    </div>
+      );
+    }
+
+    // Default case for text, code, headline1, headline2, headline3, etc.
+    return React.createElement(WrapperElement, {
+      ref: contentRef,
+      "data-typedom-editor": "block",
+      "data-typedom-id": blockId,
+      contentEditable: true,
+      suppressContentEditableWarning: true,
+      className: "typedom flex-1 outline-none border border-transparent px-2",
+      onBlur: () => onUpdate(blockId, contentRef.current?.innerHTML || ""),
+      onPaste: handlePaste,
+      onKeyUp: handleTextSelection,
+      onMouseUp: handleTextSelection,
+    });
+  };
+
+  return (
+    <>
+      <div className="group relative flex items-start gap-2 py-2">
+        <BlockMenu
+          blockId={blockId}
+          dragListeners={dragListeners}
+          onAddBelow={onAddBelow}
+          onRemove={onRemove}
+        />
+        {showToolbar && <Toolbar textMenuPosition={textMenuPosition} />}
+
+        {renderContent()}
+      </div>
+    </>
   );
 };
 
