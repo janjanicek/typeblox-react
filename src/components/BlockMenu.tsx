@@ -1,5 +1,6 @@
-import { BlockType } from ".core/types";
-import React, { FC } from "react";
+import { AVAILABLE_BLOCKS, BLOCKS_SETTINGS } from "../.core/constants";
+import { BlockType } from "../.core/types";
+import { FC } from "react";
 import { useState } from "react";
 import ContextualMenu from "./ContextualMenu";
 import Icon from "./Icon";
@@ -27,7 +28,9 @@ const BlockMenu: FC<BlockMenuProps> = ({
         style={{ left: "-55px", top: "10px" }}
       >
         <button
-          onClick={() => setShowPlusMenu(!showPlusMenu)}
+          onClick={() => {
+            setShowPlusMenu(!showPlusMenu);
+          }}
           className="w-6 h-6 flex items-center justify-center border border-0 rounded-full bg-white text-gray-700 hover:bg-gray-50"
         >
           <Icon src="/icons/plus.svg" />
@@ -58,44 +61,23 @@ const BlockMenu: FC<BlockMenuProps> = ({
       <ContextualMenu
         isVisible={showPlusMenu}
         position={{ top: 40, left: 0 }}
-        options={[
-          {
-            label: "Text",
-            onClick: () => onAddBelow(blockId, "text"),
-            icon: "icons/align-left.svg",
-          },
-          {
-            label: "Headline 1",
-            onClick: () => onAddBelow(blockId, "headline1"),
-            icon: "icons/h-1.svg",
-          },
-          {
-            label: "Headline 2",
-            onClick: () => onAddBelow(blockId, "headline2"),
-            icon: "icons/h-2.svg",
-          },
-          {
-            label: "Headline 3",
-            onClick: () => onAddBelow(blockId, "headline3"),
-            icon: "icons/h-3.svg",
-          },
-          {
-            label: "Code",
-            onClick: () => onAddBelow(blockId, "code"),
-            icon: "icons/code.svg",
-          },
-          {
-            label: "Image",
-            onClick: () => onAddBelow(blockId, "image"),
-            icon: "icons/photo.svg",
-          },
-        ]}
+        sectionName="Add new block"
+        options={AVAILABLE_BLOCKS.map((item: BlockType) => {
+          return {
+            label: BLOCKS_SETTINGS[item].visibleName,
+            description: BLOCKS_SETTINGS[item].description,
+            onClick: () => {
+              onAddBelow(blockId, item);
+            },
+            icon: BLOCKS_SETTINGS[item].icon,
+          };
+        })}
         onClose={() => setShowPlusMenu(false)}
       />
 
       <ContextualMenu
         isVisible={showDragMenu}
-        position={{ top: 40, left: 20 }}
+        position={{ top: 40, left: 0 }}
         options={[
           {
             label: "Remove Block",

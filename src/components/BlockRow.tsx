@@ -1,25 +1,37 @@
 import { useState, useRef, useEffect, FC, useCallback } from "react";
-import Toolbar from "./components/Toolbar";
-import { useFormatting } from "./utils/FormattingContext";
-import useBlockStore from "./stores/BlockStore";
-import { BlockType } from "./.core/types";
+import Toolbar from "./Toolbar";
+import { useFormatting } from "../utils/FormattingContext";
+import useBlockStore from "../stores/BlockStore";
+import { Block, BlockType } from "../.core/types";
 import React from "react";
-import { sanitizeHTML } from "./.core/utils";
-import BlockMenu from "./components/BlockMenu";
-import { BLOCKS_SETTINGS } from "./.core/constants";
+import { sanitizeHTML } from "../.core/utils";
+import BlockMenu from "./BlockMenu";
+import {
+  AVAILABLE_BLOCKS,
+  BLOCKS_SETTINGS,
+  DEFAULT_BLOCK_TYPE,
+} from "../.core/constants";
+import { focusBlock } from "../.core/blocks";
+import ContextualMenu from "./ContextualMenu";
 
 interface BlockRowProps {
-  blockId: string;
+  blocks: Block[];
+  block: Block;
   type: BlockType;
   content: string | null;
   dragListeners?: any;
-  onUpdate: (blockId: string, content: string) => void;
+  onUpdate: (update: {
+    id: string;
+    content?: string;
+    type?: BlockType;
+  }) => void;
   onAddBelow: (blockId: string, type: BlockType) => void;
   onRemove: (blockId: string) => void;
 }
 
 const BlockRow: FC<BlockRowProps> = ({
-  blockId,
+  blocks,
+  block,
   type,
   content,
   dragListeners,
@@ -29,6 +41,7 @@ const BlockRow: FC<BlockRowProps> = ({
 }) => {
   const [showToolbar, setShowToolbar] = useState(false);
   const [textMenuPosition, setTextMenuPosition] = useState({ top: 5, left: 0 });
+  const [showContentSuggestor, setShowContentSuggestor] = useState(false);
 
   const contentRef = useRef<HTMLDivElement | null>(null);
 
@@ -49,10 +62,30 @@ const BlockRow: FC<BlockRowProps> = ({
   }, [content, type]);
 
   useEffect(() => {
+    const editorElement = contentRef.current;
+
+    if (editorElement) {
+      editorElement.addEventListener("input", () => {
+        if (editorElement.innerHTML === "<br>") {
+          editorElement.innerHTML = "";
+        }
+      });
+    }
+
+    return () => {
+      if (editorElement) {
+        editorElement.removeEventListener("input", () => {});
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     setDetectedStyles(detectStyle());
   }, [setDetectedStyles, detectStyle]);
 
-  const handleTextSelection = () => {
+  const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const blockElement = getBlockElement();
+
     removeSelectedWrapper(contentRef.current);
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
@@ -70,6 +103,22 @@ const BlockRow: FC<BlockRowProps> = ({
 
       setShowToolbar(false);
     }
+
+    if (event.key === "/") {
+      if (blockElement?.innerHTML.trim() === "/") {
+        setShowContentSuggestor(true);
+        focusBlock(block.id, true);
+      } else {
+        setShowContentSuggestor(false);
+      }
+    }
+  };
+
+  const getPreviousBlock = (currentBlockId: string): Block | null => {
+    const currentIndex = blocks.findIndex(
+      (block) => block.id === currentBlockId,
+    );
+    return currentIndex > 0 ? blocks[currentIndex - 1] : null;
   };
 
   const positionMenuAboveSelection = (parentRef: HTMLElement) => {
@@ -147,7 +196,31 @@ const BlockRow: FC<BlockRowProps> = ({
     }
 
     // Update the parent state with the new content
-    onUpdate(blockId, contentRef.current?.innerHTML || "");
+    onUpdate({ id: block.id, content: contentRef.current?.innerHTML || "" });
+  };
+
+  const getBlockElement = () =>
+    document.querySelector(`[data-typedom-id="${block.id}"]`);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const blockElement = getBlockElement();
+
+    // Check if backspace is pressed and the block is empty
+    if (event.key === "Backspace") {
+      if (blockElement && blockElement.innerHTML.trim() === "") {
+        const previousBlock = getPreviousBlock(block.id);
+        if (previousBlock && previousBlock.id) {
+          focusBlock(previousBlock.id, true);
+        }
+        onRemove(block.id);
+        event.preventDefault();
+      }
+    }
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      onAddBelow(block.id, DEFAULT_BLOCK_TYPE);
+      focusBlock(block.id, true);
+    }
   };
 
   const getWrapperType = () => {
@@ -174,7 +247,10 @@ const BlockRow: FC<BlockRowProps> = ({
               accept="image/*"
               onChange={(e) =>
                 e.target.files &&
-                onUpdate(blockId, URL.createObjectURL(e.target.files[0]))
+                onUpdate({
+                  id: block.id,
+                  content: URL.createObjectURL(e.target.files[0]),
+                })
               }
               className="border p-2"
             />
@@ -187,14 +263,20 @@ const BlockRow: FC<BlockRowProps> = ({
     return React.createElement(WrapperElement, {
       ref: contentRef,
       "data-typedom-editor": "block",
-      "data-typedom-id": blockId,
+      "data-typedom-id": block.id,
+      placeholder: BLOCKS_SETTINGS[type].defaultContent,
       contentEditable: true,
       suppressContentEditableWarning: true,
       className: "typedom flex-1 outline-none border border-transparent px-2",
-      onBlur: () => onUpdate(blockId, contentRef.current?.innerHTML || ""),
+      onBlur: () =>
+        onUpdate({
+          id: block.id,
+          content: contentRef.current?.innerHTML || "",
+        }),
       onPaste: handlePaste,
-      onKeyUp: handleTextSelection,
-      onMouseUp: handleTextSelection,
+      onKeyUp: handleKeyUp,
+      onMouseUp: handleKeyUp,
+      onKeyDown: handleKeyDown,
     });
   };
 
@@ -202,14 +284,40 @@ const BlockRow: FC<BlockRowProps> = ({
     <>
       <div className="group relative flex items-start gap-2 py-2">
         <BlockMenu
-          blockId={blockId}
+          blockId={block.id}
           dragListeners={dragListeners}
           onAddBelow={onAddBelow}
           onRemove={onRemove}
         />
-        {showToolbar && <Toolbar textMenuPosition={textMenuPosition} />}
-
+        {showToolbar && (
+          <Toolbar
+            textMenuPosition={textMenuPosition}
+            block={block}
+            onUpdate={onUpdate}
+          />
+        )}
         {renderContent()}
+        <ContextualMenu
+          isVisible={showContentSuggestor}
+          position={{ top: 40, left: 0 }}
+          sectionName="Turn into"
+          options={AVAILABLE_BLOCKS.map((item: BlockType) => {
+            return {
+              label: BLOCKS_SETTINGS[item].visibleName,
+              description: BLOCKS_SETTINGS[item].description,
+              onClick: () => {
+                onUpdate({
+                  id: block.id,
+                  content: block.content?.replace(/\/$/, "") || "",
+                  type: item,
+                });
+                setTimeout(() => focusBlock(block.id), 100);
+              },
+              icon: BLOCKS_SETTINGS[item].icon,
+            };
+          })}
+          onClose={() => setShowContentSuggestor(false)}
+        />
       </div>
     </>
   );

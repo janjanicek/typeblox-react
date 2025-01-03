@@ -17,23 +17,26 @@ import {
 } from "@dnd-kit/sortable";
 
 import SortableItem from "./SortableItem";
-import { Block, BlockType } from "./.core/types";
-import { typedom } from "./.core";
-import useEditorStore from "./stores/EditorStore";
-import "./styles/Editor.scss";
-import { BLOCKS_SETTINGS } from "./.core/constants";
+import { Block, BlockType } from "../.core/types";
+import { focusBlock } from "../.core/blocks";
+import { typedom } from "../.core";
+import useEditorStore from "../stores/EditorStore";
+import "../styles/Editor.scss";
+import { DEFAULT_TOOLBARS, EVENTS } from "../.core/constants";
 
 interface EditorProps {
-  init: {
-    toolbar: string;
-    plugins?: string[];
-    height?: number;
-  };
+  toolbars?: Partial<Record<BlockType, string>>;
+  plugins?: string[];
+  height?: number;
   content: string;
   onChange: (updatedHTMLString: string) => void;
 }
 
-const Editor: React.FC<EditorProps> = ({ init, content, onChange }) => {
+const Editor: React.FC<EditorProps> = ({
+  toolbars = DEFAULT_TOOLBARS,
+  content,
+  onChange,
+}) => {
   typedom.init({
     HTMLString: content,
   });
@@ -44,9 +47,34 @@ const Editor: React.FC<EditorProps> = ({ init, content, onChange }) => {
   const [overId, setOverId] = useState<string | null>(null);
 
   useEffect(() => {
-    const addedDividers = init.toolbar.replace(/\|/g, "divider");
-    setToolbarSettings(addedDividers.split(" "));
-  }, [init.toolbar, setToolbarSettings]);
+    const handleBlocksChange = () => {
+      setBlocks(typedom.getBlocks()); // Update state with the latest blocks
+    };
+    typedom.on(EVENTS.blocksChanged, handleBlocksChange);
+    return () => {
+      typedom.off(EVENTS.blocksChanged, handleBlocksChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!toolbars || typeof toolbars !== "object") return;
+
+    const mergedToolbars = {
+      ...DEFAULT_TOOLBARS,
+      ...toolbars,
+    };
+
+    const updatedToolbar: Record<BlockType, string> = Object.fromEntries(
+      Object.entries(mergedToolbars).map(([key, value]) => [
+        key,
+        value.replace(/\|/g, "divider"),
+      ]),
+    ) as Record<BlockType, string>;
+
+    Object.entries(updatedToolbar).forEach(([blockType, tools]) => {
+      setToolbarSettings(blockType as BlockType, tools.split(" ") ?? []);
+    });
+  }, [toolbars, setToolbarSettings]);
 
   // Handle drag-and-drop reordering
   const handleDragEnd = (event: any) => {
@@ -103,11 +131,23 @@ const Editor: React.FC<EditorProps> = ({ init, content, onChange }) => {
     setOverId(null); // Reset the drop target
   };
 
-  const handleUpdateBlock = (blockId: string, newContent: string) => {
-    // Update the block content
+  const handleUpdateBlock = (update: {
+    id: string;
+    content?: string;
+    type?: BlockType;
+  }) => {
     const updatedBlocks = blocks.map((block) =>
-      block.id === blockId ? { ...block, content: newContent } : block,
+      block.id === update.id
+        ? {
+            ...block,
+            ...(update.content !== undefined
+              ? { content: update.content }
+              : {}), // Update content if provided
+            ...(update.type ? { type: update.type } : {}), // Update type if provided
+          }
+        : block,
     );
+
     setBlocks(updatedBlocks);
     updateContent();
   };
@@ -120,12 +160,14 @@ const Editor: React.FC<EditorProps> = ({ init, content, onChange }) => {
     currentBlockId: string,
     newType: BlockType, // Restrict newType to specific block types
   ) => {
+    const newBlockId = Date.now().toString();
+
     setBlocks((prev) => {
       const index = prev.findIndex((b) => b.id === currentBlockId);
       if (index === -1) return prev;
 
       const newBlock: Block = {
-        id: Date.now().toString(), // Generate a unique ID for the new block
+        id: newBlockId, // Generate a unique ID for the new block
         type: newType,
         content: getDefaultContent(newType),
       };
@@ -134,11 +176,16 @@ const Editor: React.FC<EditorProps> = ({ init, content, onChange }) => {
       newBlocks.splice(index + 1, 0, newBlock);
       return newBlocks;
     });
+
+    setTimeout(() => {
+      focusBlock(newBlockId);
+    }, 0);
+
     updateContent();
   };
 
   const getDefaultContent = (type: BlockType) => {
-    return BLOCKS_SETTINGS[type].defaultContent;
+    return "";
   };
 
   const handleRemoveBlock = (blockId: string) => {
@@ -178,6 +225,7 @@ const Editor: React.FC<EditorProps> = ({ init, content, onChange }) => {
         >
           {blocks.map((block) => (
             <SortableItem
+              blocks={blocks}
               key={block.id}
               block={block}
               onUpdateBlock={handleUpdateBlock}
@@ -194,6 +242,7 @@ const Editor: React.FC<EditorProps> = ({ init, content, onChange }) => {
 
               return activeBlock ? (
                 <SortableItem
+                  blocks={blocks}
                   key={activeBlock.id}
                   block={activeBlock}
                   onUpdateBlock={handleUpdateBlock}

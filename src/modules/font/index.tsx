@@ -26,20 +26,19 @@ export const Font: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="relative">
       <button
         className="px-2 py-1 border-0 rounded hover:bg-gray-100"
         onClick={toggleFontSelectionPicker}
       >
         <span style={{ textTransform: "capitalize" }}>{selectedFont}</span>
       </button>
-
       <ContextualMenu
         isVisible={showSelectFont}
-        position={{ top: 50, left: 200 }}
+        position={{ top: 42, left: 0 }}
         options={fontOptions}
         onClose={() => setShowSelectFont(false)}
       />
-    </>
+    </div>
   );
 };

@@ -1,5 +1,6 @@
-import { BLOCKS_SETTINGS } from "./constants";
+import { BLOCKS_SETTINGS, EVENTS } from "./constants";
 import { Block, BlockType } from "./types";
+import { EventEmitter } from "events";
 
 const isEmptyContent = (content: string | null) =>
   !content || content === "" || content === "&nbsp;";
@@ -9,7 +10,7 @@ export interface TypedomInitOptions {
   HTMLString: string; // Required parameter
 }
 
-class Typedom {
+class Typedom extends EventEmitter {
   // Private properties
   private blocks: Block[] = [];
 
@@ -47,7 +48,7 @@ class Typedom {
       return {
         id: generateId(),
         type: "text" as BlockType, // Default block type
-        content: element.innerHTML?.trim() || "Write your content here...",
+        content: element.innerHTML?.trim() || "",
       };
     });
 
@@ -74,12 +75,17 @@ class Typedom {
     onChange(this.blocksToHTML(providedBlocks ?? this.blocks));
   }
 
+  public getBlockById(id: string): Block | undefined {
+    return this.blocks?.find((block: Block) => block.id === id);
+  }
+
   public getBlocks(): Block[] {
     return this.blocks;
   }
 
   public setBlocks(blocks: Block[]): void {
     this.blocks = blocks;
+    this.emit(EVENTS.blocksChanged, this.blocks);
   }
 }
 

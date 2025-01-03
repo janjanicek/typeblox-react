@@ -18,5 +18,23 @@
 
   code {
     background: #eee;
+    padding: 1rem;
+    border-radius: 4px;
+  }
+
+  [contenteditable]:empty:after {
+    content: attr(placeholder);
+    color: #ccc;
+  }
+
+  .typedom-contextual-menu {
+    max-height: 350px;
+    overflow-y: auto;
+
+    > a {
+      &:focus {
+        background: #eee;
+      }
+    }
   }
 }

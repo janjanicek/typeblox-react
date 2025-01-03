@@ -1,7 +1,5 @@
 import { create } from "zustand";
 
-// Define the structure of the Zustand store
-
 export interface DetectedStyles {
   color: string | null;
   backgroundColor: string | null;
@@ -30,7 +28,11 @@ interface BlockStore {
   selectedColor: string;
   setSelectedColor: (selectedColor: string) => void;
   selectedBgColor: string;
-  setSelectedBgColor: (selectedColor: string) => void;
+  setSelectedBgColor: (selectedBgColor: string) => void;
+  selectedCodeLanguage: string;
+  setSelectedCodeLanguage: (selectedCodeLanguage: string) => void;
+  showTypeSelection: boolean;
+  setShowTypeSelection: (showTypeSelection: boolean) => void;
 }
 
 const useBlockStore = create<BlockStore>((set: any) => ({
@@ -72,6 +74,11 @@ const useBlockStore = create<BlockStore>((set: any) => ({
     set(() => ({
       showSelectFont,
     })),
+  showTypeSelection: false,
+  setShowTypeSelection: (showTypeSelection: boolean) =>
+    set(() => ({
+      showTypeSelection,
+    })),
   selectedFont: "arial",
   setSelectedFont: (selectedFont: string) =>
     set(() => ({
@@ -86,6 +93,11 @@ const useBlockStore = create<BlockStore>((set: any) => ({
   setSelectedBgColor: (selectedBgColor: string) =>
     set(() => ({
       selectedBgColor,
+    })),
+  selectedCodeLanguage: "javascript",
+  setSelectedCodeLanguage: (selectedCodeLanguage: string) =>
+    set(() => ({
+      selectedCodeLanguage,
     })),
 }));
 

@@ -12,12 +12,24 @@ import { Divider } from "../modules/divider";
 import useBlockStore from "../stores/BlockStore";
 import useEditorStore from "../stores/EditorStore";
 import { rgbToHex } from "../.core/utils";
+import { Block, BlockType } from "../.core/types";
+import { TypeChange } from "../modules/typeChange";
 
 interface ToolbarProps {
   textMenuPosition: { top: number; left: number };
+  block: Block;
+  onUpdate: (update: {
+    id: string;
+    content?: string;
+    type?: BlockType;
+  }) => void;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ textMenuPosition }) => {
+const Toolbar: React.FC<ToolbarProps> = ({
+  textMenuPosition,
+  block,
+  onUpdate,
+}) => {
   const {
     detectedStyles,
     setIsBold,
@@ -39,6 +51,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ textMenuPosition }) => {
     font: <Font />,
     color: <Color />,
     bgColor: <BgColor />,
+    type: <TypeChange block={block} onUpdate={onUpdate} />,
   };
 
   // Update color pickers when the detected style changes
@@ -81,26 +94,30 @@ const Toolbar: React.FC<ToolbarProps> = ({ textMenuPosition }) => {
   ]);
 
   return (
-    <div
-      className="menu-container flex gap-1 absolute bg-white border border-gray-300 shadow-lg rounded p-2 w-max"
-      style={{
-        top: `${textMenuPosition.top}px`,
-        left: `${textMenuPosition.left}px`,
-        transform: "translate(-50%, -100%)",
-        zIndex: 100,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {toolbarSettings.map((moduleName, index) =>
-        toolbarComponents[moduleName] ? (
-          React.cloneElement(toolbarComponents[moduleName], {
-            key: moduleName + "-" + index,
-          })
-        ) : (
-          <div key={moduleName + "-" + index}></div>
-        ),
+    <>
+      {toolbarSettings[block.type].length > 0 && (
+        <div
+          className="menu-container flex gap-1 absolute bg-white border border-gray-300 shadow-lg rounded p-2 w-max"
+          style={{
+            top: `${textMenuPosition.top}px`,
+            left: `${textMenuPosition.left}px`,
+            transform: "translate(-50%, -100%)",
+            zIndex: 100,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {toolbarSettings[block.type].map((moduleName, index) =>
+            toolbarComponents[moduleName] ? (
+              React.cloneElement(toolbarComponents[moduleName], {
+                key: moduleName + "-" + index,
+              })
+            ) : (
+              <div key={moduleName + "-" + index}></div>
+            ),
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

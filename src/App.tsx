@@ -1,7 +1,7 @@
 // src/App.jsx
 
 import React from "react";
-import Editor from "./Editor";
+import Editor from "./components/Editor";
 
 function App() {
   const sampleContent = `<p><span style="color: #000000; font-family: 'Helvetica Neue'; font-size: 13px; font-weight: var(--bs-body-font-weight); text-align: var(--bs-body-text-align);">You can install and start using Usetiful tours in just 3 steps</span></p>
@@ -79,9 +79,6 @@ function App() {
   return (
     <div>
       <Editor
-        init={{
-          toolbar: "bold italic underline strikethrough | font | color bgColor",
-        }}
         content={sessionStorage.getItem("tempEditorContent") ?? sampleContent}
         onChange={onChangeHandler}
       />

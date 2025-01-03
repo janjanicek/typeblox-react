@@ -1,3 +1,4 @@
+import { BlockType } from ".core/types";
 import React, { createContext, ReactNode, useContext } from "react";
 import {
   applyFormat,
@@ -26,7 +27,11 @@ interface FormattingContextProps {
 
 interface FormattingProviderProps {
   blockId: string;
-  onUpdate: (blockId: string, content: string) => void;
+  onUpdate: (update: {
+    id: string;
+    content?: string;
+    type?: BlockType;
+  }) => void;
   children: ReactNode; // Add this line to define children
 }
 
@@ -65,7 +70,7 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
 
     applyFormat(contentElement, tagName, style);
 
-    onUpdate(blockId, contentElement?.innerHTML || "");
+    onUpdate({ id: blockId, content: contentElement?.innerHTML || "" });
 
     selectAllTextInSelectedElement();
   };
@@ -75,7 +80,7 @@ export const FormattingProvider: React.FC<FormattingProviderProps> = ({
     styleKey: string | null = null,
   ) => {
     unapplyFormat(tagName, styleKey);
-    onUpdate(blockId, contentElement?.innerHTML || "");
+    onUpdate({ id: blockId, content: contentElement?.innerHTML || "" });
     selectAllTextInSelectedElement();
   };
 

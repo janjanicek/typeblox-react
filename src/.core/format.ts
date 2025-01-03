@@ -168,7 +168,8 @@ export const getStyle = () => {
 
       // Detect font-family
       if (!detectedStyles.fontFamily) {
-        detectedStyles.fontFamily = computedStyle.fontFamily || null;
+        const cleanFont = computedStyle.fontFamily.replace(/^"|"$/g, "");
+        detectedStyles.fontFamily = cleanFont || null;
       }
 
       // Detect bold (font-weight >= 700)
