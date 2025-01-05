@@ -14,9 +14,18 @@ import useEditorStore from "../stores/EditorStore";
 import { rgbToHex } from "../.core/utils";
 import { Block, BlockType } from "../.core/types";
 import { TypeChange } from "../modules/typeChange";
+import { useEditor } from "../utils/EditorContext";
+import {
+  useFloating,
+  inline,
+  offset,
+  shift,
+  flip,
+  autoPlacement,
+  autoUpdate,
+} from "@floating-ui/react";
 
 interface ToolbarProps {
-  textMenuPosition: { top: number; left: number };
   block: Block;
   onUpdate: (update: {
     id: string;
@@ -25,13 +34,8 @@ interface ToolbarProps {
   }) => void;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({
-  textMenuPosition,
-  block,
-  onUpdate,
-}) => {
+const Toolbar: React.FC<ToolbarProps> = ({ block, onUpdate }) => {
   const {
-    detectedStyles,
     setIsBold,
     setIsItalic,
     setIsUnderline,
@@ -41,6 +45,19 @@ const Toolbar: React.FC<ToolbarProps> = ({
     setSelectedBgColor,
   } = useBlockStore();
   const { toolbarSettings } = useEditorStore();
+  const { editor } = useEditor();
+
+  const { floatingStyles, refs } = useFloating({
+    placement: "bottom", // Position the toolbar above the selection
+    middleware: [
+      inline(),
+      offset(10), // Add a 10px gap between the toolbar and selection
+      shift(), // Ensure the toolbar stays within the viewport
+      flip(), // Flip the toolbar to the opposite side if there's no space
+      autoPlacement(),
+    ],
+    whileElementsMounted: autoUpdate, // Dynamically reposition as needed
+  });
 
   const toolbarComponents: Record<string, JSX.Element> = {
     bold: <Bold />,
@@ -56,34 +73,44 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
   // Update color pickers when the detected style changes
   useEffect(() => {
-    if (detectedStyles.color) {
-      const hexColor = rgbToHex(detectedStyles.color);
+    const selectedElement = editor.getSelectionElement();
+    if (selectedElement) refs.setReference(selectedElement);
+
+    const {
+      color,
+      backgroundColor,
+      fontFamily,
+      isBold,
+      isItalic,
+      isStrikeout,
+      isUnderline,
+    } = editor.getSelectionStyle();
+
+    if (color) {
+      const hexColor = rgbToHex(color);
       setSelectedColor(hexColor);
     }
 
-    if (detectedStyles.backgroundColor) {
-      const hexBgColor = rgbToHex(detectedStyles.backgroundColor);
+    if (backgroundColor) {
+      const hexBgColor = rgbToHex(backgroundColor);
       setSelectedBgColor(hexBgColor);
     } else {
       setSelectedBgColor("#ffffff");
     }
 
-    if (
-      detectedStyles.fontFamily &&
-      detectedStyles.fontFamily.indexOf("sans-serif") === -1
-    ) {
-      setSelectedFont(detectedStyles.fontFamily);
+    if (fontFamily && fontFamily.indexOf("sans-serif") === -1) {
+      setSelectedFont(fontFamily);
     } else {
       setSelectedFont("arial");
     }
 
     // Update other detected styles (e.g., bold, italic, underline, strikeout)
-    setIsBold(detectedStyles.isBold);
-    setIsItalic(detectedStyles.isItalic);
-    setIsUnderline(detectedStyles.isUnderline);
-    setIsStrikeout(detectedStyles.isStrikeout);
+    setIsBold(isBold);
+    setIsItalic(isItalic);
+    setIsUnderline(isUnderline);
+    setIsStrikeout(isStrikeout);
   }, [
-    detectedStyles,
+    editor,
     setIsBold,
     setIsItalic,
     setIsUnderline,
@@ -91,6 +118,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
     setSelectedFont,
     setSelectedBgColor,
     setSelectedColor,
+    refs,
   ]);
 
   return (
@@ -98,13 +126,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
       {toolbarSettings[block.type].length > 0 && (
         <div
           className="menu-container flex gap-1 absolute bg-white border border-gray-300 shadow-lg rounded p-2 w-max"
-          style={{
-            top: `${textMenuPosition.top}px`,
-            left: `${textMenuPosition.left}px`,
-            transform: "translate(-50%, -100%)",
-            zIndex: 100,
-            whiteSpace: "nowrap",
-          }}
+          ref={refs.setFloating} // Floating UI uses this ref for positioning
+          style={{ ...floatingStyles, zIndex: 100, whiteSpace: "nowrap" }}
         >
           {toolbarSettings[block.type].map((moduleName, index) =>
             toolbarComponents[moduleName] ? (

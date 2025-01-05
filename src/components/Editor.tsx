@@ -17,44 +17,59 @@ import {
 } from "@dnd-kit/sortable";
 
 import SortableItem from "./SortableItem";
-import { Block, BlockType } from "../.core/types";
+import { BlockType } from "../.core/types";
 import { focusBlock } from "../.core/blocks";
-import { typedom } from "../.core";
 import useEditorStore from "../stores/EditorStore";
 import "../styles/Editor.scss";
 import { DEFAULT_TOOLBARS, EVENTS } from "../.core/constants";
+import { useEditor } from "../utils/EditorContext";
+import { Blox } from "../.core/Blox";
 
 interface EditorProps {
   toolbars?: Partial<Record<BlockType, string>>;
-  plugins?: string[];
+  extensions?: string[];
   height?: number;
-  content: string;
   onChange: (updatedHTMLString: string) => void;
 }
 
 const Editor: React.FC<EditorProps> = ({
   toolbars = DEFAULT_TOOLBARS,
-  content,
   onChange,
 }) => {
-  typedom.init({
-    HTMLString: content,
-  });
+  const { editor } = useEditor();
 
-  const [blocks, setBlocks] = useState<Block[]>(typedom.getBlocks());
+  const [blocks, setBlocks] = useState<Blox[]>(editor.getBlocks());
   const { setToolbarSettings } = useEditorStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
+  // Debounce timeout
+  let debounceTimeout: NodeJS.Timeout;
+
+  // Handle content updates with debounce
+  const updateContent = () => {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(() => {
+      editor.update(onChange, blocks);
+    }, 300);
+  };
+
+  // Update content whenever blocks change
   useEffect(() => {
-    const handleBlocksChange = () => {
-      setBlocks(typedom.getBlocks()); // Update state with the latest blocks
+    updateContent();
+    return () => clearTimeout(debounceTimeout);
+  }, [blocks, updateContent]);
+
+  useEffect(() => {
+    const handleBlocksChange = (newBlocks: Blox[]) => {
+      setBlocks(newBlocks); // Update local state when blocks change in the editor
     };
-    typedom.on(EVENTS.blocksChanged, handleBlocksChange);
+
+    editor.on(EVENTS.blocksChanged, handleBlocksChange);
     return () => {
-      typedom.off(EVENTS.blocksChanged, handleBlocksChange);
+      editor.off(EVENTS.blocksChanged, handleBlocksChange);
     };
-  }, []);
+  }, [editor]);
 
   useEffect(() => {
     if (!toolbars || typeof toolbars !== "object") return;
@@ -89,7 +104,7 @@ const Editor: React.FC<EditorProps> = ({
     const oldIndex = blocks.findIndex((b) => b.id === active.id);
     const newIndex = blocks.findIndex((b) => b.id === over.id);
     setBlocks((prev) => arrayMove(prev, oldIndex, newIndex));
-    updateContent();
+    // updateContent();
   };
 
   const handleDragOver = (event: any) => {
@@ -136,24 +151,20 @@ const Editor: React.FC<EditorProps> = ({
     content?: string;
     type?: BlockType;
   }) => {
-    const updatedBlocks = blocks.map((block) =>
-      block.id === update.id
-        ? {
-            ...block,
-            ...(update.content !== undefined
-              ? { content: update.content }
-              : {}), // Update content if provided
-            ...(update.type ? { type: update.type } : {}), // Update type if provided
-          }
-        : block,
-    );
+    const updatedBlocks = blocks.map((block) => {
+      if (block.id === update.id) {
+        // Update content and type if provided
+        if (update.content !== undefined) {
+          block.content = update.content;
+        }
+        if (update.type) {
+          block.type = update.type;
+        }
+      }
+      return block;
+    });
 
     setBlocks(updatedBlocks);
-    updateContent();
-  };
-
-  const updateContent = () => {
-    typedom.update(onChange, blocks);
   };
 
   const handleAddBlockBelow = (
@@ -166,11 +177,12 @@ const Editor: React.FC<EditorProps> = ({
       const index = prev.findIndex((b) => b.id === currentBlockId);
       if (index === -1) return prev;
 
-      const newBlock: Block = {
+      const newBlock: Blox = new Blox({
         id: newBlockId, // Generate a unique ID for the new block
         type: newType,
         content: getDefaultContent(newType),
-      };
+        onUpdate: editor.onChange,
+      });
 
       const newBlocks = [...prev];
       newBlocks.splice(index + 1, 0, newBlock);
@@ -181,7 +193,7 @@ const Editor: React.FC<EditorProps> = ({
       focusBlock(newBlockId);
     }, 0);
 
-    updateContent();
+    // updateContent();
   };
 
   const getDefaultContent = (type: BlockType) => {
@@ -197,7 +209,7 @@ const Editor: React.FC<EditorProps> = ({
       newBlocks.splice(index, 1); // Remove the block at the found index
       return newBlocks;
     });
-    updateContent();
+    // updateContent();
   };
 
   const mouseSensor = useSensor(MouseSensor, {
@@ -209,7 +221,7 @@ const Editor: React.FC<EditorProps> = ({
   const sensors = useSensors(mouseSensor, keyboardSensor);
 
   return (
-    <div className="mx-auto mt-10 max-w-3xl p-4" id="typedom-editor">
+    <div className="mx-auto mt-10 max-w-3xl p-4" id="typeblox-editor">
       <DndContext
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
@@ -225,6 +237,7 @@ const Editor: React.FC<EditorProps> = ({
         >
           {blocks.map((block) => (
             <SortableItem
+              editor={editor}
               blocks={blocks}
               key={block.id}
               block={block}
@@ -242,6 +255,7 @@ const Editor: React.FC<EditorProps> = ({
 
               return activeBlock ? (
                 <SortableItem
+                  editor={editor}
                   blocks={blocks}
                   key={activeBlock.id}
                   block={activeBlock}

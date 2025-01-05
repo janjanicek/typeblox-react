@@ -1,4 +1,8 @@
-#typedom-editor {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#typeblox-editor {
   h1 {
     font-size: 1.6rem;
     font-weight: bold;
@@ -27,7 +31,7 @@
     color: #ccc;
   }
 
-  .typedom-contextual-menu {
+  .typeblox-contextual-menu {
     max-height: 350px;
     overflow-y: auto;
 

@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import Icon from "../../components/Icon";
-import useBlockStore from "../../stores/BlockStore";
-import { useFormatting } from "../../utils/FormattingContext";
+import { useEditor } from "../../utils/EditorContext";
 
 export const Italic: React.FC = () => {
-  const { isItalic, setDetectedStyles } = useBlockStore();
-  const { applyFormatting, unapplyFormatting, detectStyle } = useFormatting();
+  const { editor } = useEditor();
+  const [isItalic, setIsItalic] = useState(editor.isStyle("italic"));
 
   return (
     <button
@@ -13,8 +12,8 @@ export const Italic: React.FC = () => {
         isItalic ? "bg-gray-300 text-white" : ""
       }`}
       onClick={() => {
-        !isItalic ? applyFormatting("i") : unapplyFormatting("i");
-        setDetectedStyles(detectStyle());
+        const newStyle = editor.getCurrentBlock()?.toggleItalic();
+        setIsItalic(newStyle ?? false);
       }}
     >
       <Icon src="/icons/italic.svg" />

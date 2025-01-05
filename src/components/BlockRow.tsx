@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, FC, useCallback } from "react";
 import Toolbar from "./Toolbar";
-import { useFormatting } from "../utils/FormattingContext";
-import useBlockStore from "../stores/BlockStore";
+import { useEditor } from "../utils/EditorContext";
 import { Block, BlockType } from "../.core/types";
 import React from "react";
 import { sanitizeHTML } from "../.core/utils";
@@ -40,15 +39,11 @@ const BlockRow: FC<BlockRowProps> = ({
   onRemove,
 }) => {
   const [showToolbar, setShowToolbar] = useState(false);
-  const [textMenuPosition, setTextMenuPosition] = useState({ top: 5, left: 0 });
   const [showContentSuggestor, setShowContentSuggestor] = useState(false);
 
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  const { createSelectedElement, detectStyle, removeSelectedWrapper } =
-    useFormatting();
-
-  const { setDetectedStyles } = useBlockStore();
+  const { editor } = useEditor();
 
   useEffect(() => {
     if (
@@ -79,25 +74,18 @@ const BlockRow: FC<BlockRowProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    setDetectedStyles(detectStyle());
-  }, [setDetectedStyles, detectStyle]);
-
   const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const blockElement = getBlockElement();
 
-    removeSelectedWrapper(contentRef.current);
+    editor.unselect(contentRef.current);
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
 
-      if (contentRef.current) positionMenuAboveSelection(contentRef.current);
-
       const parentNode = range.commonAncestorContainer.parentNode;
       if (parentNode && !selection.isCollapsed) {
+        editor.select(range);
         setShowToolbar(true);
-        createSelectedElement(range);
-        setDetectedStyles(detectStyle());
         return;
       }
 
@@ -121,50 +109,41 @@ const BlockRow: FC<BlockRowProps> = ({
     return currentIndex > 0 ? blocks[currentIndex - 1] : null;
   };
 
-  const positionMenuAboveSelection = (parentRef: HTMLElement) => {
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const rect = range.getBoundingClientRect();
-
-      const parentRect = parentRef.getBoundingClientRect(); // Get the parent container's bounding box
-
-      // Calculate menu position relative to the parent container
-      const top = rect.top - parentRect.top;
-      const left = rect.left - parentRect.left + rect.width / 2;
-
-      // Apply constraints so the menu doesn't go outside the parent container
-      const constrainedTop = Math.max(top, 0); // Prevent menu from going above the parent
-      const constrainedLeft = Math.max(left, 0); // Prevent menu from going off the left side
-      const constrainedRight = Math.min(left, parentRect.width); // Prevent menu from going off the right side
-
-      setTextMenuPosition({
-        top: constrainedTop,
-        left: Math.min(constrainedLeft, constrainedRight),
-      });
-    }
-  };
-
   const handleOutsideClick = useCallback(
     (e: MouseEvent) => {
       if (
         contentRef.current &&
         !contentRef.current.contains(e.target as Node)
       ) {
-        if ((e.target as HTMLElement).closest(".menu-container")) {
-          return;
+        const blockElement = (e.target as HTMLElement).closest(
+          "[data-typeblox-id]",
+        );
+        if (!blockElement) return;
+        const blockId = (blockElement as HTMLElement).dataset.typebloxId;
+
+        const selectedBlock = editor.getCurrentBlock();
+        const currentBlock = editor.getBlockElementById(blockId);
+
+        // Check if there is any selection on the page
+        const selection = window.getSelection();
+        if (
+          !selection ||
+          selection.isCollapsed ||
+          selectedBlock !== currentBlock
+        ) {
+          // Only unselect if no text or element is selected
+          setShowToolbar(false);
+          editor.unselect(contentRef.current);
         }
-        setShowToolbar(false);
-        removeSelectedWrapper(contentRef.current);
       }
     },
-    [removeSelectedWrapper],
+    [editor],
   );
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("mouseup", handleOutsideClick);
     return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("mouseup", handleOutsideClick);
     };
   }, [handleOutsideClick]);
 
@@ -200,7 +179,7 @@ const BlockRow: FC<BlockRowProps> = ({
   };
 
   const getBlockElement = () =>
-    document.querySelector(`[data-typedom-id="${block.id}"]`);
+    document.querySelector(`[data-typeblox-id="${block.id}"]`);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const blockElement = getBlockElement();
@@ -262,12 +241,12 @@ const BlockRow: FC<BlockRowProps> = ({
     // Default case for text, code, headline1, headline2, headline3, etc.
     return React.createElement(WrapperElement, {
       ref: contentRef,
-      "data-typedom-editor": "block",
-      "data-typedom-id": block.id,
+      "data-typeblox-editor": "block",
+      "data-typeblox-id": block.id,
       placeholder: BLOCKS_SETTINGS[type].defaultContent,
       contentEditable: true,
       suppressContentEditableWarning: true,
-      className: "typedom flex-1 outline-none border border-transparent px-2",
+      className: "typeblox flex-1 outline-none border border-transparent px-2",
       onBlur: () =>
         onUpdate({
           id: block.id,
@@ -289,13 +268,7 @@ const BlockRow: FC<BlockRowProps> = ({
           onAddBelow={onAddBelow}
           onRemove={onRemove}
         />
-        {showToolbar && (
-          <Toolbar
-            textMenuPosition={textMenuPosition}
-            block={block}
-            onUpdate={onUpdate}
-          />
-        )}
+        {showToolbar && <Toolbar block={block} onUpdate={onUpdate} />}
         {renderContent()}
         <ContextualMenu
           isVisible={showContentSuggestor}

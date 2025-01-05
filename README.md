@@ -1,4 +1,4 @@
-# Typedom Editor
+# Typetet Editor
 
 Simple React block-based WYSIWYG editor
 
@@ -10,11 +10,11 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 To use the `<Editor />` component, simply import it and configure its properties. Below is an example:
 
-```jsx
+````jsx
 import Editor from './Editor';
 
 const sampleContent = `
-<h1>Welcome to Typedom Editor</h1>
+<h1>Welcome to Typeblox Editor</h1>
 <p><strong>Start creating</strong> amazing content with this simple WYSIWYG editor!</p>
 <ul>
     <li>Use <strong>bold</strong>, <em>italic</em>, and <u>underline</u> text formatting.</li>
@@ -29,7 +29,7 @@ const sampleContent = `
   }}
   content={sampleContent}
   onChange={onChangeHandler}
-/>
+/>```
 
 ## Available Scripts
 
@@ -97,4 +97,4 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-```
+````

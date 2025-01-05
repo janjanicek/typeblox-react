@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, FC, useState } from "react";
+import React, { useEffect, useRef, FC, useState, useCallback } from "react";
 import Icon from "./Icon";
 
 interface ContextualMenuProps {
@@ -13,6 +13,7 @@ interface ContextualMenuProps {
   }[];
   onClose: () => void;
   sectionName?: string;
+  selectedValue?: string;
 }
 
 const ContextualMenu: FC<ContextualMenuProps> = ({
@@ -21,10 +22,34 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
   options,
   onClose,
   sectionName,
+  selectedValue,
 }) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
+  // Helper function: Query and return focusable elements
+  const getFocusableElements = useCallback((): HTMLElement[] => {
+    const anchors = menuRef.current?.querySelectorAll("a");
+    return anchors ? Array.from(anchors) : [];
+  }, []);
+
+  // Helper function: Focus an element at a given index
+  const focusElementAtIndex = useCallback(
+    (index: number) => {
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length > 0) {
+        const clampedIndex = Math.max(
+          0,
+          Math.min(index, focusableElements.length - 1),
+        );
+        focusableElements[clampedIndex]?.focus();
+        setActiveIndex(clampedIndex);
+      }
+    },
+    [getFocusableElements],
+  );
+
+  // Handle outside click
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -34,55 +59,70 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
 
     if (isVisible) {
       document.addEventListener("mousedown", handleOutsideClick);
+
+      // Set initial focus based on `selectedValue` or default to the first option
+      const focusableElements = getFocusableElements();
+      const initialIndex = selectedValue
+        ? focusableElements.findIndex(
+            (el) =>
+              el.textContent?.trim().toLowerCase() ===
+              selectedValue?.trim().toLowerCase(),
+          )
+        : 0;
+
+      focusElementAtIndex(initialIndex);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
-  }, [isVisible, onClose]);
+  }, [
+    isVisible,
+    onClose,
+    selectedValue,
+    getFocusableElements,
+    focusElementAtIndex,
+  ]);
 
+  // Handle keyboard navigation
   useEffect(() => {
     if (!isVisible || !menuRef.current) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      const anchors = menuRef.current?.querySelectorAll("a");
-      if (!anchors || anchors.length === 0) return;
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length === 0) return;
 
-      const focusableElements = Array.from(anchors) as HTMLElement[];
       const currentIndex = focusableElements.findIndex(
         (el) => el === document.activeElement,
       );
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        const nextIndex = (currentIndex + 1) % focusableElements.length; // Wrap around
-        focusableElements[nextIndex].focus();
+        focusElementAtIndex((currentIndex + 1) % focusableElements.length); // Wrap around
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        const prevIndex =
+        focusElementAtIndex(
           (currentIndex - 1 + focusableElements.length) %
-          focusableElements.length; // Wrap around
-        focusableElements[prevIndex].focus();
+            focusableElements.length,
+        ); // Wrap around
       } else if (e.key === "Escape") {
         e.preventDefault();
         onClose(); // Close the menu
       }
     };
 
-    // Add event listener
     document.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isVisible, onClose]);
+  }, [isVisible, onClose, getFocusableElements, focusElementAtIndex]);
 
   if (!isVisible) return null;
 
   return (
     <div
       ref={menuRef}
-      className="typedom-contextual-menu absolute bg-white border border-gray-300 shadow-lg p-2 z-10 rounded-md"
+      className="typeblox-contextual-menu absolute bg-white border border-gray-300 shadow-lg p-2 z-10 rounded-md"
       style={{
         top: position.top,
         left: position.left,
@@ -99,7 +139,8 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
             activeIndex === index ? "bg-gray-200" : "hover:bg-gray-100"
           }`}
           style={option.style}
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault(); // Prevent default link behavior
             onClose();
             option.onClick();
           }}

@@ -1,15 +1,17 @@
 import React from "react";
 import Icon from "../../components/Icon";
 import useBlockStore from "../../stores/BlockStore";
-import { useFormatting } from "../../utils/FormattingContext";
+import { useEditor } from "../../utils/EditorContext";
 
 export const BgColor: React.FC = () => {
   const { selectedBgColor, setSelectedBgColor } = useBlockStore();
-  const { applyFormatting } = useFormatting();
+  const { editor } = useEditor();
 
   const handleBgColorChange = (color: string) => {
     setSelectedBgColor(color);
-    applyFormatting("mark", { backgroundColor: color, color: "inherit" });
+    editor
+      .getCurrentBlock()
+      ?.applyStyle("mark", { backgroundColor: color, color: "inherit" });
   };
 
   return (

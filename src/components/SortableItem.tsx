@@ -1,10 +1,11 @@
 import React, { useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import BlockRow from "./BlockRow";
+import { Typeblox } from "../.core";
 import { Block, BlockType } from "../.core/types";
-import { FormattingProvider } from "../utils/FormattingContext";
 
 interface SortableItemProps {
+  editor: Typeblox;
   blocks: Block[];
   block: Block;
   onUpdateBlock: (update: {
@@ -19,6 +20,7 @@ interface SortableItemProps {
 }
 
 const SortableItem: React.FC<SortableItemProps> = ({
+  editor,
   blocks,
   block,
   onUpdateBlock,
@@ -49,18 +51,16 @@ const SortableItem: React.FC<SortableItemProps> = ({
       style={style}
       {...attributes}
     >
-      <FormattingProvider blockId={block.id} onUpdate={onUpdateBlock}>
-        <BlockRow
-          blocks={blocks}
-          block={block}
-          type={type}
-          content={content}
-          dragListeners={listeners}
-          onUpdate={onUpdateBlock}
-          onAddBelow={onAddBlockBelow}
-          onRemove={onRemoveBlock}
-        />
-      </FormattingProvider>
+      <BlockRow
+        blocks={blocks}
+        block={block}
+        type={type}
+        content={content}
+        dragListeners={listeners}
+        onUpdate={onUpdateBlock}
+        onAddBelow={onAddBlockBelow}
+        onRemove={onRemoveBlock}
+      />
     </div>
   );
 };

@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import Icon from "../../components/Icon";
-import useBlockStore from "../../stores/BlockStore";
-import { useFormatting } from "../../utils/FormattingContext";
+import { useEditor } from "../../utils/EditorContext";
 
 export const Underline: React.FC = () => {
-  const { isUnderline, setDetectedStyles } = useBlockStore();
-  const { applyFormatting, unapplyFormatting, detectStyle } = useFormatting();
+  const { editor } = useEditor();
+  const [isUnderline, setIsUnderline] = useState(editor.isStyle("underline"));
 
   return (
     <button
@@ -13,8 +12,8 @@ export const Underline: React.FC = () => {
         isUnderline ? "bg-gray-300 text-white" : ""
       }`}
       onClick={() => {
-        !isUnderline ? applyFormatting("u") : unapplyFormatting("u");
-        setDetectedStyles(detectStyle());
+        const newStyle = editor.getCurrentBlock()?.toogleUnderline();
+        setIsUnderline(newStyle ?? false);
       }}
     >
       <Icon src="/icons/underline.svg" />

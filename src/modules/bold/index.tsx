@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import Icon from "../../components/Icon";
-import useBlockStore from "../../stores/BlockStore";
-import { useFormatting } from "../../utils/FormattingContext";
+import { useEditor } from "../../utils/EditorContext";
 
 export const Bold: React.FC = () => {
-  const { isBold, setDetectedStyles } = useBlockStore();
-  const { applyFormatting, unapplyFormatting, detectStyle } = useFormatting();
+  const { editor } = useEditor();
+  const [isBold, setIsBold] = useState(editor.isStyle("bold"));
 
   return (
     <button
@@ -13,8 +12,8 @@ export const Bold: React.FC = () => {
         isBold ? "bg-gray-300 text-white" : ""
       }`}
       onClick={() => {
-        !isBold ? applyFormatting("strong") : unapplyFormatting("strong");
-        setDetectedStyles(detectStyle());
+        const newStyle = editor.getCurrentBlock()?.toggleBold();
+        setIsBold(newStyle ?? false);
       }}
     >
       <Icon src="/icons/bold.svg" />

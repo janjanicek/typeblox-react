@@ -1,31 +1,56 @@
-import { CLASSES } from "./constants";
+import { AVAILABLE_FONTS, CLASSES } from "./constants";
+import { detectedStyles } from "./types";
 import { toCssStyle } from "./utils";
 
-export const createSelectedElement = (): void => {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return;
-
-  const range = selection.getRangeAt(0);
-  if (!range) return;
+export const createSelectedElement = (range?: Range): void => {
+  let customRange = range;
+  if (customRange) {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    customRange = selection.getRangeAt(0);
+  }
+  if (!customRange) return;
 
   // Create a wrapper element
   const wrapper = document.createElement("span");
   wrapper.className = CLASSES.selected;
-  wrapper.appendChild(range.extractContents());
-  range.insertNode(wrapper);
+  wrapper.appendChild(customRange.extractContents());
+  customRange.insertNode(wrapper);
 };
 
 const getSelectedElement = (
   wrapper: Element | Document = document,
 ): HTMLElement | null => {
-  return wrapper.querySelector(`.${CLASSES.selected}`);
+  const selectionElement = wrapper.querySelector(
+    `.${CLASSES.selected}`,
+  ) as HTMLElement;
+  return selectionElement;
+};
+
+const getBlockElement = (): HTMLElement | null => {
+  const selection = window.getSelection();
+
+  // Check if there's a valid selection and at least one range
+  if (!selection || selection.rangeCount === 0) return null;
+
+  const range = selection.getRangeAt(0);
+  const selectedNode = range.startContainer;
+
+  // Check if the selectedNode is an Element and use `closest`, or fall back to parentNode
+  if (selectedNode instanceof Element) {
+    return selectedNode.closest("[data-typeblox-id]");
+  } else if (selectedNode.parentNode instanceof Element) {
+    return selectedNode.parentNode.closest("[data-typeblox-id]") as HTMLElement;
+  }
+
+  return null;
 };
 
 export const applyFormat = (
-  contentElement: Element,
   tagName: string,
-  style: Record<string, string> = {},
+  style?: Record<string, string>,
 ) => {
+  const contentElement = getBlockElement();
   if (!contentElement) return;
 
   const selectedElement = getSelectedElement(contentElement);
@@ -38,7 +63,7 @@ export const applyFormat = (
   let matchingParentTag: HTMLElement | null =
     selectedElement.closest<HTMLElement>(`${tagName}`);
 
-  if (Object.keys(style).length > 0) {
+  if (style && Object.keys(style).length > 0) {
     const leadingStyle = Object.keys(style)[0];
     const styleKey = toCssStyle(leadingStyle);
     matchingParentStyle = selectedElement.closest<HTMLElement>(
@@ -60,9 +85,11 @@ export const applyFormat = (
   }
 
   const wrapper = document.createElement(tagName);
-  Object.keys(style).forEach((key: any) => {
-    wrapper.style[key] = style[key];
-  });
+  if (style) {
+    Object.keys(style).forEach((key: any) => {
+      wrapper.style[key] = style[key];
+    });
+  }
 
   const parentElement = selectedElement.parentElement;
   if (parentElement) {
@@ -127,7 +154,7 @@ const unapplyAliases = (tagName: string) => {
   }
 };
 
-export const getStyle = () => {
+export const getStyle = (): detectedStyles => {
   const selection = getSelectedElement();
   if (selection) {
     let currentNode = selection.parentElement as HTMLElement;
@@ -141,16 +168,38 @@ export const getStyle = () => {
       isUnderline: false,
       isStrikeout: false,
       fontFamily: null as string | null,
+      isH1: false,
+      isH2: false,
+      isH3: false,
+      isParagraph: false,
+      isCode: false,
     };
 
     // Traverse up the DOM tree
     while (currentNode && currentNode.nodeType === Node.ELEMENT_NODE) {
-      if (currentNode.matches("p[data-typedom-editor]")) {
+      if (currentNode.matches("p[data-typeblox-editor]")) {
         break;
       }
 
       const computedStyle = window.getComputedStyle(currentNode);
       const currentHTMLElement = currentNode;
+      const blockType = currentNode.closest("[data-typeblox-id]")?.nodeName;
+
+      if (blockType && blockType === "H1") {
+        detectedStyles.isH1 = true;
+      }
+      if (blockType && blockType === "H2") {
+        detectedStyles.isH2 = true;
+      }
+      if (blockType && blockType === "H3") {
+        detectedStyles.isH2 = true;
+      }
+      if (blockType && blockType === "P") {
+        detectedStyles.isParagraph = true;
+      }
+      if (blockType && blockType === "CODE") {
+        detectedStyles.isCode = true;
+      }
 
       // Detect color
       if (!detectedStyles.color) {
@@ -169,7 +218,16 @@ export const getStyle = () => {
       // Detect font-family
       if (!detectedStyles.fontFamily) {
         const cleanFont = computedStyle.fontFamily.replace(/^"|"$/g, "");
-        detectedStyles.fontFamily = cleanFont || null;
+        if (
+          cleanFont &&
+          AVAILABLE_FONTS.map((f) => f.toLowerCase()).includes(
+            cleanFont.toLowerCase(),
+          )
+        ) {
+          detectedStyles.fontFamily = cleanFont;
+        } else {
+          detectedStyles.fontFamily = "Arial";
+        }
       }
 
       // Detect bold (font-weight >= 700)
@@ -217,6 +275,11 @@ export const getStyle = () => {
     isUnderline: false,
     isStrikeout: false,
     fontFamily: null,
+    isH1: false,
+    isH2: false,
+    isH3: false,
+    isParagraph: false,
+    isCode: false,
   };
 };
 
@@ -276,7 +339,11 @@ export const removeElement = (matchingParent: Element) => {
 };
 
 export const selectAllTextInSelectedElement = (): void => {
-  const selectedElement = getSelectedElement();
+  let selectedElement = getSelectedElement();
+  if (!selectedElement) {
+    createSelectedElement();
+    selectedElement = getSelectedElement();
+  }
 
   if (!selectedElement) {
     console.warn("No .selected element found.");
@@ -308,6 +375,11 @@ export const removeSelection = (blockElement: HTMLElement | null) => {
     `.${CLASSES.selected}`,
   );
   selectedElements.forEach((element) => {
+    if (element.innerHTML.trim() === "") {
+      // remove empty selected element
+      element.remove();
+      return;
+    }
     const parent = element.parentNode;
     while (element.firstChild) {
       parent?.insertBefore(element.firstChild, element);

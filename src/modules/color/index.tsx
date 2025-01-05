@@ -1,16 +1,16 @@
 import React from "react";
 import Icon from "../../components/Icon";
 import useBlockStore from "../../stores/BlockStore";
-import { useFormatting } from "../../utils/FormattingContext";
+import { useEditor } from "../../utils/EditorContext";
 
 export const Color: React.FC = () => {
   const { selectedColor, setSelectedColor } = useBlockStore();
-  const { applyFormatting } = useFormatting();
+  const { editor } = useEditor();
 
   const handleColorChange = (color: string) => {
     //restoreSelection(); // Restore the saved selection
     setSelectedColor(color);
-    applyFormatting("span", { color }); // Apply text color immediately
+    editor.getCurrentBlock()?.applyStyle("span", { color });
   };
 
   return (

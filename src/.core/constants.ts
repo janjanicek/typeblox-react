@@ -21,7 +21,7 @@ export const AVAILABLE_BLOCKS: BlockType[] = [
 export const DEFAULT_BLOCK_TYPE = "text";
 
 export const CLASSES = {
-  selected: "typedom-selected",
+  selected: "typeblox-selected",
 };
 
 export const BLOCKS_SETTINGS = {
@@ -98,5 +98,7 @@ export const DEFAULT_TOOLBARS = {
 };
 
 export const EVENTS = {
-  blocksChanged: "typedom.blocksChanged",
+  blocksChanged: "typeblox.blocksChanged",
+  styleChange: "typeblox.styleChanges",
+  selectionChange: "typeblox.selectionChange",
 };
