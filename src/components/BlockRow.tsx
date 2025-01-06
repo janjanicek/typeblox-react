@@ -3,14 +3,14 @@ import Toolbar from "./Toolbar";
 import { useEditor } from "../utils/EditorContext";
 import { Block, BlockType } from "../.core/types";
 import React from "react";
-import { sanitizeHTML } from "../.core/utils";
+import { sanitizeHTML } from "../.core/utils/dom";
 import BlockMenu from "./BlockMenu";
 import {
   AVAILABLE_BLOCKS,
   BLOCKS_SETTINGS,
   DEFAULT_BLOCK_TYPE,
 } from "../.core/constants";
-import { focusBlock } from "../.core/blocks";
+import { focusBlock } from "../.core/utils/blocks";
 import ContextualMenu from "./ContextualMenu";
 
 interface BlockRowProps {

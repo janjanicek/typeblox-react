@@ -14,7 +14,7 @@ export const Strikethrough: React.FC = () => {
         isStrikethrough ? "bg-gray-300 text-white" : ""
       }`}
       onClick={() => {
-        const newStyle = editor.getCurrentBlock()?.toogleStrike();
+        const newStyle = editor.getCurrentBlock()?.toggleStrike();
         setIsStrikethrough(newStyle ?? false);
       }}
     >

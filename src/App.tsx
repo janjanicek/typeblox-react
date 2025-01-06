@@ -36,6 +36,8 @@ const MenuBar = () => {
       <div className="flex gap-2 p-5">
         <button
           onClick={() => {
+            editor.keepFocus();
+            document.execCommand("bold"); // TODO: Find alternative
             editor.getCurrentBlock()?.toggleBold();
           }}
           className={`${
@@ -45,7 +47,11 @@ const MenuBar = () => {
           Bold
         </button>
         <button
-          onClick={() => editor.getCurrentBlock()?.toggleItalic()}
+          onClick={() => {
+            editor.keepFocus();
+            document.execCommand("italic"); // TODO: Find alternative
+            editor.getCurrentBlock()?.toggleItalic();
+          }}
           className={`${
             activeStyle.isItalic ? "bg-blue-500" : "bg-gray-300"
           } ' hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center`}
@@ -53,7 +59,11 @@ const MenuBar = () => {
           Italic
         </button>
         <button
-          onClick={() => editor.getCurrentBlock()?.toogleStrike()}
+          onClick={() => {
+            editor.keepFocus();
+            document.execCommand("strikeThrough"); // TODO: Find alternative
+            editor.getCurrentBlock()?.toggleStrike();
+          }}
           className={`${
             activeStyle.isStrikeout ? "bg-blue-500" : "bg-gray-300"
           } ' hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center`}
@@ -61,7 +71,11 @@ const MenuBar = () => {
           Strike
         </button>
         <button
-          onClick={() => editor.getCurrentBlock()?.toogleUnderline()}
+          onClick={() => {
+            editor.keepFocus();
+            document.execCommand("underline"); // TODO: Find alternative
+            editor.getCurrentBlock()?.toggleUnderline();
+          }}
           className={`${
             activeStyle.isUnderline ? "bg-blue-500" : "bg-gray-300"
           } ' hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center`}
@@ -77,7 +91,9 @@ const MenuBar = () => {
           H1
         </button>
         <button
-          onClick={() => editor.getCurrentBlock()?.toggleType("headline2")}
+          onClick={() => {
+            editor.getCurrentBlock()?.toggleType("headline2");
+          }}
           className={`${
             activeStyle.isH2 ? "bg-blue-500" : "bg-gray-300"
           } ' hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center`}

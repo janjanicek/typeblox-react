@@ -11,7 +11,7 @@ import { BgColor } from "../modules/bgColor";
 import { Divider } from "../modules/divider";
 import useBlockStore from "../stores/BlockStore";
 import useEditorStore from "../stores/EditorStore";
-import { rgbToHex } from "../.core/utils";
+import { rgbToHex } from "../.core/utils/colors";
 import { Block, BlockType } from "../.core/types";
 import { TypeChange } from "../modules/typeChange";
 import { useEditor } from "../utils/EditorContext";

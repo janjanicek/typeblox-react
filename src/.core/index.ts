@@ -2,10 +2,11 @@ import { BLOCKS_SETTINGS, CLASSES, EVENTS } from "./constants";
 import { Block, BlockType, CustomRange, detectedStyles } from "./types";
 import { EventEmitter } from "events";
 import { Blox } from "./Blox";
-import { getBlockElement, getBlockElementById } from "./blocks";
-import { createSelectedElement, getStyle, removeSelection } from "./format";
+import { getBlockElement, getBlockElementById } from "./utils/blocks";
+import { FormatManager } from "./managers/FormatManager";
 import { registerListeners, removeListeners } from "./utils/listeners";
-import { HistoryManager } from "./HistoryManager";
+import { HistoryManager } from "./managers/HistoryManager";
+import { TypingManager } from "./managers/TypingManager";
 
 const isEmptyContent = (content: string | null) =>
   !content || content === "" || content === "&nbsp;";
@@ -20,6 +21,10 @@ export class Typeblox extends EventEmitter {
   private blocks: Blox[] = [];
 
   private HistoryManager: HistoryManager;
+
+  private TypingManager: TypingManager;
+
+  private FormatManager: FormatManager;
 
   private currentStyles: detectedStyles = {
     isBold: false,
@@ -51,8 +56,10 @@ export class Typeblox extends EventEmitter {
 
   constructor() {
     super();
-    this.currentStyles = this.getSelectionStyle();
     this.HistoryManager = new HistoryManager(25);
+    this.TypingManager = new TypingManager();
+    this.FormatManager = new FormatManager(this.TypingManager);
+    this.currentStyles = this.getSelectionStyle();
     registerListeners(this.detectSelection);
   }
 
@@ -87,6 +94,8 @@ export class Typeblox extends EventEmitter {
         type: "text" as BlockType, // Default block type
         content: element.innerHTML?.trim() || "",
         onUpdate: this.onChange,
+        TypingManager: this.TypingManager,
+        FormatManager: this.FormatManager,
       });
 
       // Find the corresponding block type in BLOCKS_SETTINGS
@@ -103,6 +112,8 @@ export class Typeblox extends EventEmitter {
               ? element.getAttribute("src") || ""
               : element.innerHTML?.trim(),
           onUpdate: this.onChange,
+          TypingManager: this.TypingManager,
+          FormatManager: this.FormatManager,
         });
       }
 
@@ -123,8 +134,12 @@ export class Typeblox extends EventEmitter {
     return blocks
       .map((block) => {
         if (isEmptyContent(block.content)) return "";
-        const tagName = BLOCKS_SETTINGS[block.type].tag;
-        return `<${tagName}>${block.content}</${tagName}>`;
+        if (block.type === "image") {
+          return `<img src="${block.content}" />`;
+        } else {
+          const tagName = BLOCKS_SETTINGS[block.type].tag;
+          return `<${tagName}>${block.content}</${tagName}>`;
+        }
       })
       .join("");
   };
@@ -142,12 +157,24 @@ export class Typeblox extends EventEmitter {
     removeListeners(this.detectSelection);
   }
 
-  public update(onChange: Function, providedBlocks?: Blox[]): void {
+  public selection(): TypingManager {
+    return this.TypingManager;
+  }
+
+  public format(): FormatManager {
+    return this.FormatManager;
+  }
+
+  public update(
+    onChange: Function,
+    providedBlocks?: Blox[],
+    calledFromEditor?: false,
+  ): void {
     const newBlocks = providedBlocks ?? this.blocks;
     this.blocks = newBlocks;
     onChange(this.blocksToHTML(newBlocks));
     this.saveHistory();
-    this.emit(EVENTS.blocksChanged, this.blocks);
+    if (!calledFromEditor) this.emit(EVENTS.blocksChanged, this.blocks);
   }
 
   public getBlockById(id: string | undefined): Blox | undefined {
@@ -164,7 +191,7 @@ export class Typeblox extends EventEmitter {
   }
 
   public getSelectionStyle(): detectedStyles {
-    return getStyle();
+    return this.format().getStyle();
   }
 
   public getSelectionElement(): HTMLElement | null {
@@ -175,13 +202,18 @@ export class Typeblox extends EventEmitter {
     return null;
   }
 
+  public keepFocus(): void {
+    this.TypingManager.saveSelectionRange();
+    this.TypingManager.restoreSelectionRange();
+  }
+
   public unselect(element: HTMLElement | null): void {
-    removeSelection(element);
+    this.TypingManager.removeSelection(element);
     this.emit(EVENTS.selectionChange, this.currentStyles);
   }
 
   public select(range: Range): void {
-    createSelectedElement(range);
+    this.TypingManager.createSelectedElement(range);
     this.emit(EVENTS.selectionChange, this.currentStyles);
   }
 

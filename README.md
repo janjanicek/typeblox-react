@@ -1,4 +1,4 @@
-# Typetet Editor
+# Typeblox Editor
 
 Simple React block-based WYSIWYG editor
 
@@ -11,7 +11,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 To use the `<Editor />` component, simply import it and configure its properties. Below is an example:
 
 ````jsx
-import Editor from './Editor';
+import { EditorProvider } from "./utils/EditorContext";
 
 const sampleContent = `
 <h1>Welcome to Typeblox Editor</h1>
@@ -23,13 +23,13 @@ const sampleContent = `
 </ul>
 `;
 
-<Editor
+<EditorProvider
   init={{
     toolbar: "bold italic underline strikethrough | font | color bgColor",
   }}
   content={sampleContent}
-  onChange={onChangeHandler}
-/>```
+></EditorProvider>
+        ```
 
 ## Available Scripts
 

@@ -12,7 +12,7 @@ export const Underline: React.FC = () => {
         isUnderline ? "bg-gray-300 text-white" : ""
       }`}
       onClick={() => {
-        const newStyle = editor.getCurrentBlock()?.toogleUnderline();
+        const newStyle = editor.getCurrentBlock()?.toggleUnderline();
         setIsUnderline(newStyle ?? false);
       }}
     >

@@ -18,7 +18,7 @@ import {
 
 import SortableItem from "./SortableItem";
 import { BlockType } from "../.core/types";
-import { focusBlock } from "../.core/blocks";
+import { focusBlock } from "../.core/utils/blocks";
 import useEditorStore from "../stores/EditorStore";
 import "../styles/Editor.scss";
 import { DEFAULT_TOOLBARS, EVENTS } from "../.core/constants";
@@ -182,6 +182,8 @@ const Editor: React.FC<EditorProps> = ({
         type: newType,
         content: getDefaultContent(newType),
         onUpdate: editor.onChange,
+        TypingManager: editor.selection(),
+        FormatManager: editor.format(),
       });
 
       const newBlocks = [...prev];
