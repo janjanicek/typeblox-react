@@ -2,7 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --color-primary: #0059a3;
+    --color-secondary: #dde7d1;
+    /* ... */
+  }
+}
+
 #typeblox-editor {
+  padding-left: 4rem;
+
+  [contenteditable="true"] {
+    a {
+      color: var(--color-primary);
+      text-decoration: underline;
+    }
+  }
+
   h1 {
     font-size: 1.6rem;
     font-weight: bold;

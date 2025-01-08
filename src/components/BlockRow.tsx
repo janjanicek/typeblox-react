@@ -1,21 +1,20 @@
 import { useState, useRef, useEffect, FC, useCallback } from "react";
 import Toolbar from "./Toolbar";
 import { useEditor } from "../utils/EditorContext";
-import { Block, BlockType } from "../.core/types";
+import { BlockType } from "../.core/types";
 import React from "react";
-import { sanitizeHTML } from "../.core/utils/dom";
 import BlockMenu from "./BlockMenu";
 import {
   AVAILABLE_BLOCKS,
   BLOCKS_SETTINGS,
   DEFAULT_BLOCK_TYPE,
 } from "../.core/constants";
-import { focusBlock } from "../.core/utils/blocks";
 import ContextualMenu from "./ContextualMenu";
+import type { Blox } from ".core/classes/Blox";
 
 interface BlockRowProps {
-  blocks: Block[];
-  block: Block;
+  blocks: Blox[];
+  block: Blox;
   type: BlockType;
   content: string | null;
   dragListeners?: any;
@@ -75,7 +74,7 @@ const BlockRow: FC<BlockRowProps> = ({
   }, []);
 
   const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const blockElement = getBlockElement();
+    const blockElement = editor.getBlockElementById(block.id);
 
     editor.unselect(contentRef.current);
     const selection = window.getSelection();
@@ -95,14 +94,14 @@ const BlockRow: FC<BlockRowProps> = ({
     if (event.key === "/") {
       if (blockElement?.innerHTML.trim() === "/") {
         setShowContentSuggestor(true);
-        focusBlock(block.id, true);
+        editor.DOM().focusBlock(block.id, true);
       } else {
         setShowContentSuggestor(false);
       }
     }
   };
 
-  const getPreviousBlock = (currentBlockId: string): Block | null => {
+  const getPreviousBlock = (currentBlockId: string): Blox | null => {
     const currentIndex = blocks.findIndex(
       (block) => block.id === currentBlockId,
     );
@@ -148,57 +147,28 @@ const BlockRow: FC<BlockRowProps> = ({
   }, [handleOutsideClick]);
 
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    editor.getCurrentBlock()?.pasteContent(e.nativeEvent);
     e.preventDefault(); // Prevent default paste behavior
-
-    // Get the pasted HTML or plain text
-    const pastedHTML =
-      e.clipboardData.getData("text/html") ||
-      e.clipboardData.getData("text/plain");
-
-    // Sanitize the HTML
-    const cleanHTML = sanitizeHTML(pastedHTML);
-
-    // Insert the sanitized HTML at the cursor position
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-
-      range.deleteContents(); // Remove selected content, if any
-
-      const fragment = range.createContextualFragment(cleanHTML);
-      range.insertNode(fragment);
-
-      // Collapse the selection to the end of the inserted content
-      range.collapse(false); // `false` collapses the selection to the end
-      selection.removeAllRanges(); // Clear any remaining selection
-      selection.addRange(range); // Reset the collapsed range
-    }
-
-    // Update the parent state with the new content
-    onUpdate({ id: block.id, content: contentRef.current?.innerHTML || "" });
   };
 
-  const getBlockElement = () =>
-    document.querySelector(`[data-typeblox-id="${block.id}"]`);
-
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const blockElement = getBlockElement();
+    const blockElement = editor.getBlockElementById(block.id);
 
     // Check if backspace is pressed and the block is empty
     if (event.key === "Backspace") {
       if (blockElement && blockElement.innerHTML.trim() === "") {
         const previousBlock = getPreviousBlock(block.id);
         if (previousBlock && previousBlock.id) {
-          focusBlock(previousBlock.id, true);
+          editor.DOM().focusBlock(previousBlock.id, true);
         }
         onRemove(block.id);
         event.preventDefault();
       }
     }
     if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
+      event.preventDefault(); // TODO: If in the middle of content move the rest of the contentent to the next block;
       onAddBelow(block.id, DEFAULT_BLOCK_TYPE);
-      focusBlock(block.id, true);
+      editor.DOM().focusBlock(block.id, true);
     }
   };
 
@@ -284,7 +254,7 @@ const BlockRow: FC<BlockRowProps> = ({
                   content: block.content?.replace(/\/$/, "") || "",
                   type: item,
                 });
-                setTimeout(() => focusBlock(block.id), 100);
+                setTimeout(() => editor.DOM().focusBlock(block.id), 100);
               },
               icon: BLOCKS_SETTINGS[item].icon,
             };

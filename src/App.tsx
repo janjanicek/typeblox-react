@@ -3,6 +3,7 @@
 import { EVENTS } from "./.core/constants";
 import { useEffect, useState } from "react";
 import { EditorProvider, useEditor } from "./utils/EditorContext";
+// import { toggleStyle } from "./.core/utils/dom";
 
 const MenuBar = () => {
   const { editor } = useEditor();
@@ -36,8 +37,6 @@ const MenuBar = () => {
       <div className="flex gap-2 p-5">
         <button
           onClick={() => {
-            editor.keepFocus();
-            document.execCommand("bold"); // TODO: Find alternative
             editor.getCurrentBlock()?.toggleBold();
           }}
           className={`${
@@ -48,8 +47,6 @@ const MenuBar = () => {
         </button>
         <button
           onClick={() => {
-            editor.keepFocus();
-            document.execCommand("italic"); // TODO: Find alternative
             editor.getCurrentBlock()?.toggleItalic();
           }}
           className={`${
@@ -60,8 +57,6 @@ const MenuBar = () => {
         </button>
         <button
           onClick={() => {
-            editor.keepFocus();
-            document.execCommand("strikeThrough"); // TODO: Find alternative
             editor.getCurrentBlock()?.toggleStrike();
           }}
           className={`${
@@ -72,8 +67,6 @@ const MenuBar = () => {
         </button>
         <button
           onClick={() => {
-            editor.keepFocus();
-            document.execCommand("underline"); // TODO: Find alternative
             editor.getCurrentBlock()?.toggleUnderline();
           }}
           className={`${
@@ -83,7 +76,9 @@ const MenuBar = () => {
           Underline
         </button>
         <button
-          onClick={() => editor.getCurrentBlock()?.toggleType("headline1")}
+          onClick={() => {
+            editor.getCurrentBlock()?.toggleType("headline1");
+          }}
           className={`${
             activeStyle.isH1 ? "bg-blue-500" : "bg-gray-300"
           } ' hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center`}
@@ -135,6 +130,12 @@ const MenuBar = () => {
           className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center"
         >
           Redo
+        </button>
+        <button
+          onClick={() => editor.format().clearFormat()}
+          className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center"
+        >
+          Clear
         </button>
       </div>
     </div>

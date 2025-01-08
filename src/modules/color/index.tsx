@@ -8,7 +8,6 @@ export const Color: React.FC = () => {
   const { editor } = useEditor();
 
   const handleColorChange = (color: string) => {
-    //restoreSelection(); // Restore the saved selection
     setSelectedColor(color);
     editor.getCurrentBlock()?.applyStyle("span", { color });
   };

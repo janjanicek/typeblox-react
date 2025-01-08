@@ -2,12 +2,13 @@ import React, { useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import BlockRow from "./BlockRow";
 import { Typeblox } from "../.core";
-import { Block, BlockType } from "../.core/types";
+import { BlockType } from "../.core/types";
+import { Blox } from ".core/classes/Blox";
 
 interface SortableItemProps {
   editor: Typeblox;
-  blocks: Block[];
-  block: Block;
+  blocks: Blox[];
+  block: Blox;
   onUpdateBlock: (update: {
     id: string;
     content?: string;

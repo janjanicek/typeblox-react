@@ -4,13 +4,8 @@ export type BlockType =
   | "image"
   | "headline1"
   | "headline2"
-  | "headline3";
-
-export interface Block {
-  id: string;
-  type: BlockType;
-  content: string | null; // Content can be null for images
-}
+  | "headline3"
+  | "html";
 
 export interface detectedStyles {
   color: string | null;

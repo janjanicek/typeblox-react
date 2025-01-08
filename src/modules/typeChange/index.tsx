@@ -2,11 +2,12 @@ import React from "react";
 import ContextualMenu from "../../components/ContextualMenu";
 import useBlockStore from "../../stores/BlockStore";
 import { BLOCKS_SETTINGS } from "../../.core/constants";
-import { Block, BlockType } from "../../.core/types";
+import { BlockType } from "../../.core/types";
 import Icon from "../../components/Icon";
+import type { Blox } from ".core/classes/Blox";
 
 interface TypeChangeProps {
-  block: Block;
+  block: Blox;
   onUpdate: (update: {
     id: string;
     content?: string;

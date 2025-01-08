@@ -2,6 +2,7 @@ import { CLASSES } from "../constants";
 
 export class TypingManager {
   private lastRange: Range | null = null;
+  private lastRangeElement: Node | null = null;
 
   public saveSelectionRange() {
     const selection = window.getSelection();
@@ -11,6 +12,10 @@ export class TypingManager {
 
     const range = selection.getRangeAt(0); // Get the current selection range
     this.lastRange = range;
+    this.lastRangeElement =
+      range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+        ? (range.commonAncestorContainer as Element)
+        : range.commonAncestorContainer.parentElement;
   }
 
   public restoreSelectionRange() {
@@ -22,17 +27,48 @@ export class TypingManager {
     if (!selection) {
       return;
     }
-
-    // Clear any existing selection
     selection.removeAllRanges();
-
-    // Create a new range
     const range = document.createRange();
     range.setStart(this.lastRange.startContainer, this.lastRange.startOffset);
     range.setEnd(this.lastRange.endContainer, this.lastRange.endOffset);
 
-    // Add the range back to the selection
     selection.addRange(range);
+  }
+
+  public mergeConsecutiveStyledElements(blockElement: HTMLElement): void {
+    const childNodes = Array.from(blockElement.childNodes);
+
+    let i = 0;
+    while (i < childNodes.length - 1) {
+      const currentNode = childNodes[i];
+      const nextNode = childNodes[i + 1];
+
+      // Ensure both nodes are elements
+      if (
+        currentNode.nodeType === Node.ELEMENT_NODE &&
+        nextNode.nodeType === Node.ELEMENT_NODE
+      ) {
+        const currentElement = currentNode as HTMLElement;
+        const nextElement = nextNode as HTMLElement;
+
+        // Check if both elements have the same tag and style
+        if (
+          currentElement.tagName === nextElement.tagName &&
+          currentElement.getAttribute("style") ===
+            nextElement.getAttribute("style")
+        ) {
+          // Merge the text content of the two elements
+          currentElement.textContent =
+            (currentElement.textContent || "") +
+            (nextElement.textContent || "");
+          nextElement.remove();
+          childNodes.splice(i + 1, 1);
+
+          continue;
+        }
+      }
+      i++;
+    }
   }
 
   createSelectedElement(range?: Range): void {
@@ -73,53 +109,6 @@ export class TypingManager {
       : container;
   }
 
-  splitContentBySelected(): void {
-    const selected = this.getSelectedElement();
-
-    if (!selected) {
-      console.error("No element with class 'selected' found");
-      return;
-    }
-    const parent = selected.parentElement;
-
-    if (!parent) {
-      console.error("Selected element has no parent");
-      return;
-    }
-
-    // Create fragments for "before" and "after" content
-    const beforeFragment = document.createDocumentFragment();
-    const afterFragment = document.createDocumentFragment();
-
-    // Move siblings before the selected element to the beforeFragment
-    while (selected.previousSibling) {
-      beforeFragment.insertBefore(
-        selected.previousSibling,
-        beforeFragment.firstChild,
-      );
-    }
-
-    // Move siblings after the selected element to the afterFragment
-    while (selected.nextSibling) {
-      afterFragment.appendChild(selected.nextSibling);
-    }
-
-    // Split the parent element by inserting the fragments
-    const parentCloneBefore = parent.cloneNode(false) as HTMLElement;
-    const parentCloneAfter = parent.cloneNode(false) as HTMLElement;
-
-    parentCloneBefore.appendChild(beforeFragment);
-    parentCloneAfter.appendChild(afterFragment);
-
-    // Insert the "before" and "after" content into the DOM
-    parent.parentNode?.insertBefore(parentCloneBefore, parent);
-    parent.parentNode?.insertBefore(selected, parent);
-    parent.parentNode?.insertBefore(parentCloneAfter, parent);
-
-    // Remove the original parent
-    parent.remove();
-  }
-
   selectAllTextInSelectedElement(): void {
     let selectedElement = this.getSelectedElement();
     if (!selectedElement) {
@@ -157,16 +146,26 @@ export class TypingManager {
       `.${CLASSES.selected}`,
     );
     selectedElements.forEach((element) => {
+      const parent = element.parentNode;
+
       if (element.innerHTML.trim() === "") {
         // remove empty selected element
-        element.remove();
+        if (element.innerHTML === " ") {
+          const spaceNode = document.createTextNode(" ");
+          parent?.replaceChild(spaceNode, element);
+        } else {
+          // Otherwise, remove the empty selected element
+          element.remove();
+        }
         return;
       }
-      const parent = element.parentNode;
+
       while (element.firstChild) {
         parent?.insertBefore(element.firstChild, element);
       }
       parent?.removeChild(element);
     });
+
+    this.mergeConsecutiveStyledElements(blockElement);
   }
 }

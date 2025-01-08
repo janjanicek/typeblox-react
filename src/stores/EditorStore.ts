@@ -14,6 +14,7 @@ const useEditorStore = create<EditorStore>((set) => ({
     headline1: [],
     headline2: [],
     headline3: [],
+    html: [],
   },
   setToolbarSettings: (blockType: BlockType, tools: string[]) =>
     set((state) => ({

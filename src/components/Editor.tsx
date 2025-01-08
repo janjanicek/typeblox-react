@@ -18,12 +18,11 @@ import {
 
 import SortableItem from "./SortableItem";
 import { BlockType } from "../.core/types";
-import { focusBlock } from "../.core/utils/blocks";
 import useEditorStore from "../stores/EditorStore";
 import "../styles/Editor.scss";
 import { DEFAULT_TOOLBARS, EVENTS } from "../.core/constants";
 import { useEditor } from "../utils/EditorContext";
-import { Blox } from "../.core/Blox";
+import { Blox } from "../.core/classes/Blox";
 
 interface EditorProps {
   toolbars?: Partial<Record<BlockType, string>>;
@@ -184,6 +183,7 @@ const Editor: React.FC<EditorProps> = ({
         onUpdate: editor.onChange,
         TypingManager: editor.selection(),
         FormatManager: editor.format(),
+        PasteManager: editor.paste(),
       });
 
       const newBlocks = [...prev];
@@ -192,10 +192,8 @@ const Editor: React.FC<EditorProps> = ({
     });
 
     setTimeout(() => {
-      focusBlock(newBlockId);
+      editor.DOM().focusBlock(newBlockId);
     }, 0);
-
-    // updateContent();
   };
 
   const getDefaultContent = (type: BlockType) => {
@@ -211,7 +209,6 @@ const Editor: React.FC<EditorProps> = ({
       newBlocks.splice(index, 1); // Remove the block at the found index
       return newBlocks;
     });
-    // updateContent();
   };
 
   const mouseSensor = useSensor(MouseSensor, {

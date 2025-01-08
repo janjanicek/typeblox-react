@@ -12,8 +12,9 @@ import { Divider } from "../modules/divider";
 import useBlockStore from "../stores/BlockStore";
 import useEditorStore from "../stores/EditorStore";
 import { rgbToHex } from "../.core/utils/colors";
-import { Block, BlockType } from "../.core/types";
+import { BlockType } from "../.core/types";
 import { TypeChange } from "../modules/typeChange";
+import { ViewAsCode } from "../modules/viewAsCode";
 import { useEditor } from "../utils/EditorContext";
 import {
   useFloating,
@@ -21,12 +22,13 @@ import {
   offset,
   shift,
   flip,
-  autoPlacement,
   autoUpdate,
 } from "@floating-ui/react";
+import type { Blox } from "../.core/classes/Blox";
+import { EVENTS } from "../.core/constants";
 
 interface ToolbarProps {
-  block: Block;
+  block: Blox;
   onUpdate: (update: {
     id: string;
     content?: string;
@@ -35,26 +37,17 @@ interface ToolbarProps {
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({ block, onUpdate }) => {
-  const {
-    setIsBold,
-    setIsItalic,
-    setIsUnderline,
-    setIsStrikeout,
-    setSelectedFont,
-    setSelectedColor,
-    setSelectedBgColor,
-  } = useBlockStore();
+  const { setSelectedColor, setSelectedBgColor } = useBlockStore();
   const { toolbarSettings } = useEditorStore();
   const { editor } = useEditor();
 
-  const { floatingStyles, refs } = useFloating({
-    placement: "bottom", // Position the toolbar above the selection
+  const { floatingStyles, refs, update } = useFloating({
+    placement: "top", // Position the toolbar above the selection
     middleware: [
       inline(),
       offset(10), // Add a 10px gap between the toolbar and selection
       shift(), // Ensure the toolbar stays within the viewport
       flip(), // Flip the toolbar to the opposite side if there's no space
-      autoPlacement(),
     ],
     whileElementsMounted: autoUpdate, // Dynamically reposition as needed
   });
@@ -68,23 +61,22 @@ const Toolbar: React.FC<ToolbarProps> = ({ block, onUpdate }) => {
     font: <Font />,
     color: <Color />,
     bgColor: <BgColor />,
+    viewCode: <ViewAsCode block={block} />,
     type: <TypeChange block={block} onUpdate={onUpdate} />,
   };
 
   // Update color pickers when the detected style changes
   useEffect(() => {
-    const selectedElement = editor.getSelectionElement();
-    if (selectedElement) refs.setReference(selectedElement);
+    const handleSelectionChange = () => {
+      const selectedElement = editor.getSelectionElement();
+      console.log(selectedElement);
+      if (selectedElement) {
+        refs.setReference(selectedElement);
+        update();
+      }
+    };
 
-    const {
-      color,
-      backgroundColor,
-      fontFamily,
-      isBold,
-      isItalic,
-      isStrikeout,
-      isUnderline,
-    } = editor.getSelectionStyle();
+    const { color, backgroundColor } = editor.getSelectionStyle();
 
     if (color) {
       const hexColor = rgbToHex(color);
@@ -98,28 +90,13 @@ const Toolbar: React.FC<ToolbarProps> = ({ block, onUpdate }) => {
       setSelectedBgColor("#ffffff");
     }
 
-    if (fontFamily && fontFamily.indexOf("sans-serif") === -1) {
-      setSelectedFont(fontFamily);
-    } else {
-      setSelectedFont("arial");
-    }
+    editor.on(EVENTS.selectionChange, handleSelectionChange);
 
-    // Update other detected styles (e.g., bold, italic, underline, strikeout)
-    setIsBold(isBold);
-    setIsItalic(isItalic);
-    setIsUnderline(isUnderline);
-    setIsStrikeout(isStrikeout);
-  }, [
-    editor,
-    setIsBold,
-    setIsItalic,
-    setIsUnderline,
-    setIsStrikeout,
-    setSelectedFont,
-    setSelectedBgColor,
-    setSelectedColor,
-    refs,
-  ]);
+    // Cleanup listener on unmount
+    return () => {
+      editor.off(EVENTS.selectionChange, handleSelectionChange);
+    };
+  }, [editor, setSelectedBgColor, setSelectedColor, refs, update]);
 
   return (
     <>
@@ -127,7 +104,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ block, onUpdate }) => {
         <div
           className="menu-container flex gap-1 absolute bg-white border border-gray-300 shadow-lg rounded p-2 w-max"
           ref={refs.setFloating} // Floating UI uses this ref for positioning
-          style={{ ...floatingStyles, zIndex: 100, whiteSpace: "nowrap" }}
+          style={{ ...floatingStyles, zIndex: 49, whiteSpace: "nowrap" }}
         >
           {toolbarSettings[block.type].map((moduleName, index) =>
             toolbarComponents[moduleName] ? (
