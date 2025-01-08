@@ -1,10 +1,10 @@
 import React from "react";
 import ContextualMenu from "../../components/ContextualMenu";
 import useBlockStore from "../../stores/BlockStore";
-import { BLOCKS_SETTINGS } from "../../.core/constants";
-import { BlockType } from "../../.core/types";
+import { BLOCKS_SETTINGS } from "@typeblox/core/constants";
+import { BlockType } from "@typeblox/core/types";
 import Icon from "../../components/Icon";
-import type { Blox } from ".core/classes/Blox";
+import type { Blox } from "@typeblox/core/classes/Blox";
 
 interface TypeChangeProps {
   block: Blox;

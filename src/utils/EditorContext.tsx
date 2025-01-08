@@ -1,6 +1,6 @@
-import { Typeblox } from "../.core";
+import Typeblox from "@typeblox/core";
 import React, { createContext, ReactNode, useContext, useMemo } from "react";
-import { BlockType } from "../.core/types"; // Fixed import path
+import { BlockType } from "@typeblox/core/types"; // Fixed import path
 import Editor from "../components/Editor";
 
 interface EditorContextProps {

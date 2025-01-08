@@ -17,12 +17,12 @@ import {
 } from "@dnd-kit/sortable";
 
 import SortableItem from "./SortableItem";
-import { BlockType } from "../.core/types";
+import { BlockType } from "@typeblox/core/types";
 import useEditorStore from "../stores/EditorStore";
 import "../styles/Editor.scss";
-import { DEFAULT_TOOLBARS, EVENTS } from "../.core/constants";
+import { DEFAULT_TOOLBARS, EVENTS } from "@typeblox/core/constants";
 import { useEditor } from "../utils/EditorContext";
-import { Blox } from "../.core/classes/Blox";
+import { Blox } from "@typeblox/core/classes/Blox";
 
 interface EditorProps {
   toolbars?: Partial<Record<BlockType, string>>;

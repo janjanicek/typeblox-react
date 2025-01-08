@@ -1,16 +1,16 @@
 import { useState, useRef, useEffect, FC, useCallback } from "react";
 import Toolbar from "./Toolbar";
 import { useEditor } from "../utils/EditorContext";
-import { BlockType } from "../.core/types";
+import { BlockType } from "@typeblox/core/types";
 import React from "react";
 import BlockMenu from "./BlockMenu";
 import {
   AVAILABLE_BLOCKS,
   BLOCKS_SETTINGS,
   DEFAULT_BLOCK_TYPE,
-} from "../.core/constants";
+} from "@typeblox/core/constants";
 import ContextualMenu from "./ContextualMenu";
-import type { Blox } from ".core/classes/Blox";
+import type { Blox } from "@typeblox/core/classes/Blox";
 
 interface BlockRowProps {
   blocks: Blox[];

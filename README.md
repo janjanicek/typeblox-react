@@ -29,7 +29,7 @@ const sampleContent = `
   }}
   content={sampleContent}
 ></EditorProvider>
-        ```
+````
 
 ## Available Scripts
 

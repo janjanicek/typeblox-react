@@ -11,8 +11,8 @@ import { BgColor } from "../modules/bgColor";
 import { Divider } from "../modules/divider";
 import useBlockStore from "../stores/BlockStore";
 import useEditorStore from "../stores/EditorStore";
-import { rgbToHex } from "../.core/utils/colors";
-import { BlockType } from "../.core/types";
+import { rgbToHex } from "@typeblox/core/utils/colors";
+import { BlockType } from "@typeblox/core/types";
 import { TypeChange } from "../modules/typeChange";
 import { ViewAsCode } from "../modules/viewAsCode";
 import { useEditor } from "../utils/EditorContext";
@@ -24,8 +24,8 @@ import {
   flip,
   autoUpdate,
 } from "@floating-ui/react";
-import type { Blox } from "../.core/classes/Blox";
-import { EVENTS } from "../.core/constants";
+import type { Blox } from "@typeblox/core/classes/Blox";
+import { EVENTS } from "@typeblox/core/constants";
 
 interface ToolbarProps {
   block: Blox;

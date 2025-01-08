@@ -1,9 +1,9 @@
 // src/App.jsx
 
-import { EVENTS } from "./.core/constants";
+import { EVENTS } from "@typeblox/core/constants";
 import { useEffect, useState } from "react";
 import { EditorProvider, useEditor } from "./utils/EditorContext";
-// import { toggleStyle } from "./.core/utils/dom";
+// import { toggleStyle } from "./@typeblox/core/utils/dom";
 
 const MenuBar = () => {
   const { editor } = useEditor();

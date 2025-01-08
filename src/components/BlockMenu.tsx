@@ -1,5 +1,5 @@
-import { AVAILABLE_BLOCKS, BLOCKS_SETTINGS } from "../.core/constants";
-import { BlockType } from "../.core/types";
+import { AVAILABLE_BLOCKS, BLOCKS_SETTINGS } from "@typeblox/core/constants";
+import { BlockType } from "@typeblox/core/types";
 import { FC } from "react";
 import { useState } from "react";
 import ContextualMenu from "./ContextualMenu";

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Icon from "../../components/Icon";
 import { useEditor } from "../../utils/EditorContext";
 import Modal from "../../components/Modal";
-import { Blox } from ".core/classes/Blox";
+import { Blox } from "@typeblox/core/classes/Blox";
 
 interface ViewAsCodeProps {
   block: Blox;

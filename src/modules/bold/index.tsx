@@ -1,5 +1,4 @@
-import { EVENTS } from "../../.core/constants";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Icon from "../../components/Icon";
 import { useEditor } from "../../utils/EditorContext";
 

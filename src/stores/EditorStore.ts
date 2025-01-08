@@ -1,4 +1,4 @@
-import { BlockType } from ".core/types";
+import { BlockType } from "@typeblox/core/types";
 import { create } from "zustand";
 
 interface EditorStore {

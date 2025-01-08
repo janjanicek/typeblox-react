@@ -1,9 +1,9 @@
 import React, { useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import BlockRow from "./BlockRow";
-import { Typeblox } from "../.core";
-import { BlockType } from "../.core/types";
-import { Blox } from ".core/classes/Blox";
+import Typeblox from "@typeblox/core";
+import { BlockType } from "@typeblox/core/types";
+import { Blox } from "@typeblox/core/classes/Blox";
 
 interface SortableItemProps {
   editor: Typeblox;

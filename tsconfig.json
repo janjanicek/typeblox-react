@@ -15,10 +15,6 @@
   },
   "include": [
     "src",
-    "src/.core",
-    "src/.core/types.ts",
-    "src/.core/constants.ts",
-    "src/.core/utils.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }
