@@ -1,0 +1,91 @@
+{
+  "name": "@typeblox/react",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@floating-ui/react": "^0.27.2",
+    "@rollup/plugin-sucrase": "^5.0.2",
+    "@typeblox/core": "^0.1.2",
+    "@types/jest": "^29.5.14",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "cra-template": "1.2.0",
+    "css-loader": "^7.1.2",
+    "react-scripts": "^5.0.1",
+    "sass-loader": "^16.0.4",
+    "style-loader": "^4.0.0",
+    "tabler-icons-react": "^1.56.0",
+    "ts-jest": "^29.2.5",
+    "web-vitals": "^4.2.4",
+    "zustand": "^5.0.2"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@eslint/js": "^9.17.0",
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@typeblox/core": "^0.1.1",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-react": "^7.37.2",
+    "globals": "^15.14.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "postcss": "^8.4.49",
+    "prettier": "3.4.2",
+    "rollup": "^4.30.1",
+    "rollup-plugin-postcss": "^4.0.2",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.18.1"
+  },
+  "scripts": {
+    "build": "tsc && rollup -c",
+    "start": "cd ../example && react-scripts start",
+    "test": "jest",
+    "pretty": "prettier . --write",
+    "prepublishOnly": "yarn build",
+    "reinstall": "yarn install --force"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "dist/styles/editor.css",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "description": "Simple React block-based WYSIWYG editor",
+  "keywords": [
+    "WYSIWYG",
+    "block-editor",
+    "react",
+    "editor"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT"
+}

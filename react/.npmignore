@@ -1,0 +1,6 @@
+src/
+tsconfig.json
+rollup.config.json
+postcss.config.cjs
+tailwind.congif.json
+node_modules/
