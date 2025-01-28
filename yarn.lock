@@ -2159,7 +2159,7 @@
   integrity sha512-xLOnon5aI51cpl1B4NQ0blZ9OlLfoTfCVanVMJuFAx9EaJF6fvW2Q1HCynCkYECmCHvcoN+qA3J37fzxfdKAVw==
 
 "@typeblox/react@file:react":
-  version "0.2.0"
+  version "0.2.1"
   dependencies:
     "@dnd-kit/core" "^6.3.1"
     "@dnd-kit/sortable" "^10.0.0"

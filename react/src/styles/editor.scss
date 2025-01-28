@@ -29,14 +29,14 @@
   ul,
   ol {
     list-style: inside;
+  }
 
-    ul {
-      list-style-type: initial;
-    }
+  ul {
+    list-style-type: initial;
+  }
 
-    ol {
-      list-style-type: decimal;
-    }
+  ol {
+    list-style-type: decimal;
   }
 
   h1 {
@@ -103,11 +103,11 @@
       opacity: 1;
     }
 
-    &.image-block {
+    .image-block {
       width: 100%;
       position: relative;
 
-      &[data-focused="true"] {
+      &[data-focused=true] {
         img {
           border: 1px solid #1fbf6d;
         }
