@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Icon from "../../components/Icon";
-import { useEditor } from "../../utils/EditorContext";
+import { useTypebloxEditor } from "../../context/EditorContext";
 import Modal from "../../components/Modal";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
 
@@ -9,7 +9,7 @@ interface ViewAsCodeProps {
 }
 
 export const ViewAsCode: React.FC<ViewAsCodeProps> = ({ block }) => {
-  const { editor } = useEditor();
+  const { editor } = useTypebloxEditor();
   const currentBlock = block;
 
   // State to manage the textarea value
@@ -45,7 +45,7 @@ export const ViewAsCode: React.FC<ViewAsCodeProps> = ({ block }) => {
         onClick={openModal}
         className="px-2 py-1 border-0 rounded hover:bg-gray-100"
       >
-        <Icon name="code" />
+        <Icon name="Code" />
       </button>
       <Modal
         title="View Block as Code"

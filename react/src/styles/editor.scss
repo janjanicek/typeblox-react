@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Root Variables
+:root {
+  --color-primary: #1d7e4c;
+  --color-secondary: #dde7d1;
+  /* ... */
+}
+
+// Editor Styles
+#typeblox-editor {
+  padding-left: 4rem;
+
+  [contenteditable="true"] a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: bold;
+    margin: 0;
+  }
+
+  ul,
+  ol {
+    list-style: inside;
+
+    ul {
+      list-style-type: initial;
+    }
+
+    ol {
+      list-style-type: decimal;
+    }
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+  }
+
+  h4 {
+    font-size: 1rem;
+  }
+
+  image:focus {
+    border: 1px solid blue;
+  }
+
+  .tbx-code-block {
+    background: #eee;
+    padding: 1.5rem 1rem;
+    border-radius: 4px;
+    margin: 0;
+    position: relative;
+    width: 100%;
+
+    .tbx-button {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      visibility: hidden;
+    }
+
+    &:hover .tbx-button {
+      visibility: visible;
+    }
+  }
+
+  [contenteditable]:empty:after {
+    content: attr(placeholder);
+    color: #ccc;
+  }
+
+  > a:focus {
+    background: #eee;
+  }
+
+  .tbx-block {
+    margin: 2px auto;
+    border-radius: 4px;
+
+    .tbx-actions {
+      display: flex;
+      position: absolute;
+      opacity: 0;
+      z-index: 3;
+    }
+
+    &:hover .tbx-actions {
+      opacity: 1;
+    }
+
+    &.image-block {
+      width: 100%;
+      position: relative;
+
+      &[data-focused="true"] {
+        img {
+          border: 1px solid #1fbf6d;
+        }
+
+        .resize-handle {
+          position: absolute;
+          bottom: -5px;
+          right: -5px;
+          width: 14px;
+          height: 14px;
+          background: #1fbf6d;
+          border: 1px solid white;
+          cursor: nwse-resize;
+          z-index: 10;
+
+          &:hover {
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+          }
+        }
+      }
+    }
+
+    .tbx-placeholder {
+      display: flex;
+      padding: 10px 20px;
+      background-color: #eee;
+      border-radius: 4px;
+      width: 100%;
+    }
+  }
+
+  .tbx-block[data-is-selected="true"] {
+    background-color: rgba(35, 131, 226, 0.2);
+  }
+}
+
+// Button Styles
+.tbx-button {
+  display: flex;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #c0c0c0;
+
+  &:hover {
+    border: 1px solid #333;
+  }
+
+  &.tbx-small {
+    padding: 1px 4px;
+    font-size: 14px;
+    border: 0;
+  }
+
+  &.tbx-active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+  }
+}
+
+// Contextual Menu
+.tbx-contextual-menu {
+  max-height: 350px;
+  min-width: 250px;
+  overflow-y: auto;
+  z-index: 4;
+
+  a {
+    text-decoration: none !important;
+    color: black !important;
+  }
+
+  &.tbx-size-medium {
+    min-width: 400px;
+    max-width: 100%;
+  }
+}
+
+// Menu Container
+.tbx-menu-container {
+  z-index: 4;
+}
+
+// Tabs
+.tbx-tabs {
+  &.tbx-active {
+    font-weight: 600;
+    border-bottom: 2px solid black;
+  }
+}
+
+// Background Utilities
+.tbx-bg-primary {
+  background-color: var(--color-primary);
+}
+
+// Alignment Utilities
+.tbx-block {
+  &:has(img.tbx-align-center) {
+    text-align: center;
+  }
+
+  &:has(img.tbx-align-right) {
+    float: right;
+  }
+}
+
+img.tbx-align-center {
+  margin: auto;
+}

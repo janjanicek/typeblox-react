@@ -2,10 +2,12 @@
     "private": true,
     "name": "monorepo",
     "workspaces": [
-      "example",
-      "react"
+        "example",
+        "react"
     ],
     "scripts": {
-        "rebuild": "cd react && yarn reinstall && yarn build && cd .. && cd example && yarn reinstall && yarn build && yarn start"
-    }
-  }
+        "rebuild": "cd react && yarn reinstall && yarn build && yarn link && cd .. && cd example && yarn reinstall && yarn build && yarn start",
+        "build": "cd react && yarn build && cd .. && cd example && yarn reinstall && yarn build && yarn start"
+    },
+    "license": "SEE LICENSE IN LICENSE"
+}

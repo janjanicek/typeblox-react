@@ -1,2 +1,2 @@
-export { useEditor } from "./utils/EditorContext";
+export { useTypebloxEditor } from "./utils/EditorContext";
 export { EditorProvider } from "./utils/EditorProvider";

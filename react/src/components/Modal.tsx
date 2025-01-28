@@ -24,7 +24,7 @@ const Modal: React.FC<ModalProps> = ({
       {/* Modal */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-50"
+          className="tbx-modal fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-50"
           onClick={onClose}
         >
           <div
@@ -37,7 +37,7 @@ const Modal: React.FC<ModalProps> = ({
                 className="px-2 py-2 text-gray-600 rounded hover:bg-gray-200"
                 onClick={onClose}
               >
-                <Icon name="x" />
+                <Icon name="X" />
               </button>
             </div>
             <div className="mt-2 text-gray-600">{children}</div>

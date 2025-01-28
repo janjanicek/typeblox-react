@@ -3,7 +3,11 @@ import { create } from "zustand";
 
 interface EditorStore {
   toolbarSettings: Record<BlockType, string[]>;
+  menuSettings: Record<string, string[]>;
   setToolbarSettings: (blockType: BlockType, tools: string[]) => void;
+  setMenuSettings: (menuName: string, modules: string[]) => void;
+  isAllSelected: boolean;
+  setIsAllSelected: (showTypeSelection: boolean) => void;
 }
 
 const useEditorStore = create<EditorStore>((set) => ({
@@ -15,6 +19,8 @@ const useEditorStore = create<EditorStore>((set) => ({
     headline2: [],
     headline3: [],
     html: [],
+    numberedList: [],
+    bulletedList: [],
   },
   setToolbarSettings: (blockType: BlockType, tools: string[]) =>
     set((state) => ({
@@ -23,6 +29,18 @@ const useEditorStore = create<EditorStore>((set) => ({
         [blockType]: tools, // Update only the specified block type
       },
     })),
+  menuSettings: {
+    block: [],
+  },
+  setMenuSettings: (menuName: string, modules: string[]) =>
+    set((state) => ({
+      menuSettings: {
+        ...state.menuSettings,
+        [menuName]: modules, // Update only the specified block type
+      },
+    })),
+  isAllSelected: false,
+  setIsAllSelected: (value) => set({ isAllSelected: value }),
 }));
 
 export default useEditorStore;

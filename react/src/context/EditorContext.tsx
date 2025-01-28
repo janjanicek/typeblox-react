@@ -1,9 +1,14 @@
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 import Typeblox from "@typeblox/core";
+import {
+  imageUploadFunction,
+  onChangeFunction,
+} from "@typeblox/core/dist/types";
 
 interface EditorContextProps {
   editor: Typeblox;
-  onChange: (updatedHTMLString: string) => void;
+  onChange: onChangeFunction;
+  onImageUpload?: imageUploadFunction;
 }
 
 // Create the context
@@ -12,7 +17,7 @@ export const EditorContext = createContext<EditorContextProps | undefined>(
 );
 
 // Create the hook
-export const useEditor = (): EditorContextProps => {
+export const useTypebloxEditor = (): EditorContextProps => {
   const context = useContext(EditorContext);
   if (!context) {
     throw new Error("useEditor must be used within an EditorProvider");

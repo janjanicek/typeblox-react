@@ -1,20 +1,20 @@
 import Icon from "../../components/Icon";
 import React from "react";
 import useBlockStore from "../../stores/BlockStore";
-import { useEditor } from "../../utils/EditorContext";
+import { useTypebloxEditor } from "../../context/EditorContext";
 
 export const Color: React.FC = () => {
   const { selectedColor, setSelectedColor } = useBlockStore();
-  const { editor } = useEditor();
+  const { editor } = useTypebloxEditor();
 
   const handleColorChange = (color: string) => {
     setSelectedColor(color);
-    editor.getCurrentBlock()?.applyStyle("span", { color });
+    editor.blox().getCurrentBlock()?.applyStyle("span", { color });
   };
 
   return (
     <button className="px-2 py-1 border-0 rounded hover:bg-gray-100 flex">
-      <Icon name="letterA" />
+      <Icon name="LetterA" />
       <input
         type="color"
         value={selectedColor}

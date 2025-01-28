@@ -1,22 +1,35 @@
 import React, { useState } from "react";
-import { useEditor } from "../../utils/EditorContext";
+import { useTypebloxEditor } from "../../context/EditorContext";
 import Icon from "../../components/Icon";
 
-export const Bold: React.FC = () => {
-  const { editor } = useEditor();
+interface ModuleProps {
+  isMenu?: boolean;
+}
+
+export const Bold: React.FC<ModuleProps> = ({ isMenu = false }) => {
+  const { editor } = useTypebloxEditor();
   const [isBold, setIsBold] = useState(editor.isStyle("bold"));
 
   return (
     <button
-      className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-        isBold ? "bg-gray-300 text-white" : ""
+      className={`block flex ${isMenu ? "p-2" : "px-2 py-1"} border-0 rounded hover:bg-gray-100 ${
+        isBold ? "bg-gray-300" : ""
       }`}
       onClick={() => {
-        const newStyle = editor.getCurrentBlock()?.toggleBold();
+        const newStyle = editor.blox().getCurrentBlock()?.toggleBold();
         setIsBold(newStyle ?? false);
       }}
     >
-      <Icon name="bold" />
+      {isMenu ? (
+        <>
+          <span className="mr-2">
+            <Icon name="Bold" />
+          </span>{" "}
+          <span>Bold</span>
+        </>
+      ) : (
+        <Icon name="Bold" />
+      )}
     </button>
   );
 };

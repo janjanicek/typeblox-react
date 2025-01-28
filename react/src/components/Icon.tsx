@@ -2,6 +2,8 @@ import React from "react";
 import {
   X,
   AlignLeft,
+  AlignCenter,
+  AlignRight,
   Article,
   Bold,
   ClearFormatting,
@@ -18,6 +20,14 @@ import {
   TextSize,
   Trash,
   Underline,
+  Refresh,
+  ArrowUp,
+  ArrowDown,
+  GripVertical,
+  DotsVertical,
+  List,
+  ListNumbers,
+  Copy,
 } from "tabler-icons-react";
 
 interface IconProps {
@@ -41,42 +51,62 @@ const Icon: React.FC<IconProps> = ({
     switch (name) {
       case "x":
         return <X color={color} />;
-      case "alignLeft":
+      case "AlignLeft":
         return <AlignLeft color={color} />;
-      case "article":
+      case "AlignCenter":
+        return <AlignCenter color={color} />;
+      case "AlignRight":
+        return <AlignRight color={color} />;
+      case "Article":
         return <Article color={color} />;
-      case "bold":
+      case "Bold":
         return <Bold color={color} />;
-      case "clear":
+      case "Clear":
         return <ClearFormatting color={color} />;
-      case "code":
+      case "Code":
         return <Code color={color} />;
-      case "code":
+      case "Code":
         return <Code color={color} />;
-      case "h1":
+      case "H1":
         return <H1 color={color} />;
-      case "h2":
+      case "H2":
         return <H2 color={color} />;
-      case "h3":
+      case "H3":
         return <H3 color={color} />;
-      case "highlight":
+      case "Highlight":
         return <Highlight color={color} />;
-      case "italic":
+      case "Italic":
         return <Italic color={color} />;
-      case "letterA":
+      case "LetterA":
         return <LetterA color={color} />;
-      case "photo":
+      case "Photo":
         return <Photo color={color} />;
-      case "plus":
+      case "Plus":
         return <Plus color={color} />;
-      case "strike":
+      case "Strike":
         return <Strikethrough color={color} />;
-      case "textSize":
+      case "TextSize":
         return <TextSize color={color} />;
-      case "trash":
+      case "Trash":
         return <Trash color={color} />;
-      case "underline":
+      case "Underline":
         return <Underline color={color} />;
+      case "Refresh":
+        return <Refresh color={color} />;
+      case "ArrowUp":
+        return <ArrowUp color={color} />;
+      case "ArrowDown":
+        return <ArrowDown color={color} />;
+      case "GripVertical":
+        return <GripVertical color={color} />;
+      case "DotsVertical":
+        return <DotsVertical color={color} />;
+      case "List":
+        return <List color={color} />;
+      case "ListNumbers":
+        return <ListNumbers color={color} />;
+      case "Copy":
+        return <Copy color={color} />;
       default:
         return <X />;
     }

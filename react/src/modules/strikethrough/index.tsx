@@ -1,24 +1,38 @@
 import React, { useState } from "react";
-import { useEditor } from "../../utils/EditorContext";
+import { useTypebloxEditor } from "../../context/EditorContext";
 import Icon from "../../components/Icon";
 
-export const Strikethrough: React.FC = () => {
-  const { editor } = useEditor();
+interface ModuleProps {
+  isMenu?: boolean;
+}
+
+export const Strikethrough: React.FC<ModuleProps> = ({ isMenu }) => {
+  const { editor } = useTypebloxEditor();
   const [isStrikethrough, setIsStrikethrough] = useState(
     editor.isStyle("strikethrough"),
   );
 
   return (
     <button
-      className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-        isStrikethrough ? "bg-gray-300 text-white" : ""
-      }`}
+      className={`${isMenu ? "p-2" : "px-2 py-1"} border-0 rounded hover:bg-gray-100 ${
+        isStrikethrough ? "bg-gray-300" : ""
+      }
+      ${isMenu ? "flex" : ""}`}
       onClick={() => {
-        const newStyle = editor.getCurrentBlock()?.toggleStrike();
+        const newStyle = editor.blox().getCurrentBlock()?.toggleStrike();
         setIsStrikethrough(newStyle ?? false);
       }}
     >
-      <Icon name="strike" />
+      {isMenu ? (
+        <>
+          <span className="mr-2">
+            <Icon name="Strike" />
+          </span>{" "}
+          <span>Strike-through</span>
+        </>
+      ) : (
+        <Icon name="Strike" />
+      )}
     </button>
   );
 };

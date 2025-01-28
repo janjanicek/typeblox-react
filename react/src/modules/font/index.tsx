@@ -1,16 +1,17 @@
-import React from "react";
+import React, { useRef } from "react";
 import ContextualMenu from "../../components/ContextualMenu";
 import useBlockStore from "../../stores/BlockStore";
 import { AVAILABLE_FONTS } from "@typeblox/core/dist/constants";
-import { useEditor } from "../../utils/EditorContext";
+import { useTypebloxEditor } from "../../context/EditorContext";
 
 export const Font: React.FC = () => {
   const { showSelectFont, setShowSelectFont } = useBlockStore();
-  const { editor } = useEditor();
+  const { editor } = useTypebloxEditor();
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   const handleFontChange = (font: string) => {
     // setSelectedFont(font);
-    editor.getCurrentBlock()?.applyStyle("span", { fontFamily: font });
+    editor.blox().getCurrentBlock()?.applyStyle("span", { fontFamily: font });
   };
 
   const fontOptions = AVAILABLE_FONTS.map((font: string) => ({
@@ -26,6 +27,7 @@ export const Font: React.FC = () => {
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         className="px-2 py-1 border-0 rounded hover:bg-gray-100"
         onClick={toggleFontSelectionPicker}
       >
@@ -34,8 +36,8 @@ export const Font: React.FC = () => {
         </span>
       </button>
       <ContextualMenu
+        referenceElement={buttonRef.current}
         isVisible={showSelectFont}
-        position={{ top: 42, left: 0 }}
         options={fontOptions}
         onClose={() => setShowSelectFont(false)}
         selectedValue={editor.getStyle("fontFamily")}

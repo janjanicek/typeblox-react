@@ -1,16 +1,22 @@
 import { useState, useRef, useEffect, FC, useCallback } from "react";
 import Toolbar from "./Toolbar";
-import { useEditor } from "../utils/EditorContext";
+import { useTypebloxEditor } from "../context/EditorContext";
 import { BlockType } from "@typeblox/core/dist/types";
 import React from "react";
 import BlockMenu from "./BlockMenu";
 import {
   AVAILABLE_BLOCKS,
   BLOCKS_SETTINGS,
+  BLOCK_TYPES,
   DEFAULT_BLOCK_TYPE,
 } from "@typeblox/core/dist/constants";
 import ContextualMenu from "./ContextualMenu";
 import type { Blox } from "@typeblox/core/dist/classes/Blox";
+import { Image } from "./blox/Image";
+import useEditorStore from "../stores/EditorStore";
+import { BlockProvider } from "../context/BlockContext";
+import { List } from "./blox/List";
+import { Code } from "./blox/Code";
 
 interface BlockRowProps {
   blocks: Blox[];
@@ -23,8 +29,6 @@ interface BlockRowProps {
     content?: string;
     type?: BlockType;
   }) => void;
-  onAddBelow: (blockId: string, type: BlockType) => void;
-  onRemove: (blockId: string) => void;
 }
 
 const BlockRow: FC<BlockRowProps> = ({
@@ -34,15 +38,16 @@ const BlockRow: FC<BlockRowProps> = ({
   content,
   dragListeners,
   onUpdate,
-  onAddBelow,
-  onRemove,
 }) => {
+  const { isAllSelected, setIsAllSelected } = useEditorStore();
+
   const [showToolbar, setShowToolbar] = useState(false);
   const [showContentSuggestor, setShowContentSuggestor] = useState(false);
+  const [isBlockSelected, setIsBlockSelected] = useState(isAllSelected);
 
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  const { editor } = useEditor();
+  const { editor } = useTypebloxEditor();
 
   useEffect(() => {
     if (
@@ -54,6 +59,10 @@ const BlockRow: FC<BlockRowProps> = ({
       contentRef.current.innerHTML = content;
     }
   }, [content, type]);
+
+  useEffect(() => {
+    setIsBlockSelected(isAllSelected);
+  }, [isAllSelected]);
 
   useEffect(() => {
     const editorElement = contentRef.current;
@@ -76,6 +85,17 @@ const BlockRow: FC<BlockRowProps> = ({
   const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const blockElement = editor.getBlockElementById(block.id);
 
+    if (event.key === "/") {
+      if (blockElement?.innerHTML.trim() === "/") {
+        setShowContentSuggestor(true);
+        editor.elements().focusBlock(block.id, true);
+      } else {
+        setShowContentSuggestor(false);
+      }
+    }
+  };
+
+  const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
     editor.unselect(contentRef.current);
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
@@ -90,15 +110,6 @@ const BlockRow: FC<BlockRowProps> = ({
 
       setShowToolbar(false);
     }
-
-    if (event.key === "/") {
-      if (blockElement?.innerHTML.trim() === "/") {
-        setShowContentSuggestor(true);
-        editor.DOM().focusBlock(block.id, true);
-      } else {
-        setShowContentSuggestor(false);
-      }
-    }
   };
 
   const getPreviousBlock = (currentBlockId: string): Blox | null => {
@@ -110,30 +121,40 @@ const BlockRow: FC<BlockRowProps> = ({
 
   const handleOutsideClick = useCallback(
     (e: MouseEvent) => {
-      if (
-        contentRef.current &&
-        !contentRef.current.contains(e.target as Node)
-      ) {
-        const blockElement = (e.target as HTMLElement).closest(
-          "[data-typeblox-id]",
-        );
-        if (!blockElement) return;
-        const blockId = (blockElement as HTMLElement).dataset.typebloxId;
+      const target = e.target as Node;
 
-        const selectedBlock = editor.getCurrentBlock();
-        const currentBlock = editor.getBlockElementById(blockId);
+      const isInsideBlock = contentRef.current?.contains(target);
+      const isInsideMenu = (e.target as HTMLElement).closest(
+        ".tbx-contextual-menu",
+      );
+      const isInsideToolbar = (e.target as HTMLElement).closest(".tbx-toolbar");
+      const isInsideModal = (e.target as HTMLElement).closest(".tbx-modal");
+      if (isInsideBlock || isInsideMenu || isInsideToolbar || isInsideModal) {
+        return;
+      }
 
-        // Check if there is any selection on the page
-        const selection = window.getSelection();
-        if (
-          !selection ||
-          selection.isCollapsed ||
-          selectedBlock?.getContentElement() !== currentBlock
-        ) {
-          // Only unselect if no text or element is selected
-          setShowToolbar(false);
-          editor.unselect(contentRef.current);
-        }
+      // Handle unselecting and hiding toolbar
+      setIsBlockSelected(false);
+      setIsAllSelected(false);
+      setShowToolbar(false);
+
+      const blockElement = (e.target as HTMLElement).closest(
+        "[data-typeblox-id]",
+      );
+      if (!blockElement) return;
+
+      const blockId = blockElement.getAttribute("data-typeblox-id");
+      const selectedBlock = editor.blox().getCurrentBlock();
+      const currentBlock = editor.getBlockElementById(blockId ?? undefined);
+
+      const selection = window.getSelection();
+      const hasNoSelection =
+        !selection ||
+        selection.isCollapsed ||
+        selectedBlock?.getContentElement() !== currentBlock;
+
+      if (hasNoSelection) {
+        editor.unselect(contentRef.current);
       }
     },
     [editor],
@@ -147,7 +168,7 @@ const BlockRow: FC<BlockRowProps> = ({
   }, [handleOutsideClick]);
 
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
-    editor.getCurrentBlock()?.pasteContent(e.nativeEvent);
+    editor.blox().getCurrentBlock()?.pasteContent(e.nativeEvent);
     e.preventDefault(); // Prevent default paste behavior
   };
 
@@ -156,19 +177,71 @@ const BlockRow: FC<BlockRowProps> = ({
 
     // Check if backspace is pressed and the block is empty
     if (event.key === "Backspace") {
-      if (blockElement && blockElement.innerHTML.trim() === "") {
+      if (
+        editor.selection().isCursorAtStart() &&
+        blockElement &&
+        blockElement.innerHTML.trim() !== ""
+      ) {
+        // Merge the current block with the previous block
         const previousBlock = getPreviousBlock(block.id);
         if (previousBlock && previousBlock.id) {
-          editor.DOM().focusBlock(previousBlock.id, true);
+          editor.blox().merge(block.id);
+          event.preventDefault();
         }
-        onRemove(block.id);
+      } else if (blockElement && blockElement.innerHTML.trim() === "") {
+        // Handle empty block case
+        const previousBlock = getPreviousBlock(block.id);
+        if (previousBlock && previousBlock.id) {
+          editor.elements().focusBlock(previousBlock.id, true);
+        }
+        editor.blox().removeById(block.id);
         event.preventDefault();
       }
     }
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault(); // TODO: If in the middle of content move the rest of the contentent to the next block;
-      onAddBelow(block.id, DEFAULT_BLOCK_TYPE);
-      editor.DOM().focusBlock(block.id, true);
+
+    if (event.key === "Enter" && event.shiftKey) {
+      event.preventDefault();
+
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount) {
+        return;
+      }
+
+      let range = selection.getRangeAt(0);
+      const br = document.createElement("br");
+      range.insertNode(br);
+      const space = document.createTextNode("\u00A0"); // Non-breaking space
+      range.insertNode(space);
+      range.collapse(false);
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+
+      const blockElement = editor.elements().getBlockElementById(block.id);
+      if (!blockElement) return;
+
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount) return;
+
+      if (editor.selection().isCursorAtEnd(blockElement)) {
+        // Cursor is at the end of the block, add a new one
+        editor.blox().addBlockAfter(block.id, DEFAULT_BLOCK_TYPE);
+      } else if (editor.selection().isCursorAtStart(blockElement)) {
+        editor.blox().addBlockBefore(block.id, DEFAULT_BLOCK_TYPE);
+      } else {
+        editor.blox().split(block.id);
+      }
+    }
+
+    if ((event.metaKey || event.ctrlKey) && event.key === "a") {
+      if (!isBlockSelected) {
+        event.stopPropagation();
+        setIsBlockSelected(true); // Select this block
+      } else {
+        event.preventDefault();
+      }
     }
   };
 
@@ -181,30 +254,47 @@ const BlockRow: FC<BlockRowProps> = ({
   const WrapperElement = getWrapperType();
 
   const renderContent = () => {
-    if (type === "image") {
+    if (type === BLOCK_TYPES.image) {
       return (
-        <div className="flex-1">
-          {content ? (
-            <img
-              src={content}
-              alt="Uploaded"
-              className="max-w-full h-auto border rounded"
-            />
-          ) : (
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                e.target.files &&
-                onUpdate({
-                  id: block.id,
-                  content: URL.createObjectURL(e.target.files[0]),
-                })
-              }
-              className="border p-2"
-            />
-          )}
-        </div>
+        <Image
+          ref={contentRef}
+          block={block}
+          content={content}
+          onUpdate={onUpdate}
+          setShowToolbar={setShowToolbar}
+          showToolbar={showToolbar}
+        />
+      );
+    }
+
+    if (
+      type === BLOCK_TYPES.numberedList ||
+      type === BLOCK_TYPES.bulletedList
+    ) {
+      return (
+        <List
+          ref={contentRef}
+          block={block}
+          content={content}
+          onUpdate={onUpdate}
+          setShowToolbar={setShowToolbar}
+          showToolbar={showToolbar}
+          handleMouseUp={handleMouseUp}
+        />
+      );
+    }
+
+    if (type === BLOCK_TYPES.code) {
+      return (
+        <Code
+          ref={contentRef}
+          block={block}
+          content={content}
+          onUpdate={onUpdate}
+          setShowToolbar={setShowToolbar}
+          showToolbar={showToolbar}
+          handleMouseUp={handleMouseUp}
+        />
       );
     }
 
@@ -216,7 +306,8 @@ const BlockRow: FC<BlockRowProps> = ({
       placeholder: BLOCKS_SETTINGS[type].defaultContent,
       contentEditable: true,
       suppressContentEditableWarning: true,
-      className: "typeblox flex-1 outline-none border border-transparent px-2",
+      className: `typeblox flex-1 outline-none px-2 ${block.getClasses().join(" ")}`,
+      style: block.getStyles(),
       onBlur: () =>
         onUpdate({
           id: block.id,
@@ -224,25 +315,35 @@ const BlockRow: FC<BlockRowProps> = ({
         }),
       onPaste: handlePaste,
       onKeyUp: handleKeyUp,
-      onMouseUp: handleKeyUp,
+      onMouseUp: handleMouseUp,
       onKeyDown: handleKeyDown,
     });
   };
 
   return (
-    <>
-      <div className="group relative flex items-start gap-2 py-2">
-        <BlockMenu
-          blockId={block.id}
-          dragListeners={dragListeners}
-          onAddBelow={onAddBelow}
-          onRemove={onRemove}
-        />
-        {showToolbar && <Toolbar block={block} onUpdate={onUpdate} />}
+    <BlockProvider
+      block={block}
+      setShowToolbar={setShowToolbar}
+      onUpdate={onUpdate}
+      dragListeners={dragListeners}
+    >
+      <div
+        className="tbx-block relative flex items-start gap-2 py-2"
+        data-is-selected={isBlockSelected}
+      >
+        <BlockMenu />
+        {showToolbar && (
+          <Toolbar
+            block={block}
+            onUpdate={onUpdate}
+            setShowToolbar={setShowToolbar}
+            dragListeners={dragListeners}
+          />
+        )}
         {renderContent()}
         <ContextualMenu
+          referenceElement={contentRef.current}
           isVisible={showContentSuggestor}
-          position={{ top: 40, left: 0 }}
           sectionName="Turn into"
           options={AVAILABLE_BLOCKS.map((item: BlockType) => {
             return {
@@ -254,7 +355,7 @@ const BlockRow: FC<BlockRowProps> = ({
                   content: block.content?.replace(/\/$/, "") || "",
                   type: item,
                 });
-                setTimeout(() => editor.DOM().focusBlock(block.id), 100);
+                setTimeout(() => editor.elements().focusBlock(block.id), 100);
               },
               icon: BLOCKS_SETTINGS[item].icon,
             };
@@ -262,7 +363,7 @@ const BlockRow: FC<BlockRowProps> = ({
           onClose={() => setShowContentSuggestor(false)}
         />
       </div>
-    </>
+    </BlockProvider>
   );
 };
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import ContextualMenu from "../../components/ContextualMenu";
 import useBlockStore from "../../stores/BlockStore";
 import { BLOCKS_SETTINGS } from "@typeblox/core/dist/constants";
@@ -17,6 +17,8 @@ interface TypeChangeProps {
 
 export const TypeChange: React.FC<TypeChangeProps> = ({ block, onUpdate }) => {
   const { showTypeSelection, setShowTypeSelection } = useBlockStore();
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
   const handleBlockTypeChange = (newType: BlockType) => {
     onUpdate({
       id: block.id,
@@ -31,6 +33,7 @@ export const TypeChange: React.FC<TypeChangeProps> = ({ block, onUpdate }) => {
   return (
     <>
       <button
+        ref={buttonRef}
         className="px-2 py-1 border-0 rounded hover:bg-gray-100 flex"
         onClick={toggleBlockSelection}
       >
@@ -41,19 +44,19 @@ export const TypeChange: React.FC<TypeChangeProps> = ({ block, onUpdate }) => {
       </button>
 
       <ContextualMenu
+        referenceElement={buttonRef.current}
         isVisible={showTypeSelection}
         sectionName="Turn into"
-        position={{ top: 50, left: 0 }}
         options={(
           BLOCKS_SETTINGS[block.type].availableTypes as BlockType[]
         ).map((item) => {
           return {
-            label: BLOCKS_SETTINGS[item].visibleName,
-            description: BLOCKS_SETTINGS[item].description,
+            label: BLOCKS_SETTINGS[item]?.visibleName,
+            description: BLOCKS_SETTINGS[item]?.description,
             onClick: () => {
               handleBlockTypeChange(item);
             },
-            icon: BLOCKS_SETTINGS[item].icon,
+            icon: BLOCKS_SETTINGS[item]?.icon,
           };
         })}
         onClose={() => setShowTypeSelection(false)}

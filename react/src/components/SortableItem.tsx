@@ -12,8 +12,6 @@ interface SortableItemProps {
     content?: string;
     type?: BlockType;
   }) => void;
-  onAddBlockBelow: (blockId: string, type: BlockType) => void;
-  onRemoveBlock: (blockId: string) => void;
   isDragging?: boolean;
   isOver?: boolean;
 }
@@ -22,8 +20,6 @@ const SortableItem: React.FC<SortableItemProps> = ({
   blocks,
   block,
   onUpdateBlock,
-  onAddBlockBelow,
-  onRemoveBlock,
   isDragging = false,
   isOver = false,
 }) => {
@@ -56,8 +52,6 @@ const SortableItem: React.FC<SortableItemProps> = ({
         content={content}
         dragListeners={listeners}
         onUpdate={onUpdateBlock}
-        onAddBelow={onAddBlockBelow}
-        onRemove={onRemoveBlock}
       />
     </div>
   );

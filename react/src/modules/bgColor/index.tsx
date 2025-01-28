@@ -1,22 +1,23 @@
 import React from "react";
 import useBlockStore from "../../stores/BlockStore";
-import { useEditor } from "../../utils/EditorContext";
+import { useTypebloxEditor } from "../../context/EditorContext";
 import Icon from "../../components/Icon";
 
 export const BgColor: React.FC = () => {
   const { selectedBgColor, setSelectedBgColor } = useBlockStore();
-  const { editor } = useEditor();
+  const { editor } = useTypebloxEditor();
 
   const handleBgColorChange = (color: string) => {
     setSelectedBgColor(color);
     editor
+      .blox()
       .getCurrentBlock()
       ?.applyStyle("mark", { backgroundColor: color, color: "inherit" });
   };
 
   return (
     <button className="px-2 py-1 border-0 rounded hover:bg-gray-100 flex">
-      <Icon name="highlight" />
+      <Icon name="Highlight" />
       <input
         type="color"
         value={selectedBgColor}

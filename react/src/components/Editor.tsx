@@ -1,5 +1,5 @@
 // Editor.jsx
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 // dnd-kit imports
 import {
   DndContext,
@@ -19,39 +19,69 @@ import {
 import SortableItem from "./SortableItem";
 import { BlockType } from "@typeblox/core/dist/types";
 import useEditorStore from "../stores/EditorStore";
-import "../styles/editor.css";
-import { DEFAULT_TOOLBARS, EVENTS } from "@typeblox/core/dist/constants";
-import { useEditor } from "../utils/EditorContext";
+import "../styles/editor.scss";
+import {
+  AVAILABLE_BLOCKS,
+  BLOCK_TYPES,
+  DEFAULT_TOOLBARS,
+  EVENTS,
+} from "@typeblox/core/dist/constants";
+import { useTypebloxEditor } from "../context/EditorContext";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
+import { imageUploadFunction } from "../utils/types";
+import { DEFAULT_MENUS } from "../utils/constants";
 
 interface EditorProps {
   toolbars?: Partial<Record<BlockType, string>>;
-  extensions?: string[];
+  menus?: Partial<Record<string, Array<string>>>;
+  extensions?: Record<string, string>;
   height?: number;
-  onChange: (updatedHTMLString: string) => void;
 }
 
 const Editor: React.FC<EditorProps> = ({
   toolbars = DEFAULT_TOOLBARS,
-  onChange,
+  menus = DEFAULT_MENUS,
 }) => {
-  const { editor } = useEditor();
+  const { editor, onChange, onImageUpload } = useTypebloxEditor();
 
-  const [blocks, setBlocks] = useState<Blox[]>(editor.getBlocks());
-  const { setToolbarSettings } = useEditorStore();
+  const [blocks, setBlocks] = useState<Blox[]>(editor.blox().getBlox());
+  const { setToolbarSettings, setMenuSettings } = useEditorStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  const { isAllSelected, setIsAllSelected } = useEditorStore();
 
   // Debounce timeout
   let debounceTimeout: NodeJS.Timeout;
 
   // Handle content updates with debounce
-  const updateContent = () => {
+  const updateContent = useCallback(() => {
     clearTimeout(debounceTimeout);
     debounceTimeout = setTimeout(() => {
-      editor.update(onChange, blocks);
+      editor.blox().update(onChange, blocks);
     }, 300);
-  };
+  }, [editor, onChange, blocks]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Cmd+A (or Ctrl+A for Windows/Linux)
+      if ((event.metaKey || event.ctrlKey) && event.key === "a") {
+        event.preventDefault();
+        setIsAllSelected(true);
+      }
+
+      // Backspace to delete all blocks
+      if (event.key === "Backspace" && isAllSelected) {
+        event.preventDefault();
+        setBlocks([createNewBlox(BLOCK_TYPES.text)]); // Clear all blocks
+        setIsAllSelected(false);
+        updateContent();
+      }
+    };
+
+    // Attach the event listener to the editor
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isAllSelected, setIsAllSelected, setBlocks]);
 
   // Update content whenever blocks change
   useEffect(() => {
@@ -61,12 +91,30 @@ const Editor: React.FC<EditorProps> = ({
 
   useEffect(() => {
     const handleBlocksChange = (newBlocks: Blox[]) => {
-      setBlocks(newBlocks); // Update local state when blocks change in the editor
+      // Update the blocks state directly
+      setBlocks(newBlocks);
+    };
+
+    const handleStyleChange = (updatedBlock: Blox): void => {
+      if (!updatedBlock) return;
+      // Update the blocks state to reflect the style change
+      setBlocks((prevBlocks) =>
+        prevBlocks.map((block) => {
+          if (block.id === updatedBlock.id) {
+            return Object.assign(new Blox(block), {
+              styles: updatedBlock.styles,
+            });
+          }
+          return block;
+        }),
+      );
     };
 
     editor.on(EVENTS.blocksChanged, handleBlocksChange);
+    editor.on(EVENTS.styleChange, handleStyleChange);
     return () => {
       editor.off(EVENTS.blocksChanged, handleBlocksChange);
+      editor.off(EVENTS.styleChange, handleStyleChange);
     };
   }, [editor]);
 
@@ -76,6 +124,11 @@ const Editor: React.FC<EditorProps> = ({
     const mergedToolbars = {
       ...DEFAULT_TOOLBARS,
       ...toolbars,
+    };
+
+    const mergedMenus = {
+      ...DEFAULT_MENUS,
+      ...menus,
     };
 
     const updatedToolbar: Record<BlockType, string> = Object.fromEntries(
@@ -88,7 +141,11 @@ const Editor: React.FC<EditorProps> = ({
     Object.entries(updatedToolbar).forEach(([blockType, tools]) => {
       setToolbarSettings(blockType as BlockType, tools.split(" ") ?? []);
     });
-  }, [toolbars, setToolbarSettings]);
+
+    Object.entries(mergedMenus).forEach(([menuName, modules]) => {
+      setMenuSettings(menuName, modules ?? []);
+    });
+  }, [toolbars, setToolbarSettings, menus, setMenuSettings]);
 
   // Handle drag-and-drop reordering
   const handleDragEnd = (event: any) => {
@@ -166,44 +223,17 @@ const Editor: React.FC<EditorProps> = ({
     setBlocks(updatedBlocks);
   };
 
-  const handleAddBlockBelow = (
-    currentBlockId: string,
-    newType: BlockType, // Restrict newType to specific block types
-  ) => {
+  const createNewBlox = (newType: BlockType) => {
     const newBlockId = Date.now().toString();
 
-    setBlocks((prev) => {
-      const index = prev.findIndex((b) => b.id === currentBlockId);
-      if (index === -1) return prev;
-
-      const newBlock: Blox = new Blox({
-        id: newBlockId, // Generate a unique ID for the new block
-        type: newType,
-        content: "",
-        onUpdate: editor.onChange,
-        TypingManager: editor.selection(),
-        FormatManager: editor.format(),
-        PasteManager: editor.paste(),
-      });
-
-      const newBlocks = [...prev];
-      newBlocks.splice(index + 1, 0, newBlock);
-      return newBlocks;
-    });
-
-    setTimeout(() => {
-      editor.DOM().focusBlock(newBlockId);
-    }, 0);
-  };
-
-  const handleRemoveBlock = (blockId: string) => {
-    setBlocks((prev) => {
-      const index = prev.findIndex((b) => b.id === blockId);
-      if (index === -1) return prev; // If the block doesn't exist, return the previous state
-
-      const newBlocks = [...prev];
-      newBlocks.splice(index, 1); // Remove the block at the found index
-      return newBlocks;
+    return new Blox({
+      id: newBlockId, // Generate a unique ID for the new block
+      type: newType,
+      content: "",
+      onUpdate: editor.onChange,
+      TypingManager: editor.selection(),
+      StyleManager: editor.style(),
+      PasteManager: editor.paste(),
     });
   };
 
@@ -216,7 +246,7 @@ const Editor: React.FC<EditorProps> = ({
   const sensors = useSensors(mouseSensor, keyboardSensor);
 
   return (
-    <div className="mx-auto mt-10 max-w-3xl p-4" id="typeblox-editor">
+    <div id="typeblox-editor">
       <DndContext
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
@@ -236,8 +266,6 @@ const Editor: React.FC<EditorProps> = ({
               key={block.id}
               block={block}
               onUpdateBlock={handleUpdateBlock}
-              onAddBlockBelow={handleAddBlockBelow}
-              onRemoveBlock={handleRemoveBlock}
               isOver={block.id === overId}
             />
           ))}
@@ -253,8 +281,6 @@ const Editor: React.FC<EditorProps> = ({
                   key={activeBlock.id}
                   block={activeBlock}
                   onUpdateBlock={handleUpdateBlock}
-                  onAddBlockBelow={handleAddBlockBelow}
-                  onRemoveBlock={handleRemoveBlock}
                   isDragging={true}
                 />
               ) : null;
