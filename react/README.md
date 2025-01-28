@@ -20,7 +20,7 @@ const sampleContent = `
 `;
 
 const onChangeHandler = (updatedHTMLString: string) => {
-  sessionStorage.setItem("tempEditorContent", updatedHTMLString);
+  // Your code to store the update HTML content;
 };
 
 <EditorProvider
