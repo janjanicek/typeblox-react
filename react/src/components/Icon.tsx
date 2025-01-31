@@ -27,6 +27,7 @@ import {
   DotsVertical,
   List,
   ListNumbers,
+  Link,
   Copy,
 } from "tabler-icons-react";
 
@@ -107,6 +108,8 @@ const Icon: React.FC<IconProps> = ({
         return <ListNumbers color={color} />;
       case "Copy":
         return <Copy color={color} />;
+      case "Link":
+        return <Link color={color} />;
       default:
         return <X />;
     }

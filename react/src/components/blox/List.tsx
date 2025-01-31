@@ -37,23 +37,11 @@ export const List = forwardRef<HTMLDivElement, ListBloxProps>(
       }
     }, [content]);
 
-    const handleEnterKey = (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "Enter") {
-        console.warn("enter");
-        event.preventDefault();
-        if (editor.selection().isCursorAtEnd()) {
-          editor.elements().addElementAfter("li");
-        } else {
-          editor.elements().splitElementBySelector("li");
-        }
-      }
-    };
-
     const wrapperElement = React.createElement(
       block.type === BLOCK_TYPES.bulletedList ? "ul" : "ol",
       {
         ref: listRef,
-        onKeyDown: handleEnterKey,
+        // onKeyDown: handleEnterKey,
         contentEditable: true,
         suppressContentEditableWarning: true,
         "data-typeblox-id": block.id,

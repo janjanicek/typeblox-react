@@ -59,12 +59,12 @@ export const Code = forwardRef<HTMLDivElement, CodeBloxProps>(
 
     const renderContent = () => {
       return React.createElement(
-        "div",
+        "code",
         {
           ref: codeRef,
           "data-typeblox-editor": "block",
           "data-typeblox-id": block.id,
-          placeholder: BLOCKS_SETTINGS[block.type].defaultContent,
+          placeholder: BLOCKS_SETTINGS[block.type].placeholder,
           contentEditable: true,
           suppressContentEditableWarning: true,
           className: `outline-none tbx-pre ${block.getClasses().join(" ")}`,
@@ -88,7 +88,7 @@ export const Code = forwardRef<HTMLDivElement, CodeBloxProps>(
           </button>
         </Tooltip>
 
-        {renderContent()}
+        <pre>{renderContent()}</pre>
       </div>
     );
   },

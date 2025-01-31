@@ -86,23 +86,8 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
     [getFocusableElements],
   );
 
-  // Handle outside click
   useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (
-        refs.floating?.current &&
-        !refs.floating.current.contains(e.target as Node) &&
-        referenceElement &&
-        !referenceElement.contains(e.target as Node)
-      ) {
-        onClose(); // Close the menu when clicking outside
-      }
-    };
-
     if (isVisible) {
-      document.addEventListener("mousedown", handleOutsideClick);
-
-      // Set initial focus based on `selectedValue` or default to the first option
       const focusableElements = getFocusableElements();
       const initialIndex = selectedValue
         ? focusableElements.findIndex(
@@ -111,22 +96,31 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
               selectedValue?.trim().toLowerCase(),
           )
         : 0;
-
       focusElementAtIndex(initialIndex);
+      setActiveIndex(initialIndex);
     }
+  }, [focusElementAtIndex, isVisible]);
 
+  const handleOutsideClick = useCallback(
+    (e: MouseEvent) => {
+      if (
+        refs.floating?.current &&
+        !refs.floating.current.contains(e.target as Node) &&
+        referenceElement &&
+        !referenceElement.contains(e.target as Node)
+      ) {
+        onClose(); // Close the menu when clicking outside
+      }
+    },
+    [refs.floating, referenceElement, onClose],
+  );
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleOutsideClick);
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
     };
-  }, [
-    isVisible,
-    onClose,
-    selectedValue,
-    getFocusableElements,
-    focusElementAtIndex,
-    refs.floating,
-    referenceElement,
-  ]);
+  }, [handleOutsideClick]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -193,6 +187,7 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
               className={`flex cursor-pointer p-2 ${
                 activeIndex === index ? "bg-gray-200" : "hover:bg-gray-100"
               }`}
+              // className={`flex cursor-pointer p-2`}
               style={option.style}
               onClick={(e) => {
                 e.preventDefault(); // Prevent default link behavior

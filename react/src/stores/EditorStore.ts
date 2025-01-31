@@ -21,6 +21,7 @@ const useEditorStore = create<EditorStore>((set) => ({
     html: [],
     numberedList: [],
     bulletedList: [],
+    blockquote: [],
   },
   setToolbarSettings: (blockType: BlockType, tools: string[]) =>
     set((state) => ({

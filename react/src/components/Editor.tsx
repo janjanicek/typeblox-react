@@ -11,30 +11,27 @@ import {
   closestCenter,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
 import SortableItem from "./SortableItem";
-import { BlockType } from "@typeblox/core/dist/types";
+import { BlockType, Extension } from "@typeblox/core/dist/types";
 import useEditorStore from "../stores/EditorStore";
 import "../styles/editor.scss";
 import {
-  AVAILABLE_BLOCKS,
   BLOCK_TYPES,
   DEFAULT_TOOLBARS,
   EVENTS,
 } from "@typeblox/core/dist/constants";
 import { useTypebloxEditor } from "../context/EditorContext";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
-import { imageUploadFunction } from "../utils/types";
 import { DEFAULT_MENUS } from "../utils/constants";
 
 interface EditorProps {
   toolbars?: Partial<Record<BlockType, string>>;
   menus?: Partial<Record<string, Array<string>>>;
-  extensions?: Record<string, string>;
+  extensions?: Extension[];
   height?: number;
 }
 
@@ -48,7 +45,7 @@ const Editor: React.FC<EditorProps> = ({
   const { setToolbarSettings, setMenuSettings } = useEditorStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
-  const { isAllSelected, setIsAllSelected } = useEditorStore();
+  // const { isAllSelected, setIsAllSelected } = useEditorStore();
 
   // Debounce timeout
   let debounceTimeout: NodeJS.Timeout;
@@ -60,28 +57,6 @@ const Editor: React.FC<EditorProps> = ({
       editor.blox().update(onChange, blocks);
     }, 300);
   }, [editor, onChange, blocks]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Cmd+A (or Ctrl+A for Windows/Linux)
-      if ((event.metaKey || event.ctrlKey) && event.key === "a") {
-        event.preventDefault();
-        setIsAllSelected(true);
-      }
-
-      // Backspace to delete all blocks
-      if (event.key === "Backspace" && isAllSelected) {
-        event.preventDefault();
-        setBlocks([createNewBlox(BLOCK_TYPES.text)]); // Clear all blocks
-        setIsAllSelected(false);
-        updateContent();
-      }
-    };
-
-    // Attach the event listener to the editor
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isAllSelected, setIsAllSelected, setBlocks]);
 
   // Update content whenever blocks change
   useEffect(() => {
@@ -157,10 +132,9 @@ const Editor: React.FC<EditorProps> = ({
       return;
     }
 
-    const oldIndex = blocks.findIndex((b) => b.id === active.id);
+    // const oldIndex = blocks.findIndex((b) => b.id === active.id);
     const newIndex = blocks.findIndex((b) => b.id === over.id);
-    setBlocks((prev) => arrayMove(prev, oldIndex, newIndex));
-    // updateContent();
+    editor.blox().moveBlock(active.id, newIndex);
   };
 
   const handleDragOver = (event: any) => {
@@ -175,7 +149,6 @@ const Editor: React.FC<EditorProps> = ({
     const overId = over.id;
 
     if (activeId === overId) {
-      // Not moving
       setOverId(activeId);
       return;
     }
@@ -184,10 +157,10 @@ const Editor: React.FC<EditorProps> = ({
     const overIndex = blocks.findIndex((block) => block.id === overId);
 
     if (activeIndex > overIndex) {
-      // Moving up
+      // Move up if above half height
       setOverId(overId);
     } else {
-      // Moving down
+      // Move down if below half height
       const nextBlock = blocks[overIndex + 1];
       setOverId(nextBlock ? nextBlock.id : overId);
     }
@@ -207,34 +180,15 @@ const Editor: React.FC<EditorProps> = ({
     content?: string;
     type?: BlockType;
   }) => {
-    const updatedBlocks = blocks.map((block) => {
-      if (block.id === update.id) {
-        // Update content and type if provided
-        if (update.content !== undefined) {
-          block.content = update.content;
-        }
-        if (update.type) {
-          block.type = update.type;
-        }
-      }
-      return block;
-    });
+    const currentBlock = editor.blox().getBlockById(update.id);
 
-    setBlocks(updatedBlocks);
-  };
+    if (!currentBlock) return;
 
-  const createNewBlox = (newType: BlockType) => {
-    const newBlockId = Date.now().toString();
+    console.log("handleUpdateBlock", update.content);
+    if(update.content?.includes('class="typeblox-selected"')) return;
 
-    return new Blox({
-      id: newBlockId, // Generate a unique ID for the new block
-      type: newType,
-      content: "",
-      onUpdate: editor.onChange,
-      TypingManager: editor.selection(),
-      StyleManager: editor.style(),
-      PasteManager: editor.paste(),
-    });
+    if (update.content && update.content !== currentBlock.content) currentBlock.content = update.content;
+    if (update.type && update.type !== currentBlock.type) currentBlock?.toggleType(update.type);
   };
 
   const mouseSensor = useSensor(MouseSensor, {
@@ -262,7 +216,6 @@ const Editor: React.FC<EditorProps> = ({
         >
           {blocks.map((block) => (
             <SortableItem
-              blocks={blocks}
               key={block.id}
               block={block}
               onUpdateBlock={handleUpdateBlock}
@@ -276,13 +229,22 @@ const Editor: React.FC<EditorProps> = ({
               const activeBlock = blocks.find((item) => item.id === activeId);
 
               return activeBlock ? (
-                <SortableItem
-                  blocks={blocks}
-                  key={activeBlock.id}
-                  block={activeBlock}
-                  onUpdateBlock={handleUpdateBlock}
-                  isDragging={true}
-                />
+                <div
+                  style={{
+                    height: "50px",
+                    maxWidth:
+                      activeBlock.type === BLOCK_TYPES.image ? "50%" : "auto",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <SortableItem
+                    key={activeBlock.id}
+                    block={activeBlock}
+                    onUpdateBlock={handleUpdateBlock}
+                    isDragging={true}
+                  />
+                </div>
               ) : null;
             })()}
         </DragOverlay>

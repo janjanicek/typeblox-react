@@ -18,11 +18,6 @@ import { useBlock } from "../context/BlockContext";
 
 interface ToolbarProps {
   block: Blox;
-  onUpdate: (update: {
-    id: string;
-    content?: string;
-    type?: BlockType;
-  }) => void;
   setShowToolbar: Function;
   dragListeners: any;
 }

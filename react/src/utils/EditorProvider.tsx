@@ -1,4 +1,4 @@
-import React, { Component, ReactNode } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import Typeblox from "@typeblox/core";
 import { EditorContext } from "../context/EditorContext";
 import Editor from "../components/Editor";
@@ -17,47 +17,42 @@ interface EditorProviderProps {
   slotBefore?: ReactNode;
 }
 
-interface EditorProviderState {
-  TypeBoxEditor: Typeblox | null;
-}
-
 declare global {
   interface Window {
     typebloxEditor?: Typeblox;
   }
 }
 
-export class EditorProvider extends Component<
-  EditorProviderProps,
-  EditorProviderState
-> {
-  constructor(props: EditorProviderProps) {
-    super(props);
+export const EditorProvider: React.FC<EditorProviderProps> = ({
+  content,
+  onChange,
+  onImageUpload,
+  toolbars,
+  menus,
+  extensions = [],
+  children,
+  slotBefore,
+}) => {
+  const [typeBoxEditor, setTypeBoxEditor] = useState<Typeblox | null>(null);
+  const editorRef = useRef<Typeblox | null>(null);
 
-    this.state = {
-      TypeBoxEditor: null,
-    };
-  }
+  const cleanupEditor = () => {
+    console.warn("Cleaning up editor:", editorRef.current);
+    try {
+      if (editorRef.current) editorRef.current.destroy();
+      if (window.typebloxEditor === editorRef.current) {
+        delete window.typebloxEditor;
+      }
+    } catch (error) {
+      console.error("Failed to destroy Typeblox editor:", error);
+    } finally {
+      editorRef.current = null;
+      setTypeBoxEditor(null);
+    }
+  };
 
-  componentDidMount() {
-    this.initializeEditor();
-  }
-
-  componentDidUpdate(prevProps: EditorProviderProps) {
-    // if (
-    //   prevProps.content !== this.props.content ||
-    //   prevProps.onChange !== this.props.onChange
-    // ) {
-    //   this.reinitializeEditor();
-    // }
-  }
-
-  componentWillUnmount() {
-    this.cleanupEditor();
-  }
-
-  initializeEditor() {
-    const { content, onChange, onImageUpload, extensions } = this.props;
+  useEffect(() => {
+    if (editorRef.current) return; // Prevent reinitialization
 
     try {
       const editor = new Typeblox();
@@ -68,69 +63,35 @@ export class EditorProvider extends Component<
         extensions,
       });
 
+      console.log(editor);
+
+      // Set both the ref and the state
+      editorRef.current = editor;
+      setTypeBoxEditor(editor);
+
       console.warn("Editor initialized:", editor.blox().getBlox());
-
-      // Register editor instance globally for debugging (optional)
-      window.typebloxEditor = editor;
-
-      this.setState({ TypeBoxEditor: editor });
     } catch (error) {
       console.error("Failed to initialize Typeblox editor:", error);
     }
+
+    return () => cleanupEditor(); // Cleanup on unmount
+  }, []);
+
+  if (!typeBoxEditor) {
+    return <div>Loading editor...</div>;
   }
 
-  reinitializeEditor() {
-    this.cleanupEditor();
-    this.initializeEditor();
-  }
-
-  cleanupEditor() {
-    try {
-      if (this.state.TypeBoxEditor) {
-        this.state.TypeBoxEditor.destroy?.();
-        if (window.typebloxEditor === this.state.TypeBoxEditor) {
-          delete window.typebloxEditor;
-        }
-      }
-    } catch (error) {
-      console.error("Failed to destroy Typeblox editor:", error);
-    } finally {
-      this.setState({ TypeBoxEditor: null });
-    }
-  }
-
-  render() {
-    const { TypeBoxEditor } = this.state;
-    const {
-      children,
-      slotBefore,
-      toolbars,
-      menus,
-      extensions = {},
-      onChange,
-      onImageUpload,
-    } = this.props;
-
-    if (!TypeBoxEditor) {
-      return <div>Loading editor...</div>;
-    }
-
-    return (
-      <EditorContext.Provider
-        value={{
-          editor: TypeBoxEditor,
-          onChange,
-          onImageUpload,
-        }}
-      >
-        <div>
-          {slotBefore && <div>{slotBefore}</div>}
-          <Editor toolbars={toolbars} extensions={extensions} menus={menus} />
-          {children}
-        </div>
-      </EditorContext.Provider>
-    );
-  }
-}
+  return (
+    <EditorContext.Provider
+      value={{ editor: typeBoxEditor, onChange, onImageUpload }}
+    >
+      <div>
+        {slotBefore && <div>{slotBefore}</div>}
+        <Editor toolbars={toolbars} extensions={extensions} menus={menus} />
+        {children}
+      </div>
+    </EditorContext.Provider>
+  );
+};
 
 export default EditorProvider;

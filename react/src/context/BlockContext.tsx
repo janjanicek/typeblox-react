@@ -15,6 +15,7 @@ import { Add } from "../modules/add";
 import { Align } from "../modules/align";
 import { Drag } from "../modules/drag";
 import { Extension } from "../modules/extension";
+import { Link } from "../modules/link";
 import { Menu } from "../modules/menu";
 import { ReplaceImage } from "../modules/replaceImage";
 
@@ -95,6 +96,10 @@ export const BlockProvider: FC<BlockProviderProps> = ({
         );
       case "align":
         return <Align block={block} isMenu={isMenuComponent} />;
+
+      case "link":
+        return <Link isMenu={isMenuComponent} />;
+
       case "type":
         return <TypeChange block={block} onUpdate={onUpdate} />;
       case "add":

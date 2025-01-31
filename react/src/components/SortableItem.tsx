@@ -5,7 +5,6 @@ import { BlockType } from "@typeblox/core/dist/types";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
 
 interface SortableItemProps {
-  blocks: Blox[];
   block: Blox;
   onUpdateBlock: (update: {
     id: string;
@@ -17,7 +16,6 @@ interface SortableItemProps {
 }
 
 const SortableItem: React.FC<SortableItemProps> = ({
-  blocks,
   block,
   onUpdateBlock,
   isDragging = false,
@@ -46,7 +44,6 @@ const SortableItem: React.FC<SortableItemProps> = ({
       {...attributes}
     >
       <BlockRow
-        blocks={blocks}
         block={block}
         type={type}
         content={content}
