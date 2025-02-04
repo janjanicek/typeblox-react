@@ -19,22 +19,10 @@ export const Code = forwardRef<HTMLDivElement, CodeBloxProps>(
     { content, block, onUpdate, showToolbar, setShowToolbar, handleMouseUp },
     ref,
   ) => {
-    const { selectedCodeLanguage, setSelectedCodeLanguage } = useBlockStore();
     const codeRef = useRef<HTMLDivElement | null>(null);
-    const copyButtonRef = useRef<HTMLButtonElement | null>(null);
-    const [showTooltip, setShowTooltip] = useState<boolean>(false);
 
     // Attach the forwarded ref to the div element
     React.useImperativeHandle(ref, () => codeRef.current as HTMLDivElement);
-
-    const copyToClipboard = () => {
-      if (content) {
-        navigator.clipboard.writeText(content.toString()).then(() => {
-          setShowTooltip(true); // Show tooltip when copying
-          setTimeout(() => setShowTooltip(false), 2000); // Hide tooltip after 2 seconds
-        });
-      }
-    };
 
     const handleBlur = () => {
       const rawContent = codeRef.current?.innerHTML || "";
@@ -78,16 +66,6 @@ export const Code = forwardRef<HTMLDivElement, CodeBloxProps>(
 
     return (
       <div className="tbx-code-block">
-        <Tooltip content="Copied!" display={showTooltip}>
-          <button
-            ref={copyButtonRef}
-            className="tbx-button tbx-small"
-            onClick={copyToClipboard}
-          >
-            <Icon name="Copy" className="mr-2" />
-          </button>
-        </Tooltip>
-
         <pre>{renderContent()}</pre>
       </div>
     );

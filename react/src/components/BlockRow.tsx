@@ -222,10 +222,9 @@ const BlockRow: FC<BlockRowProps> = ({
       placeholder: BLOCKS_SETTINGS[type].placeholder,
       contentEditable: true,
       suppressContentEditableWarning: true,
-      className: `typeblox flex-1 outline-none px-2 ${block.getClasses().join(" ")}`,
+      className: `typeblox outline-none ${block.getClasses().join(" ")}`,
       style: block.getStyles(),
       onBlur: () => {
-        console.log("onblur");
         onUpdate({
           id: block.id,
           content: contentRef.current?.innerHTML || "",
@@ -245,7 +244,7 @@ const BlockRow: FC<BlockRowProps> = ({
       dragListeners={dragListeners}
     >
       <div
-        className="tbx-block relative flex items-start gap-2 py-2"
+        className="tbx-block relative"
         data-is-selected={block.isSelected}
       >
         <BlockMenu />
@@ -266,7 +265,6 @@ const BlockRow: FC<BlockRowProps> = ({
               label: BLOCKS_SETTINGS[item].visibleName,
               description: BLOCKS_SETTINGS[item].description,
               onClick: () => {
-                console.log("onclick");
                 onUpdate({
                   id: block.id,
                   content: block.content?.replace(/\/$/, "") || "",

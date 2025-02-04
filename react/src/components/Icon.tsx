@@ -29,6 +29,7 @@ import {
   ListNumbers,
   Link,
   Copy,
+  Blockquote
 } from "tabler-icons-react";
 
 interface IconProps {
@@ -110,6 +111,8 @@ const Icon: React.FC<IconProps> = ({
         return <Copy color={color} />;
       case "Link":
         return <Link color={color} />;
+      case "Blockquote":
+        return <Blockquote color={color} />;
       default:
         return <X />;
     }

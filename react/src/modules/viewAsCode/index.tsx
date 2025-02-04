@@ -29,9 +29,6 @@ export const ViewAsCode: React.FC<ViewAsCodeProps> = ({ block }) => {
       const currentBlock = editor.getBlockById(block.id);
       const currentContent = currentBlock?.getContent();
       if (currentContent) setContent(currentContent);
-      console.log(currentContent);
-      console.log(block.getContent());
-      console.log(currentBlock?.getContentElement());
       setIsModalOpen(true);
     });
   };
@@ -65,7 +62,7 @@ export const ViewAsCode: React.FC<ViewAsCodeProps> = ({ block }) => {
           <div>
             <button
               onClick={handleSubmit}
-              className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+              className="px-4 py-2 text-white tbx-bg-primary rounded"
             >
               Save change
             </button>

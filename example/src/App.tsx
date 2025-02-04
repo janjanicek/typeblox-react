@@ -4,6 +4,9 @@ import React from "react";
 import { EVENTS } from "@typeblox/core/dist/constants";
 import { useEffect, useState } from "react";
 import { EditorProvider, useTypebloxEditor } from "@typeblox/react";
+import "./App.css";
+import { codeToHtml, createHighlighter } from 'shiki'
+
 
 const MenuBar = ({style}) => {
   const { editor } = useTypebloxEditor();
@@ -34,7 +37,7 @@ const MenuBar = ({style}) => {
 
   return (
     <div className="control-group" style={style}>
-      <div className="flex gap-2 p-5" style={{flexWrap: 'wrap'}}>
+      <div className="flex gap-2 p-5" style={{flexWrap: 'wrap', gap: '.5rem'}}>
         <button
           onClick={() => {
             editor.blox().getCurrentBlock()?.toggleBold();
@@ -135,7 +138,7 @@ const MenuBar = ({style}) => {
           onClick={() => editor.style().clearFormat()}
           className="tbx-button"
         >
-          Clear
+          Clear style
         </button>
         <button
           onClick={() => editor.blox().getCurrentBlock()?.setStyle('text-align', 'left')}
@@ -167,6 +170,142 @@ const MenuBar = ({style}) => {
 };
 
 function App() {
+
+  const [activeTab, setActiveTab] = useState("editor");
+  const [activeCodeTab, setActiveCodeTab] = useState("react");
+  const [highlightedCode, setHighlightedCode] = useState("");
+  const [highlightedReactCode, setHighlightedReactCode] = useState("");
+
+  const code = `import { Typeblox } from "@typeblox/core";
+
+const TypeBoxEditor = new Typeblox();
+
+const sampleContent = \`
+<h1>Welcome to Typeblox Editor 👋</h1>
+<p><a href="https://www.typeblox.com">Typeblox</a> is a <i>powerful</i> and <b>flexible</b> headless editor built with TypeScript. 
+Designed to integrate seamlessly with any JavaScript framework, Typeblox empowers developers to create rich, 
+content-driven applications with ease.</p>
+
+<h2>Key Features</h2>
+<ul>
+  <li><b>Rich Text Editing:</b> Apply styles like bold, italic, underline, and more.</li>
+  <li><b>Lists:</b> Create ordered and unordered lists to organize your content.</li>
+  <li><b>Media Embedding:</b> Easily embed images and videos to enhance your articles.</li>
+  <li><b>Code Blocks:</b> Insert and display code snippets with proper formatting.</li>
+</ul>\`;
+
+const onChange = () => {
+    // your code for updating content
+}
+
+TypeBoxEditor.init({
+  HTMLString: sampleContent,
+  onUpdate: onChange,
+});
+
+console.log(TypeBoxEditor.blox().getBlox()); // To see instances of blocks
+
+// Examples of operations
+
+TypeBoxEditor.blox().getCurrentBlock()?.toggleBold(); //toggles the bold style on the selection text
+
+TypeBoxEditor.blox().getCurrentBlock()?.toggleItalic(); //toggles the bold style on the selection
+
+TypeBoxEditor.blox().getCurrentBlock()?.toggleType("headline1"); //change the type of the block to h1
+
+TypeBoxEditor.format().clearFormat(); //clears the text style`;
+
+  const reactCode = `import { EditorProvider, useTypebloxEditor } from "@typeblox/react";
+
+const sampleContent = \`
+<h1>Welcome to Typeblox Editor 👋</h1>
+<p><a href="https://www.typeblox.com">Typeblox</a> is a <i>powerful</i> and <b>flexible</b> headless editor built with TypeScript. 
+Designed to integrate seamlessly with any JavaScript framework, Typeblox empowers developers to create rich, 
+content-driven applications with ease.</p>
+
+<h2>Key Features</h2>
+<ul>
+  <li><b>Rich Text Editing:</b> Apply styles like bold, italic, underline, and more.</li>
+  <li><b>Lists:</b> Create ordered and unordered lists to organize your content.</li>
+  <li><b>Media Embedding:</b> Easily embed images and videos to enhance your articles.</li>
+  <li><b>Code Blocks:</b> Insert and display code snippets with proper formatting.</li>
+</ul>\`;
+
+const CustomToolbar = () => {
+  const { editor } = useTypebloxEditor();
+
+  return (
+    <div className="toolbar">
+        <button
+          onClick={() => {
+            editor.blox().getCurrentBlock()?.toggleBold();
+          }}
+        >
+          Bold
+        </button>
+    </div>
+  );
+};
+
+function App() { // Sample App component
+  const onChangeHandler = (updatedHTMLString: string) => {
+    sessionStorage.setItem("tempEditorContent", updatedHTMLString); // This sample function saves the updated content into the sessionStorage
+  };
+
+  return (
+    <EditorProvider
+      toolbars={{
+        text: 'add drag | bold italic underline strikethrough | font | color bgColor | newModule',
+        image: 'replaceImage | align' 
+        // If not specified, default settings is used
+      }}
+      menus={{
+        block: ["add", "drag"] // If not specified, default settings is used
+      }}
+      slotBefore={<CustomToolbar />} // You can put above the editor your own toolbar
+      className="content"
+      content={String(sessionStorage.getItem("tempEditorContent") ?? sampleContent)}
+      onChange={onChangeHandler}
+      extensions={[ // You can define your own modules
+        {
+          name: "newModule",
+          onClick: () => {
+            (window as any).typebloxEditor?.blox().getCurrentBlock()?.toggleStyle('text-align', 'left');
+          },
+          isActive: () => (window as any).typebloxEditor?.style().getStyle().textAlign === "left",
+          iconName: "newModule",
+        },
+    ]}>
+    </EditorProvider>
+  );
+}
+  `;
+
+  useEffect(() => {
+    async function highlightCode() {
+      const highlighter = await createHighlighter({
+        themes: ["github-dark-default"], // Choose theme
+        langs: ["javascript"],
+      });
+
+      const html = await highlighter.codeToHtml(code, {
+        lang: "javascript",
+        theme: "github-dark-default", // Change theme here
+      });
+
+      const htmReact = await highlighter.codeToHtml(reactCode, {
+        lang: "javascript",
+        theme: "github-dark-default", // Change theme here
+      });
+
+      setHighlightedCode(html);
+      setHighlightedReactCode(htmReact);
+    }
+
+    if (activeTab === "code") {
+      highlightCode();
+    }
+  }, [activeTab]);
 
   // const sampleContent = "some text";
   const sampleContent = `
@@ -218,6 +357,20 @@ function App() {
   
   return (
     <div style={{padding: '20px'}}>
+       <div style={{display: 'flex'}}>
+      <div className="tabs">
+        <button onClick={() => setActiveTab("editor")} className={`${activeTab === "editor" ? "active" : ""} button`}>
+          Editor
+        </button>
+        <button onClick={() => setActiveTab("preview")} className={`${activeTab === "preview" ? "active" : ""} button`}>
+          Preview
+        </button>
+        <button onClick={() => setActiveTab("code")} className={`${activeTab === "code" ? "active" : ""} button`}>
+          Code
+        </button>
+      </div>
+      </div>
+      {activeTab === "editor" && (  
         <EditorProvider
           // toolbars={{
           //   text: 'add drag | bold italic underline strikethrough | font | color bgColor | newModule',
@@ -227,6 +380,7 @@ function App() {
           //   block: ["add", "drag"]
           // }}
           slotBefore={<MenuBar style={{marginBottom: '40px'}} />}
+          className="content"
           content={String(sessionStorage.getItem("tempEditorContent") ?? sampleContent)}
           onChange={onChangeHandler}
           extensions={[
@@ -258,6 +412,31 @@ function App() {
           
 
         ></EditorProvider>
+      )}
+      {activeTab === "preview" && (
+        <div className="content" id="preview" dangerouslySetInnerHTML={{ __html: sessionStorage.getItem("tempEditorContent") }}></div>
+      )}
+      {activeTab === "code" && (
+        <div className="" id="code">
+              <div className="tabs">
+                <button onClick={() => setActiveCodeTab("react")} className={`${activeCodeTab === "react" ? "active" : ""} button`}>
+                  React
+                </button>
+                <button onClick={() => setActiveCodeTab("js")} className={`${activeCodeTab === "js" ? "active" : ""} button`}>
+                  Vanilla JS
+                </button>
+                <button className={`button`} disabled>
+                  Vue.js (coming soon)
+                </button>
+              </div>
+          {activeCodeTab === "js" && (
+          <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+          )}
+          {activeCodeTab === "react" && (
+          <div dangerouslySetInnerHTML={{ __html: highlightedReactCode }} />
+          )}
+        </div>
+      )}
     </div>
   );
 }

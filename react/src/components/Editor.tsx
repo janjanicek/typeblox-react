@@ -33,13 +33,15 @@ interface EditorProps {
   menus?: Partial<Record<string, Array<string>>>;
   extensions?: Extension[];
   height?: number;
+  className?: string;
 }
 
 const Editor: React.FC<EditorProps> = ({
   toolbars = DEFAULT_TOOLBARS,
   menus = DEFAULT_MENUS,
+  className
 }) => {
-  const { editor, onChange, onImageUpload } = useTypebloxEditor();
+  const { editor, onChange } = useTypebloxEditor();
 
   const [blocks, setBlocks] = useState<Blox[]>(editor.blox().getBlox());
   const { setToolbarSettings, setMenuSettings } = useEditorStore();
@@ -183,10 +185,7 @@ const Editor: React.FC<EditorProps> = ({
     const currentBlock = editor.blox().getBlockById(update.id);
 
     if (!currentBlock) return;
-
-    console.log("handleUpdateBlock", update.content);
     if(update.content?.includes('class="typeblox-selected"')) return;
-
     if (update.content && update.content !== currentBlock.content) currentBlock.content = update.content;
     if (update.type && update.type !== currentBlock.type) currentBlock?.toggleType(update.type);
   };
@@ -200,7 +199,7 @@ const Editor: React.FC<EditorProps> = ({
   const sensors = useSensors(mouseSensor, keyboardSensor);
 
   return (
-    <div id="typeblox-editor">
+    <div id="typeblox-editor" className={className}>
       <DndContext
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}

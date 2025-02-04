@@ -10,7 +10,7 @@ const BlockMenu: FC = () => {
     <>
       <div
         className="tbx-actions items-center space-x-1 flex"
-        style={{ left: "-65px", top: "10px" }}
+        style={{ left: "-65px", top: "0px" }}
       >
         {menuSettings["block"].map((moduleName, index) => {
           const component = getComponent({ name: moduleName }); // Retrieve the component

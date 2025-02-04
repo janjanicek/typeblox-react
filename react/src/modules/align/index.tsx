@@ -20,23 +20,17 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
   useEffect(() => {
     const currentAlignment =
       block
-        .getClasses()
-        .find((cls) =>
-          ["align-left", "align-center", "align-right"].includes(cls),
-        ) ||
+        .getAttributes()["data-tbx-alignment"] ||
       block.getStyles().textAlign ||
       null;
     setActiveAlignment(currentAlignment);
   }, [editor]);
 
   const toggleAlignment = (alignment: string) => {
-    console.log(block.type);
-
     if (block.type === BLOCK_TYPES.image) {
-      block.removeClass(`tbx-align-left`);
-      block.removeClass(`tbx-align-center`);
-      block.removeClass(`tbx-align-right`);
-      block.addClass(`tbx-align-${alignment}`);
+      block.removeStyle("margin"); 
+      if(alignment === "center") block.setStyle("margin", "auto"); 
+      block.setAttribute('data-tbx-alignment', alignment);
     } else {
       // Toggle style for other block types
       block.toggleStyle("text-align", alignment);

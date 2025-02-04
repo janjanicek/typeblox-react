@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTypebloxEditor } from "../context/EditorContext";
 
 interface UploadMenuProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -8,6 +9,32 @@ interface UploadMenuProps {
 const UploadMenu: React.FC<UploadMenuProps> = ({ onChange, onUrlSubmit }) => {
   const [activeTab, setActiveTab] = useState("upload");
   const [imageUrl, setImageUrl] = useState("");
+
+  const {onImageUpload}= useTypebloxEditor();
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && onImageUpload) {
+      // Convert file to BlobInfo-like object
+      const blobInfo = {
+        blob: () => file,
+        filename: () => file.name,
+      };
+
+      // Call the image upload handler
+      onImageUpload(
+        blobInfo,
+        (url: string) => {
+          console.log("Image uploaded successfully:", url);
+        },
+        (error: string) => {
+          console.error("Image upload failed:", error);
+        }
+      );
+    }
+    onChange(event); // Call the original onChange function
+  };
+
 
   const handleUrlSubmit = () => {
     if (imageUrl.trim()) {
@@ -42,7 +69,7 @@ const UploadMenu: React.FC<UploadMenuProps> = ({ onChange, onUrlSubmit }) => {
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => onChange(e)}
+            onChange={handleFileUpload}
             className="border p-2 w-full"
           />
         </div>

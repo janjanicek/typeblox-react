@@ -12,6 +12,7 @@ interface EditorProviderProps {
   toolbars?: Record<string, string>;
   menus?: Record<string, Array<string>>;
   extensions?: Extension[];
+  className?: string;
   height?: number;
   children?: ReactNode;
   slotBefore?: ReactNode;
@@ -31,6 +32,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   menus,
   extensions = [],
   children,
+  className,
   slotBefore,
 }) => {
   const [typeBoxEditor, setTypeBoxEditor] = useState<Typeblox | null>(null);
@@ -63,8 +65,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         extensions,
       });
 
-      console.log(editor);
-
       // Set both the ref and the state
       editorRef.current = editor;
       setTypeBoxEditor(editor);
@@ -87,7 +87,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     >
       <div>
         {slotBefore && <div>{slotBefore}</div>}
-        <Editor toolbars={toolbars} extensions={extensions} menus={menus} />
+        <Editor toolbars={toolbars} extensions={extensions} menus={menus} className={className} />
         {children}
       </div>
     </EditorContext.Provider>

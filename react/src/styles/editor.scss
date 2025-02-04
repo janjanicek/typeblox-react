@@ -17,92 +17,12 @@
 
 // Editor Styles
 #typeblox-editor {
-  padding-left: 4rem;
-
-  [contenteditable="true"] a {
-    color: var(--color-primary);
-    text-decoration: underline;
-  }
+  padding-left: 3rem;
 
   .icon {
     width: auto;
   }
-
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-weight: bold;
-    margin: 0;
-  }
-
-  ul,
-  ol {
-    list-style: inside;
-
-    ul,
-    ol {
-      margin-left: 1rem;
-    }
-  }
-
-  ul {
-    list-style-type: initial;
-
-    ul {
-      list-style-type: square;
-    }
-  }
-
-  ol {
-    list-style-type: decimal;
-  }
-
-  h1 {
-    font-size: 1.6rem;
-  }
-
-  h2 {
-    font-size: 1.4rem;
-  }
-
-  h3 {
-    font-size: 1.2rem;
-  }
-
-  h4 {
-    font-size: 1rem;
-  }
-
-  blockquote {
-    border-left: 3px solid var(--color-gray-1);
-    margin: 0.5rem 0;
-    padding-left: 1rem;
-  }
-
-  .tbx-code-block {
-    background: var(--color-gray-1);
-    color: var(--color-black);
-    padding: 1.5rem 1rem;
-    border-radius: 0.5rem;
-    font-family: "Courier New", Courier, monospace;
-    font-size: 0.8rem;
-    margin: 0;
-    position: relative;
-    width: 100%;
-
-    .tbx-button {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      visibility: hidden;
-    }
-
-    &:hover .tbx-button {
-      visibility: visible;
-    }
-  }
-
+  
   [data-is-selected="true"] .tbx-code-block {
     background-color: var(--color-selected-blue);
   }
@@ -237,20 +157,11 @@
 
 // Alignment Utilities
 .tbx-block {
-  &:has(img.tbx-align-center) {
+  &:has(img[data-tbx-alignment="center"]) {
     text-align: center;
   }
 
-  &:has(img.tbx-align-right) {
+  &:has(img[data-tbx-alignment="right"]) {
     float: right;
   }
-
-  [contenteditable="true"] {
-    padding: 0;
-    margin: 0;
-  }
-}
-
-img.tbx-align-center {
-  margin: auto;
 }

@@ -119,7 +119,7 @@ export const Image = forwardRef<HTMLDivElement, ImageBloxProps>(
               src={content}
               alt="Uploaded"
               className={[
-                "max-w-full h-auto border rounded",
+                "",
                 ...block.getClasses(),
               ].join(" ")}
               style={{
@@ -127,6 +127,7 @@ export const Image = forwardRef<HTMLDivElement, ImageBloxProps>(
                 width: dimensions.width,
                 height: dimensions.height,
               }}
+              {...block.getAttributes()}
             />
             {showToolbar && (
               <div className="resize-handle" onMouseDown={handleResizeStart} />
