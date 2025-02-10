@@ -1,6 +1,6 @@
 {
   "name": "@typeblox/react",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,7 +15,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@floating-ui/react": "^0.27.2",
-    "@typeblox/core": "^0.3.0",
+    "@typeblox/core": "^0.4.2",
     "tabler-icons-react": "^1.56.0",
     "zustand": "^5.0.2"
   },
@@ -24,6 +24,8 @@
     "@eslint/js": "^9.17.0",
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-replace": "^6.0.2",
+    "@rollup/plugin-strip": "^3.0.4",
     "@rollup/plugin-sucrase": "^5.0.2",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/jest": "^29.5.14",
@@ -46,6 +48,7 @@
     "rollup": "^4.32.1",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-replace": "^2.2.0",
+    "rollup-plugin-terser": "^7.0.2",
     "sass": "^1.83.4",
     "sass-loader": "^16.0.4",
     "style-loader": "^4.0.0",

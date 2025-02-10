@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import Icon from "../../components/Icon";
-import ContextualMenu from "../../components/ContextualMenu";
+import ContextualMenu from "../../components/menus/ContextualMenu";
 import Tooltip from "../../components/Tooltip";
 
 interface DragProps {
@@ -35,12 +35,8 @@ export const Drag: React.FC<DragProps> = ({
             }, 100);
           }}
           {...dragListeners}
-          className={`border-0 rounded hover:bg-gray-100 ${
+          className={`border-0 rounded hover:bg-gray-100 flex items-center justify-center ${
             showDragMenu ? "bg-gray-300 text-white" : ""
-          } ${
-            isToolbar
-              ? "px-2 py-1 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-50"
-              : "v-6 h-6"
           }`}
         >
           <Icon name="GripVertical" color="black" />

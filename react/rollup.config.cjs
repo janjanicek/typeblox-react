@@ -4,13 +4,15 @@ const postcss = require("rollup-plugin-postcss");
 const typescript = require("@rollup/plugin-typescript");
 const sucrase = require("@rollup/plugin-sucrase");
 const replace = require("@rollup/plugin-replace");
+const { terser } = require("rollup-plugin-terser");
+const strip = require("@rollup/plugin-strip");
 
 module.exports = {
   input: "src/index.ts", // Entry point for your library
   output: {
     file: "dist/index.js",
     format: "esm",
-    sourcemap: true, // Enable source maps for debugging
+    sourcemap: true,
   },
   plugins: [
     resolve({
@@ -18,6 +20,11 @@ module.exports = {
       preferBuiltins: true,
     }),
     commonjs(),
+    terser(),
+    strip({
+      include: ["node_modules/**/*.js"],
+      sourceMap: false,
+    }),
     typescript({
       tsconfig: "./tsconfig.json", // Point to your TypeScript config
     }),

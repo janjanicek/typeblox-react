@@ -24,7 +24,7 @@ export const Extension: React.FC<ExtensionProps> = ({ name }) => {
         if (typeof onClick === "function") {
           onClick(); // Call the extension's click handler
         } else {
-          console.warn(
+          console.log(
             `onClick handler for extension "${name}" is not a function.`,
           );
         }

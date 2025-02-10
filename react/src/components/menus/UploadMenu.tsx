@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useTypebloxEditor } from "../context/EditorContext";
+import { useTypebloxEditor } from "../../context/EditorContext";
 
 interface UploadMenuProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -10,7 +10,7 @@ const UploadMenu: React.FC<UploadMenuProps> = ({ onChange, onUrlSubmit }) => {
   const [activeTab, setActiveTab] = useState("upload");
   const [imageUrl, setImageUrl] = useState("");
 
-  const {onImageUpload}= useTypebloxEditor();
+  const { onImageUpload } = useTypebloxEditor();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,12 +29,11 @@ const UploadMenu: React.FC<UploadMenuProps> = ({ onChange, onUrlSubmit }) => {
         },
         (error: string) => {
           console.error("Image upload failed:", error);
-        }
+        },
       );
     }
     onChange(event); // Call the original onChange function
   };
-
 
   const handleUrlSubmit = () => {
     if (imageUrl.trim()) {
@@ -45,10 +44,10 @@ const UploadMenu: React.FC<UploadMenuProps> = ({ onChange, onUrlSubmit }) => {
 
   return (
     <div className="rounded-md">
-      <div className="flex mb-4">
+      <div className="flex mb-4 tbx-tabs">
         <button
           className={`px-3 py-1 ${
-            activeTab === "upload" ? "tbx-tabs tbx-active" : ""
+            activeTab === "upload" ? "tbx-active" : ""
           }`}
           onClick={() => setActiveTab("upload")}
         >
@@ -56,7 +55,7 @@ const UploadMenu: React.FC<UploadMenuProps> = ({ onChange, onUrlSubmit }) => {
         </button>
         <button
           className={`px-3 py-1 ${
-            activeTab === "url" ? "tbx-tabs tbx-active" : "text-grey"
+            activeTab === "url" ? "tbx-active" : ""
           }`}
           onClick={() => setActiveTab("url")}
         >

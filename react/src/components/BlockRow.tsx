@@ -3,17 +3,15 @@ import Toolbar from "./Toolbar";
 import { useTypebloxEditor } from "../context/EditorContext";
 import { BlockType } from "@typeblox/core/dist/types";
 import React from "react";
-import BlockMenu from "./BlockMenu";
+import BlockMenu from "./menus/BlockMenu";
 import {
   AVAILABLE_BLOCKS,
   BLOCKS_SETTINGS,
   BLOCK_TYPES,
-  DEFAULT_BLOCK_TYPE,
 } from "@typeblox/core/dist/constants";
-import ContextualMenu from "./ContextualMenu";
+import ContextualMenu from "./menus/ContextualMenu";
 import type { Blox } from "@typeblox/core/dist/classes/Blox";
 import { Image } from "./blox/Image";
-import useEditorStore from "../stores/EditorStore";
 import { BlockProvider } from "../context/BlockContext";
 import { List } from "./blox/List";
 import { Code } from "./blox/Code";
@@ -37,10 +35,10 @@ const BlockRow: FC<BlockRowProps> = ({
   dragListeners,
   onUpdate,
 }) => {
-  const { isAllSelected, setIsAllSelected } = useEditorStore();
   const [showToolbar, setShowToolbar] = useState(false);
   const [showContentSuggestor, setShowContentSuggestor] = useState(false);
 
+  const blockMenuReference = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   const { editor } = useTypebloxEditor();
@@ -55,10 +53,6 @@ const BlockRow: FC<BlockRowProps> = ({
       contentRef.current.innerHTML = content;
     }
   }, [content, type]);
-
-  useEffect(() => {
-    editor.blox().selectAllBlox(isAllSelected);
-  }, [isAllSelected]);
 
   useEffect(() => {
     const editorElement = contentRef.current;
@@ -123,8 +117,9 @@ const BlockRow: FC<BlockRowProps> = ({
       }
 
       // Handle unselecting and hiding toolbar
-      editor.blox().selectAllBlox(false);
-      setIsAllSelected(false);
+      if (editor.blox().isAllSelected()) editor.blox().selectAllBlox(false);
+      if (editor.getBlockById(block.id)?.isSelected)
+        editor.getBlockById(block.id)?.setIsSelected(false);
       setShowToolbar(false);
 
       const blockElement = (e.target as HTMLElement).closest(
@@ -228,7 +223,7 @@ const BlockRow: FC<BlockRowProps> = ({
         onUpdate({
           id: block.id,
           content: contentRef.current?.innerHTML || "",
-        })
+        });
       },
       onPaste: handlePaste,
       onKeyUp: handleKeyUp,
@@ -246,8 +241,9 @@ const BlockRow: FC<BlockRowProps> = ({
       <div
         className="tbx-block relative"
         data-is-selected={block.isSelected}
+        ref={blockMenuReference}
       >
-        <BlockMenu />
+        <BlockMenu referenceElement={blockMenuReference} />
         {showToolbar && (
           <Toolbar
             block={block}

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import Icon from "../../components/Icon";
-import ContextualMenu from "../../components/ContextualMenu";
+import ContextualMenu from "../../components/menus/ContextualMenu";
 
 interface MenuProps {
   modules: Array<string>;

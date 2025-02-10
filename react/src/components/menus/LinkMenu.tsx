@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useTypebloxEditor } from "../context/EditorContext";
+import { useTypebloxEditor } from "../../context/EditorContext";
 
 interface LinkMenuProps {
   onChange: (url: string, target: string) => void;

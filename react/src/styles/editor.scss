@@ -1,8 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-// Root Variables
 :root {
   --color-primary: #1d7e4c;
   --color-primary-2: #1fbf6d;
@@ -16,13 +11,30 @@
 }
 
 // Editor Styles
+.tbx-editor-container {
+  container: editor / inline-size;
+}
+
 #typeblox-editor {
+  @tailwind components;
+  @tailwind utilities;
+
   padding-left: 3rem;
+
+  button {
+    background: white;
+    border: 0;
+    padding: 1rem .5rem;
+
+    &:hover {
+      background-color: var(--color-gray-1);
+    }
+  }
 
   .icon {
     width: auto;
   }
-  
+
   [data-is-selected="true"] .tbx-code-block {
     background-color: var(--color-selected-blue);
   }
@@ -46,6 +58,10 @@
       position: absolute;
       opacity: 0;
       z-index: 3;
+
+      button {
+        padding: .2rem;
+      }
     }
 
     &:hover .tbx-actions {
@@ -85,6 +101,8 @@
       display: flex;
       padding: 10px 20px;
       background-color: var(--color-gray-1);
+      border-color: var(--color-gray-2);
+      border-width: 2px;
       border-radius: 4px;
       width: 100%;
     }
@@ -93,75 +111,143 @@
   .tbx-block[data-is-selected="true"] {
     background-color: var(--color-selected-blue);
   }
+
+  // Button Styles
+  .tbx-button {
+    display: flex;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--color-gray-2);
+
+    &:disabled {
+      opacity: 0.5;
+    }
+
+    &:hover {
+      border: 1px solid var(--color-gray-3);
+    }
+
+    &.tbx-small {
+      padding: 1px 4px;
+      font-size: 14px;
+      border: 0;
+    }
+
+    &.tbx-active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-white);
+    }
+  }
+
+  // Contextual Menu
+  .tbx-contextual-menu {
+    max-height: 350px;
+    min-width: 250px;
+    overflow-y: auto;
+    z-index: 4;
+    border: 1px solid var(--color-gray-1);
+    padding: .5rem;
+
+    &:has(h5) {
+      padding: 0 .5rem .5rem .5rem;
+    }
+
+    h5 {
+      margin: 0;
+      padding: 1rem .5rem .5rem;
+      position: sticky;
+      background-color: white;
+      top: 0;
+      left: 0;
+    }
+
+    a {
+      text-decoration: none !important;
+      color: var(--color-black) !important;
+    }
+
+    &.tbx-size-medium {
+      min-width: 400px;
+      max-width: 100%;
+    }
+  }
+
+  .tbx-toolbar {
+    max-height: 350px;
+    min-width: 250px;
+    z-index: 4;
+    border: 1px solid var(--color-gray-1);
+
+    button {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  // Menu Container
+  .tbx-menu-container {
+    z-index: 4;
+  }
+
+  // Tabs
+  .tbx-tabs {
+
+    button {
+      background: none;
+      border: 0;
+    }
+
+    button.tbx-active {
+      font-weight: 600;
+      border-bottom: 2px solid var(--color-black);
+    }
+  }
+
+  // Background Utilities
+  .tbx-bg-primary {
+    background-color: var(--color-primary);
+
+    &:hover {
+      background-color: var(--color-black);
+    }
+  }
+
+  // Alignment Utilities
+  .tbx-block {
+    &:has(img[data-tbx-alignment="center"]) {
+      text-align: center;
+    }
+
+    &:has(img[data-tbx-alignment="right"]) {
+      float: right;
+    }
+  }
+
+  .tbx-modal {
+    margin: 0;
+
+    .size-s {
+      max-width: 500px;
+    }
+    .size-m {
+      max-width: 800px;
+    }
+  }
 }
 
-// Button Styles
-.tbx-button {
-  display: flex;
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--color-gray-2);
+@container editor (width < 500px) {
+  #typeblox-editor {
+    padding: 0;
 
-  &:hover {
-    border: 1px solid var(--color-gray-3);
-  }
-
-  &.tbx-small {
-    padding: 1px 4px;
-    font-size: 14px;
-    border: 0;
-  }
-
-  &.tbx-active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: var(--color-white);
-  }
-}
-
-// Contextual Menu
-.tbx-contextual-menu {
-  max-height: 350px;
-  min-width: 250px;
-  overflow-y: auto;
-  z-index: 4;
-
-  a {
-    text-decoration: none !important;
-    color: var(--color-black) !important;
-  }
-
-  &.tbx-size-medium {
-    min-width: 400px;
-    max-width: 100%;
-  }
-}
-
-// Menu Container
-.tbx-menu-container {
-  z-index: 4;
-}
-
-// Tabs
-.tbx-tabs {
-  &.tbx-active {
-    font-weight: 600;
-    border-bottom: 2px solid var(--color-black);
-  }
-}
-
-// Background Utilities
-.tbx-bg-primary {
-  background-color: var(--color-primary);
-}
-
-// Alignment Utilities
-.tbx-block {
-  &:has(img[data-tbx-alignment="center"]) {
-    text-align: center;
-  }
-
-  &:has(img[data-tbx-alignment="right"]) {
-    float: right;
+    .tbx-block {
+      .tbx-actions {
+        flex-direction: column;
+        
+        button {
+          padding: 0;
+        }
+      }
+    }
   }
 }

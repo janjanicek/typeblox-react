@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import Icon from "../../components/Icon";
-import ContextualMenu from "../../components/ContextualMenu";
+import ContextualMenu from "../../components/menus/ContextualMenu";
 import {
   AVAILABLE_BLOCKS,
   BLOCKS_SETTINGS,
@@ -33,14 +33,9 @@ export const Add: React.FC<AddProps> = ({
             setShowPlusMenu(!showPlusMenu);
             if (!isToolbar) setShowToolbar(false);
           }}
-          className={`border-0 rounded hover:bg-gray-100 ${
+          className={`border-0 rounded hover:bg-gray-100 flex items-center justify-center ${
             showPlusMenu ? "bg-gray-300 text-white" : ""
-          } ${
-            isToolbar
-              ? "px-2 py-1 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-50"
-              : "v-6 h-6"
-          }
-            `}
+          }`}
         >
           <Icon name="Plus" color="black" />
         </button>

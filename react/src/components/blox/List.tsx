@@ -46,14 +46,15 @@ export const List = forwardRef<HTMLDivElement, ListBloxProps>(
         suppressContentEditableWarning: true,
         "data-typeblox-id": block.id,
         "data-typeblox-editor": block,
-        className: `tbx-list-block  flex-1 outline-none px-2 ${block.getClasses().join(" ")}`,
+        className: `tbx-list-block flex-1 outline-none px-2 ${block.getClasses().join(" ")}`,
         style: block.getStyles(),
         onMouseUp: handleMouseUp,
-        onBlur: () =>
+        onBlur: () => {
           onUpdate({
             id: block.id,
             content: listRef.current?.innerHTML || "",
-          }),
+          })
+        },
       },
       content,
     );

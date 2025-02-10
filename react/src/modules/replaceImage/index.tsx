@@ -1,9 +1,9 @@
 import { Blox } from "@typeblox/core/dist/classes/Blox";
 import React, { useRef, useState } from "react";
-import ContextualMenu from "../../components/ContextualMenu";
+import ContextualMenu from "../../components/menus/ContextualMenu";
 import Icon from "../../components/Icon";
 import Tooltip from "../../components/Tooltip";
-import UploadMenu from "../../components/UploadMenu";
+import UploadMenu from "../../components/menus/UploadMenu";
 
 interface ReplaceImageProps {
   setShowToolbar: Function;

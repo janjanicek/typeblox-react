@@ -3,6 +3,7 @@ import Icon from "../../components/Icon";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import Modal from "../../components/Modal";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
+import Tooltip from "../../components/Tooltip";
 
 interface ViewAsCodeProps {
   block: Blox;
@@ -38,12 +39,14 @@ export const ViewAsCode: React.FC<ViewAsCodeProps> = ({ block }) => {
 
   return (
     <>
-      <button
-        onClick={openModal}
-        className="px-2 py-1 border-0 rounded hover:bg-gray-100"
-      >
-        <Icon name="Code" />
-      </button>
+      <Tooltip content="Source code">
+        <button
+          onClick={openModal}
+          className="px-2 py-1 border-0 rounded hover:bg-gray-100"
+        >
+          <Icon name="Code" />
+        </button>
+      </Tooltip>
       <Modal
         title="View Block as Code"
         showCloseButton={false}

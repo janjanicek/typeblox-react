@@ -5,17 +5,19 @@ import Icon from "./Icon";
 interface ModalProps {
   title: string;
   children: ReactNode; // Content passed as children
-  showCloseButton: boolean;
-  isOpen: boolean;
+  showCloseButton?: boolean;
+  isOpen?: boolean;
   onClose: () => void;
+  className?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
   title,
   children,
-  showCloseButton,
-  isOpen,
+  showCloseButton = false,
+  isOpen = false,
   onClose,
+  className,
 }) => {
   if (!isOpen) return null;
 
@@ -24,12 +26,10 @@ const Modal: React.FC<ModalProps> = ({
       {/* Modal */}
       {isOpen && (
         <div
-          className="tbx-modal fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-50"
-          onClick={onClose}
+          className={`tbx-modal fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-50`}
         >
           <div
-            className="relative w-10/12 p-6 bg-white rounded shadow-lg"
-            onClick={(e) => e.stopPropagation()} // Prevent click on the backdrop from closing the modal
+            className={`relative w-10/12 p-6 bg-white rounded shadow-lg ${className}`}
           >
             <div className="flex justify-between">
               <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
@@ -55,7 +55,7 @@ const Modal: React.FC<ModalProps> = ({
         </div>
       )}
     </>,
-    document.body,
+    document.getElementById("typeblox-editor") as Element,
   );
 };
 

@@ -8,11 +8,14 @@
     "@typeblox/react": "file:../react",
     "@types/react": "^18.2.33",
     "@types/react-dom": "^18.2.14",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "^5.0.1",
-    "typescript": "^5.7.2",
-    "shiki": "^2.3.0"
+    "shiki": "^2.3.0",
+    "tailwindcss": "^4.0.5",
+    "typescript": "^5.7.2"
   },
   "resolutions": {
     "react": "18.0.0",

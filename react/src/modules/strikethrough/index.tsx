@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useTypebloxEditor } from "../../context/EditorContext";
+import { useBlock } from "../../context/BlockContext";
 import Icon from "../../components/Icon";
+import Tooltip from "../../components/Tooltip";
 
 interface ModuleProps {
   isMenu?: boolean;
@@ -8,31 +10,44 @@ interface ModuleProps {
 
 export const Strikethrough: React.FC<ModuleProps> = ({ isMenu }) => {
   const { editor } = useTypebloxEditor();
+  const { getShortcut } = useBlock();
   const [isStrikethrough, setIsStrikethrough] = useState(
     editor.isStyle("strikethrough"),
   );
 
+  const handleClick = () => {
+    const newStyle = editor.blox().getCurrentBlock()?.toggleStrike();
+    setIsStrikethrough(newStyle ?? false);
+  };
+
+  const shortcut = getShortcut("strikethrough");
+
   return (
-    <button
-      className={`${isMenu ? "p-2" : "px-2 py-1"} border-0 rounded hover:bg-gray-100 ${
-        isStrikethrough ? "bg-gray-300" : ""
-      }
-      ${isMenu ? "flex" : ""}`}
-      onClick={() => {
-        const newStyle = editor.blox().getCurrentBlock()?.toggleStrike();
-        setIsStrikethrough(newStyle ?? false);
-      }}
-    >
+    <>
       {isMenu ? (
-        <>
+        <button
+          className={`p-2 border-0 rounded hover:bg-gray-100 ${
+            isStrikethrough ? "bg-gray-300" : ""
+          } flex`}
+          onClick={handleClick}
+        >
           <span className="mr-2">
             <Icon name="Strike" />
-          </span>{" "}
+          </span>
           <span>Strike-through</span>
-        </>
+        </button>
       ) : (
-        <Icon name="Strike" />
+        <Tooltip content={`Strike-through`}>
+          <button
+            className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
+              isStrikethrough ? "bg-gray-300" : ""
+            }`}
+            onClick={handleClick}
+          >
+            <Icon name="Strike" />
+          </button>
+        </Tooltip>
       )}
-    </button>
+    </>
   );
 };

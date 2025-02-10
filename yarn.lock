@@ -1843,6 +1843,23 @@
     "@rollup/pluginutils" "^3.1.0"
     magic-string "^0.25.7"
 
+"@rollup/plugin-replace@^6.0.2":
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-replace/-/plugin-replace-6.0.2.tgz#2f565d312d681e4570ff376c55c5c08eb6f1908d"
+  integrity sha512-7QaYCf8bqF04dOy7w/eHmJeNExxTYwvKAmlSAH/EaWWUzbT0h5sbF6bktFoX/0F/0qwng5/dWFMyf3gzaM8DsQ==
+  dependencies:
+    "@rollup/pluginutils" "^5.0.1"
+    magic-string "^0.30.3"
+
+"@rollup/plugin-strip@^3.0.4":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-strip/-/plugin-strip-3.0.4.tgz#ad623cc18cf305b484f8bf38fde4ae855c1229e4"
+  integrity sha512-LDRV49ZaavxUo2YoKKMQjCxzCxugu1rCPQa0lDYBOWLj6vtzBMr8DcoJjsmg+s450RbKbe3qI9ZLaSO+O1oNbg==
+  dependencies:
+    "@rollup/pluginutils" "^5.0.1"
+    estree-walker "^2.0.2"
+    magic-string "^0.30.3"
+
 "@rollup/plugin-sucrase@^5.0.2":
   version "5.0.2"
   resolved "https://registry.npmjs.org/@rollup/plugin-sucrase/-/plugin-sucrase-5.0.2.tgz"
@@ -2214,18 +2231,18 @@
   resolved "https://registry.yarnpkg.com/@typeblox/core/-/core-0.2.2.tgz#04146e2c43a6c910b5109766bb93080f54ece7bc"
   integrity sha512-xLOnon5aI51cpl1B4NQ0blZ9OlLfoTfCVanVMJuFAx9EaJF6fvW2Q1HCynCkYECmCHvcoN+qA3J37fzxfdKAVw==
 
-"@typeblox/core@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@typeblox/core/-/core-0.3.0.tgz#894ad39cafb037fea69194963156c83c35fbcfb1"
-  integrity sha512-Logg6Lm5qnDqe/ady6Ye1E9K2z6Fie2onY3Ofu6FzjCIMXCQI6EU3VKVHNuErJoLVdls4e0k+ckDVT19HJrpHQ==
+"@typeblox/core@^0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@typeblox/core/-/core-0.4.2.tgz#360bab703bf6d7f4d50b7a9fe8edf8bf7d9f3ad5"
+  integrity sha512-GXTbtcOtoEZz7rlE0qqmx2dnhwmUEzF9wB2NUKIpjY+w4HOJzP8GykP8b6JD2kmBDq6SZRMB56Awg3qY4YtAzQ==
 
 "@typeblox/react@file:react":
-  version "0.3.1"
+  version "0.4.0"
   dependencies:
     "@dnd-kit/core" "^6.3.1"
     "@dnd-kit/sortable" "^10.0.0"
     "@floating-ui/react" "^0.27.2"
-    "@typeblox/core" "^0.3.0"
+    "@typeblox/core" "^0.4.2"
     tabler-icons-react "^1.56.0"
     zustand "^5.0.2"
 
@@ -7982,7 +7999,7 @@ performance-now@^2.1.0:
 
 picocolors@^0.2.1:
   version "0.2.1"
-  resolved "https://registry.npmjs.org/picocolors/-/picocolors-0.2.1.tgz"
+  resolved "https://registry.yarnpkg.com/picocolors/-/picocolors-0.2.1.tgz#570670f793646851d1ba135996962abad587859f"
   integrity sha512-cMlDqaLEqfSaW8Z7N5Jw+lyIW869EzT73/F5lhtY9cLGoVxSXznfgfXMO0Z5K0o0Q2TkTXq+0KFsdnSe3jDViA==
 
 picocolors@^1.0.0, picocolors@^1.0.1, picocolors@^1.1.1:
@@ -8640,7 +8657,7 @@ postcss-value-parser@^4.0.0, postcss-value-parser@^4.1.0, postcss-value-parser@^
 
 postcss@^7.0.35:
   version "7.0.39"
-  resolved "https://registry.npmjs.org/postcss/-/postcss-7.0.39.tgz"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.39.tgz#9624375d965630e2e1f2c02a935c82a59cb48309"
   integrity sha512-yioayjNbHn6z1/Bywyb2Y4s3yvDAeXGOyxqD+LnVOinq6Mdmd++SW2wUNVzavyyHxd6+DxzWGIuosg6P1Rj8uA==
   dependencies:
     picocolors "^0.2.1"
@@ -9255,9 +9272,9 @@ rollup-plugin-replace@^2.2.0:
     magic-string "^0.25.2"
     rollup-pluginutils "^2.6.0"
 
-rollup-plugin-terser@^7.0.0:
+rollup-plugin-terser@^7.0.0, rollup-plugin-terser@^7.0.2:
   version "7.0.2"
-  resolved "https://registry.npmjs.org/rollup-plugin-terser/-/rollup-plugin-terser-7.0.2.tgz"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-terser/-/rollup-plugin-terser-7.0.2.tgz#e8fbba4869981b2dc35ae7e8a502d5c6c04d324d"
   integrity sha512-w3iIaU4OxcF52UUXiZNsNeuXIMDvFrr+ZXK6bFZ0Q60qyVfq4uLptoS4bbq3paG3x216eQllFZX7zt6TIImguQ==
   dependencies:
     "@babel/code-frame" "^7.10.4"
@@ -10156,6 +10173,11 @@ tailwindcss@^3.0.2, tailwindcss@^3.4.17:
     postcss-selector-parser "^6.1.2"
     resolve "^1.22.8"
     sucrase "^3.35.0"
+
+tailwindcss@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-4.0.5.tgz#725c1b8589707e6d079b9940978d761be4a99b6b"
+  integrity sha512-DZZIKX3tA23LGTjHdnwlJOTxfICD1cPeykLLsYF1RQBI9QsCR3i0szohJfJDVjr6aNRAIio5WVO7FGB77fRHwg==
 
 tapable@^1.0.0:
   version "1.1.3"

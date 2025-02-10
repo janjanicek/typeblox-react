@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import Icon from "../../components/Icon";
-import ContextualMenu from "../../components/ContextualMenu";
-import LinkMenu from "../../components/LinkMenu";
+import ContextualMenu from "../../components/menus/ContextualMenu";
+import LinkMenu from "../../components/menus/LinkMenu";
+import Tooltip from "../../components/Tooltip";
 
 interface ModuleProps {
   isMenu?: boolean;
@@ -29,28 +30,40 @@ export const Link: React.FC<ModuleProps> = ({ isMenu = false }) => {
 
   return (
     <>
-      <button
-        ref={buttonRef}
-        className={`block flex ${isMenu ? "p-2" : "px-2 py-1"} border-0 rounded hover:bg-gray-100 ${
-          isLink ? "bg-gray-300" : ""
-        }`}
-        onMouseDown={(e) => {
-          e.preventDefault(); // Prevents losing focus before saving selection
-          editor.selection().saveSelectionRange();
-          setShowMenu(!showMenu);
-        }}
-      >
-        {isMenu ? (
-          <>
-            <span className="mr-2">
-              <Icon name="Link" />
-            </span>{" "}
-            <span>Link</span>
-          </>
-        ) : (
-          <Icon name="Link" />
-        )}
-      </button>
+      {isMenu ? (
+        <button
+          ref={buttonRef}
+          className={`block flex p-2 border-0 rounded hover:bg-gray-100 ${
+            isLink ? "bg-gray-300" : ""
+          }`}
+          onMouseDown={(e) => {
+            e.preventDefault(); // Prevents losing focus before saving selection
+            editor.selection().saveSelectionRange();
+            setShowMenu(!showMenu);
+          }}
+        >
+          <span className="mr-2">
+            <Icon name="Link" />
+          </span>
+          <span>Link</span>
+        </button>
+      ) : (
+        <Tooltip content={isLink ? "Link settings" : "Place link"}>
+          <button
+            ref={buttonRef}
+            className={`block px-2 py-1 border-0 rounded hover:bg-gray-100 ${
+              isLink ? "bg-gray-300" : ""
+            }`}
+            onMouseDown={(e) => {
+              e.preventDefault(); // Prevents losing focus before saving selection
+              editor.selection().saveSelectionRange();
+              setShowMenu(!showMenu);
+            }}
+          >
+            <Icon name="Link" />
+          </button>
+        </Tooltip>
+      )}
       <ContextualMenu
         referenceElement={buttonRef.current}
         isVisible={showMenu}

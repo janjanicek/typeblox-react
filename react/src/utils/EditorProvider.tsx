@@ -39,7 +39,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   const editorRef = useRef<Typeblox | null>(null);
 
   const cleanupEditor = () => {
-    console.warn("Cleaning up editor:", editorRef.current);
     try {
       if (editorRef.current) editorRef.current.destroy();
       if (window.typebloxEditor === editorRef.current) {
@@ -69,7 +68,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       editorRef.current = editor;
       setTypeBoxEditor(editor);
 
-      console.warn("Editor initialized:", editor.blox().getBlox());
+      console.log("TypeBlox editor initialized:", editor.blox().getBlox());
     } catch (error) {
       console.error("Failed to initialize Typeblox editor:", error);
     }
@@ -87,7 +86,12 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     >
       <div>
         {slotBefore && <div>{slotBefore}</div>}
-        <Editor toolbars={toolbars} extensions={extensions} menus={menus} className={className} />
+        <Editor
+          toolbars={toolbars}
+          extensions={extensions}
+          menus={menus}
+          className={className}
+        />
         {children}
       </div>
     </EditorContext.Provider>

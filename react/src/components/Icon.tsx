@@ -29,7 +29,8 @@ import {
   ListNumbers,
   Link,
   Copy,
-  Blockquote
+  Blockquote,
+  Settings,
 } from "tabler-icons-react";
 
 interface IconProps {
@@ -63,7 +64,7 @@ const Icon: React.FC<IconProps> = ({
         return <Article color={color} />;
       case "Bold":
         return <Bold color={color} />;
-      case "Clear":
+      case "ClearFormatting":
         return <ClearFormatting color={color} />;
       case "Code":
         return <Code color={color} />;
@@ -113,6 +114,8 @@ const Icon: React.FC<IconProps> = ({
         return <Link color={color} />;
       case "Blockquote":
         return <Blockquote color={color} />;
+      case "Settings":
+        return <Settings color={color} />;
       default:
         return <X />;
     }

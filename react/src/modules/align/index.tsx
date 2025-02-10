@@ -4,7 +4,7 @@ import Icon from "../../components/Icon";
 import Tooltip from "../../components/Tooltip";
 import { BLOCK_TYPES } from "@typeblox/core/dist/constants";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
-import ContextualMenu from "../../components/ContextualMenu";
+import ContextualMenu from "../../components/menus/ContextualMenu";
 
 interface AlignProps {
   block: Blox;
@@ -19,8 +19,7 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
 
   useEffect(() => {
     const currentAlignment =
-      block
-        .getAttributes()["data-tbx-alignment"] ||
+      block.getAttributes()["data-tbx-alignment"] ||
       block.getStyles().textAlign ||
       null;
     setActiveAlignment(currentAlignment);
@@ -28,9 +27,9 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
 
   const toggleAlignment = (alignment: string) => {
     if (block.type === BLOCK_TYPES.image) {
-      block.removeStyle("margin"); 
-      if(alignment === "center") block.setStyle("margin", "auto"); 
-      block.setAttribute('data-tbx-alignment', alignment);
+      block.removeStyle("margin");
+      if (alignment === "center") block.setStyle("margin", "auto");
+      block.setAttribute("data-tbx-alignment", alignment);
     } else {
       // Toggle style for other block types
       block.toggleStyle("text-align", alignment);
@@ -65,15 +64,19 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
 
   return isMenu ? (
     <div>
-      <button
-        ref={buttonRef}
-        className={`px-2 py-1 border-0 rounded hover:bg-gray-100`}
-        onClick={() => setMenuVisible(!menuVisible)}
+      <Tooltip
+        content={`Align ${activeAlignment ? activeAlignment.charAt(0).toUpperCase() + activeAlignment.slice(1) : "Left"}`}
       >
-        <Icon
-          name={`Align${activeAlignment ? activeAlignment.charAt(0).toUpperCase() + activeAlignment.slice(1) : "Left"}`}
-        />
-      </button>
+        <button
+          ref={buttonRef}
+          className={`px-2 py-1 border-0 rounded hover:bg-gray-100`}
+          onClick={() => setMenuVisible(!menuVisible)}
+        >
+          <Icon
+            name={`Align${activeAlignment ? activeAlignment.charAt(0).toUpperCase() + activeAlignment.slice(1) : "Left"}`}
+          />
+        </button>
+      </Tooltip>
       {menuVisible && (
         <ContextualMenu
           referenceElement={buttonRef.current}

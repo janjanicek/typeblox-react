@@ -1,8 +1,9 @@
 import React, { useRef } from "react";
-import ContextualMenu from "../../components/ContextualMenu";
+import ContextualMenu from "../../components/menus/ContextualMenu";
 import useBlockStore from "../../stores/BlockStore";
 import { AVAILABLE_FONTS } from "@typeblox/core/dist/constants";
 import { useTypebloxEditor } from "../../context/EditorContext";
+import Tooltip from "../../components/Tooltip";
 
 export const Font: React.FC = () => {
   const { showSelectFont, setShowSelectFont } = useBlockStore();
@@ -24,17 +25,19 @@ export const Font: React.FC = () => {
     setShowSelectFont(!showSelectFont);
   };
 
+  const selectedFont = editor.getStyle("fontFamily") ?? "Arial";
+
   return (
-    <div className="relative">
-      <button
-        ref={buttonRef}
-        className="px-2 py-1 border-0 rounded hover:bg-gray-100"
-        onClick={toggleFontSelectionPicker}
-      >
-        <span style={{ textTransform: "capitalize" }}>
-          {editor.getStyle("fontFamily") ?? "Arial"}
-        </span>
-      </button>
+    <div className="relative flex items-stretch">
+      <Tooltip content={`Font ${selectedFont}`}>
+        <button
+          ref={buttonRef}
+          className="px-2 py-1 border-0 rounded hover:bg-gray-100"
+          onClick={toggleFontSelectionPicker}
+        >
+          <span style={{ textTransform: "capitalize" }}>{selectedFont}</span>
+        </button>
+      </Tooltip>
       <ContextualMenu
         referenceElement={buttonRef.current}
         isVisible={showSelectFont}

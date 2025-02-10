@@ -37,7 +37,7 @@ const MenuBar = ({style}) => {
 
   return (
     <div className="control-group" style={style}>
-      <div className="flex gap-2 p-5" style={{flexWrap: 'wrap', gap: '.5rem'}}>
+      <div style={{flexWrap: 'wrap', gap: '.5rem', display: 'flex'}}>
         <button
           onClick={() => {
             editor.blox().getCurrentBlock()?.toggleBold();
@@ -123,14 +123,16 @@ const MenuBar = ({style}) => {
           Code
         </button>
         <button
-          onClick={() => editor.handleUndo()}
+          onClick={() => editor.history().undo()}
           className="tbx-button"
+          disabled={!editor.history().isUndoAvailable()}
         >
           Undo
         </button>
         <button
-          onClick={() => editor.handleRedo()}
+          onClick={() => editor.history().redo()}
           className="tbx-button"
+          disabled={!editor.history().isRedoAvailable()}
         >
           Redo
         </button>

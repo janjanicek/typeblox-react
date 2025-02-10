@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .App {
   text-align: center;
 }
@@ -130,6 +134,7 @@ blockquote {
   font-size: 0.8rem;
   margin: 0;
   width: 100%;
+  box-sizing: border-box;
   display: block;
   overflow: auto;
 }
@@ -181,4 +186,31 @@ img {
 ;
   color: white;
   border-radius: 6px; 
+}
+
+.tbx-button {
+  display: flex;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--color-gray-2);
+}
+
+.tbx-button:disabled {
+  opacity: .5;
+}
+
+.tbx-button:hover {
+  border: 1px solid var(--color-gray-3);
+}
+
+.tbx-button.tbx-small {
+  padding: 1px 4px;
+  font-size: 14px;
+  border: 0;
+}
+
+.tbx-button.tbx-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
 }

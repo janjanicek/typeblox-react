@@ -1,8 +1,8 @@
 import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
-import ContextualMenu from "../ContextualMenu";
+import ContextualMenu from "../menus/ContextualMenu";
 import Icon from "../Icon";
-import UploadMenu from "../UploadMenu";
+import UploadMenu from "../menus/UploadMenu";
 
 interface ImageBloxProps {
   content: string | null;
@@ -29,11 +29,17 @@ export const Image = forwardRef<HTMLDivElement, ImageBloxProps>(
       }
     }, [content]);
 
+    useEffect(() => {
+      setDimensions({
+        width: block.getStyles().width || "auto",
+        height: block.getStyles().height || "auto",
+      });
+    }, [JSON.stringify(block.getStyles())]);
+
     const toggleToolbar = (event: React.MouseEvent<HTMLDivElement>) => {
       const isInsideMenu = (event.target as HTMLElement).closest(
         ".tbx-contextual-menu",
       );
-      console.warn(isInsideMenu);
       if (isInsideMenu) return;
 
       if (content) {
@@ -118,10 +124,7 @@ export const Image = forwardRef<HTMLDivElement, ImageBloxProps>(
             <img
               src={content}
               alt="Uploaded"
-              className={[
-                "",
-                ...block.getClasses(),
-              ].join(" ")}
+              className={["", ...block.getClasses()].join(" ")}
               style={{
                 ...block.getStyles(),
                 width: dimensions.width,

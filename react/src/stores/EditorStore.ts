@@ -6,8 +6,6 @@ interface EditorStore {
   menuSettings: Record<string, string[]>;
   setToolbarSettings: (blockType: BlockType, tools: string[]) => void;
   setMenuSettings: (menuName: string, modules: string[]) => void;
-  isAllSelected: boolean;
-  setIsAllSelected: (showTypeSelection: boolean) => void;
 }
 
 const useEditorStore = create<EditorStore>((set) => ({
@@ -40,8 +38,6 @@ const useEditorStore = create<EditorStore>((set) => ({
         [menuName]: modules, // Update only the specified block type
       },
     })),
-  isAllSelected: false,
-  setIsAllSelected: (value) => set({ isAllSelected: value }),
 }));
 
 export default useEditorStore;

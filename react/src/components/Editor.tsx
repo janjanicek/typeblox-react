@@ -1,5 +1,5 @@
 // Editor.jsx
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useReducer, useRef } from "react";
 // dnd-kit imports
 import {
   DndContext,
@@ -36,27 +36,49 @@ interface EditorProps {
   className?: string;
 }
 
+type BlockAction =
+  | { type: 'SET_BLOCKS'; payload: Blox[] }
+  | { type: 'UPDATE_STYLE'; payload: Blox };
+
+
+  const blockReducer = (state: Blox[], action: BlockAction): Blox[] => {
+    switch (action.type) {
+      case 'SET_BLOCKS':
+        return action.payload;
+      case 'UPDATE_STYLE':
+        return state.map(block =>
+          block.id === action.payload.id
+            ? Object.assign(new Blox(block), {
+              styles: action.payload.styles,
+              content: action.payload.content,
+              classes: action.payload.classes,
+              attributes: action.payload.attributes
+            })
+            : block
+        );
+      default:
+        return state;
+    }
+  };
+
 const Editor: React.FC<EditorProps> = ({
   toolbars = DEFAULT_TOOLBARS,
   menus = DEFAULT_MENUS,
-  className
+  className,
 }) => {
   const { editor, onChange } = useTypebloxEditor();
-
-  const [blocks, setBlocks] = useState<Blox[]>(editor.blox().getBlox());
+  const [blocks, dispatch] = useReducer(blockReducer, [], () => editor.blox()?.getBlox() ?? []);
   const { setToolbarSettings, setMenuSettings } = useEditorStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
-  // const { isAllSelected, setIsAllSelected } = useEditorStore();
 
-  // Debounce timeout
   let debounceTimeout: NodeJS.Timeout;
 
   // Handle content updates with debounce
   const updateContent = useCallback(() => {
     clearTimeout(debounceTimeout);
     debounceTimeout = setTimeout(() => {
-      editor.blox().update(onChange, blocks);
+      editor.blox().update({onChange, blocks});
     }, 300);
   }, [editor, onChange, blocks]);
 
@@ -66,27 +88,16 @@ const Editor: React.FC<EditorProps> = ({
     return () => clearTimeout(debounceTimeout);
   }, [blocks, updateContent]);
 
+  const handleBlocksChange = (newBlocks: Blox[]) => {
+    dispatch({ type: 'SET_BLOCKS', payload: newBlocks });
+  };
+
+  const handleStyleChange = (updatedBlock: Blox): void => {
+    if (!updatedBlock) return;
+    dispatch({ type: 'UPDATE_STYLE', payload: updatedBlock });
+  };
+
   useEffect(() => {
-    const handleBlocksChange = (newBlocks: Blox[]) => {
-      // Update the blocks state directly
-      setBlocks(newBlocks);
-    };
-
-    const handleStyleChange = (updatedBlock: Blox): void => {
-      if (!updatedBlock) return;
-      // Update the blocks state to reflect the style change
-      setBlocks((prevBlocks) =>
-        prevBlocks.map((block) => {
-          if (block.id === updatedBlock.id) {
-            return Object.assign(new Blox(block), {
-              styles: updatedBlock.styles,
-            });
-          }
-          return block;
-        }),
-      );
-    };
-
     editor.on(EVENTS.blocksChanged, handleBlocksChange);
     editor.on(EVENTS.styleChange, handleStyleChange);
     return () => {
@@ -183,11 +194,14 @@ const Editor: React.FC<EditorProps> = ({
     type?: BlockType;
   }) => {
     const currentBlock = editor.blox().getBlockById(update.id);
-
     if (!currentBlock) return;
-    if(update.content?.includes('class="typeblox-selected"')) return;
-    if (update.content && update.content !== currentBlock.content) currentBlock.content = update.content;
-    if (update.type && update.type !== currentBlock.type) currentBlock?.toggleType(update.type);
+    if (update.content?.includes('class="typeblox-selected"')) return;
+    if (update.content && update.content !== currentBlock.content)
+      currentBlock.setContent(update.content);
+
+    if (update.type && update.type !== currentBlock.type)
+      currentBlock?.toggleType(update.type);
+    onChange(editor.elements().getCurrentDOM());
   };
 
   const mouseSensor = useSensor(MouseSensor, {
@@ -199,7 +213,7 @@ const Editor: React.FC<EditorProps> = ({
   const sensors = useSensors(mouseSensor, keyboardSensor);
 
   return (
-    <div id="typeblox-editor" className={className}>
+    <div className="tbx-editor-container"><div id="typeblox-editor" className={className}>
       <DndContext
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
@@ -248,7 +262,7 @@ const Editor: React.FC<EditorProps> = ({
             })()}
         </DragOverlay>
       </DndContext>
-    </div>
+    </div></div>
   );
 };
 

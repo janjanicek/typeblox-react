@@ -7,7 +7,7 @@ import {
   autoPlacement,
 } from "@floating-ui/react";
 import React, { useEffect, useRef, FC, useState, useCallback } from "react";
-import Icon from "./Icon";
+import Icon from "../Icon";
 
 interface ContextualMenuProps {
   referenceElement?: HTMLElement | null;

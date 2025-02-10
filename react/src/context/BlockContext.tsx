@@ -13,8 +13,10 @@ import {
 } from "../modules";
 import { Add } from "../modules/add";
 import { Align } from "../modules/align";
+import { ClearFormatting } from "../modules/clearFormatting";
 import { Drag } from "../modules/drag";
 import { Extension } from "../modules/extension";
+import ImageSettings from "../modules/imageSettings";
 import { Link } from "../modules/link";
 import { Menu } from "../modules/menu";
 import { ReplaceImage } from "../modules/replaceImage";
@@ -28,6 +30,7 @@ interface ComponentProps {
 
 interface BlockContextProps {
   getComponent: (props: ComponentProps) => JSX.Element | undefined;
+  getShortcut: (name: string) => string | undefined;
 }
 
 interface BlockProviderProps {
@@ -94,12 +97,21 @@ export const BlockProvider: FC<BlockProviderProps> = ({
             onUpdate={onUpdate}
           />
         );
+      case "imageSettings":
+        return (
+          <ImageSettings
+            setShowToolbar={setShowToolbar}
+            block={block}
+          />
+        );
       case "align":
         return <Align block={block} isMenu={isMenuComponent} />;
 
       case "link":
         return <Link isMenu={isMenuComponent} />;
 
+      case "clearFormatting":
+        return <ClearFormatting isMenu={isMenuComponent} />;
       case "type":
         return <TypeChange block={block} onUpdate={onUpdate} />;
       case "add":
@@ -127,8 +139,41 @@ export const BlockProvider: FC<BlockProviderProps> = ({
     }
   };
 
+  const isMacOS = (): boolean => {
+    // Feature detect `userAgentData` (optional chaining for safety)
+    if (
+      typeof navigator !== "undefined" &&
+      (navigator as any).userAgentData?.platform
+    ) {
+      return (navigator as any).userAgentData.platform
+        .toLowerCase()
+        .includes("mac");
+    }
+
+    // Fallback to `userAgent` for older browsers
+    return (
+      typeof navigator !== "undefined" &&
+      /Mac|iPhone|iPod|iPad/.test(navigator.userAgent)
+    );
+  };
+
+  const getShortcut = (action: string): string | undefined => {
+    const modifierKey = isMacOS() ? "⌘" : "CTRL+";
+
+    switch (action) {
+      case "bold":
+        return `${modifierKey}B`;
+      case "italic":
+        return `${modifierKey}I`;
+      case "underline":
+        return `${modifierKey}U`;
+      default:
+        return undefined; // Return undefined if no matching shortcut exists
+    }
+  };
+
   return (
-    <BlockContext.Provider value={{ getComponent }}>
+    <BlockContext.Provider value={{ getComponent, getShortcut }}>
       {children}
     </BlockContext.Provider>
   );
