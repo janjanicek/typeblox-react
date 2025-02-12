@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import ContextualMenu from "../../components/menus/ContextualMenu";
 import useBlockStore from "../../stores/BlockStore";
-import { BLOCKS_SETTINGS } from "@typeblox/core/dist/constants";
+import { BLOCKS_SETTINGS } from "@typeblox/core/dist/blockTypes";
 import { BlockType } from "@typeblox/core/dist/types";
 import Icon from "../../components/Icon";
 import type { Blox } from "@typeblox/core/dist/classes/Blox";
@@ -41,9 +41,10 @@ export const TypeChange: React.FC<TypeChangeProps> = ({ block, onUpdate }) => {
           className="px-2 py-1 border-0 rounded hover:bg-gray-100 flex items-center"
           onClick={toggleBlockSelection}
         >
+          {typeof BLOCKS_SETTINGS[block.type].icon === "string" && (
           <span className="mr-2">
-            <Icon name={BLOCKS_SETTINGS[block.type].icon} />
-          </span>
+            <Icon name={BLOCKS_SETTINGS[block.type].icon as string} />
+          </span>)}
           {BLOCKS_SETTINGS[block.type].visibleName}
         </button>
       </Tooltip>

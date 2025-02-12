@@ -68,7 +68,7 @@ const LinkMenu: React.FC<LinkMenuProps> = ({ onChange }) => {
             restoreSelection();
             onChange(url, target);
           }}
-          className="tbx-bg-primary text-white px-4 py-2 rounded"
+          className="tbx-bg-primary px-4 py-2 rounded"
         >
           {!isLinkUpdate ? "Place link" : "Update link"}
         </button>
@@ -78,7 +78,7 @@ const LinkMenu: React.FC<LinkMenuProps> = ({ onChange }) => {
               restoreSelection();
               onChange("", "");
             }} // Empty URL removes link
-            className="text-red-500 border border-red-500 px-4 py-2 rounded"
+            className="tbd-button border border-red-500 px-4 py-2 rounded"
           >
             Unlink
           </button>

@@ -37,7 +37,7 @@ export const Underline: React.FC<ModuleProps> = ({ isMenu = false }) => {
       {isMenu ? (
         <button
           className={`p-2 border-0 rounded hover:bg-gray-100 ${
-            isUnderline ? "bg-gray-300" : ""
+            isUnderline ? "tbx-active" : ""
           } flex justify-between`}
           onClick={handleClick}
         >
@@ -53,7 +53,7 @@ export const Underline: React.FC<ModuleProps> = ({ isMenu = false }) => {
         <Tooltip content={`Underline (${shortcut})`}>
           <button
             className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-              isUnderline ? "bg-gray-300" : ""
+              isUnderline ? "tbx-active" : ""
             }`}
             onClick={handleClick}
           >

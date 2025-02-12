@@ -3,11 +3,10 @@ import React, {
   useEffect,
   useRef,
   useState,
-  KeyboardEvent,
   MouseEventHandler,
 } from "react";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
-import { BLOCK_TYPES } from "@typeblox/core/dist/constants";
+import { BLOCK_TYPES } from "@typeblox/core/dist/blockTypes";
 import { useTypebloxEditor } from "../../context/EditorContext";
 
 interface ListBloxProps {
@@ -21,11 +20,10 @@ interface ListBloxProps {
 
 export const List = forwardRef<HTMLDivElement, ListBloxProps>(
   (
-    { content, block, onUpdate, showToolbar, setShowToolbar, handleMouseUp },
+    { content, block, onUpdate, handleMouseUp },
     ref,
   ) => {
     const [isMenuVisible, setIsMenuVisible] = useState(false);
-    const { editor } = useTypebloxEditor();
     const listRef = useRef<HTMLDivElement | null>(null);
 
     // Attach the forwarded ref to the div element

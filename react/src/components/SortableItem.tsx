@@ -28,9 +28,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
 
   const { attributes, listeners, setNodeRef, transition } = useSortable({ id });
 
-  const style: React.CSSProperties = {
+  const styles: React.CSSProperties = {
     opacity: isDragging ? 0.5 : 1,
-    borderTop: isOver ? "2px solid black" : 0,
     transition,
   };
 
@@ -40,7 +39,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
         setNodeRef(node); // Attach the sortable node reference
         if (node) contentRef.current = node as HTMLElement; // Explicitly set contentRef
       }}
-      style={style}
+      className={isOver ? "tbx-over-element" : ""}
+      style={styles}
       {...attributes}
     >
       <BlockRow

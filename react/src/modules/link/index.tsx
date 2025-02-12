@@ -34,7 +34,7 @@ export const Link: React.FC<ModuleProps> = ({ isMenu = false }) => {
         <button
           ref={buttonRef}
           className={`block flex p-2 border-0 rounded hover:bg-gray-100 ${
-            isLink ? "bg-gray-300" : ""
+            isLink ? "tbx-active" : ""
           }`}
           onMouseDown={(e) => {
             e.preventDefault(); // Prevents losing focus before saving selection
@@ -52,7 +52,7 @@ export const Link: React.FC<ModuleProps> = ({ isMenu = false }) => {
           <button
             ref={buttonRef}
             className={`block px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-              isLink ? "bg-gray-300" : ""
+              isLink ? "tbx-active" : ""
             }`}
             onMouseDown={(e) => {
               e.preventDefault(); // Prevents losing focus before saving selection

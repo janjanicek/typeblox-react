@@ -35,7 +35,7 @@ export const Bold: React.FC<ModuleProps> = ({ isMenu = false }) => {
       {isMenu ? (
         <button
           className={`block flex p-2 border-0 rounded hover:bg-gray-100 justify-between ${
-            isBold ? "bg-gray-300" : ""
+            isBold ? "tbx-active" : ""
           }`}
           onClick={handleClick}
         >
@@ -51,7 +51,7 @@ export const Bold: React.FC<ModuleProps> = ({ isMenu = false }) => {
         <Tooltip content={`Bold (${getShortcut("bold")})`}>
           <button
             className={`block px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-              isBold ? "bg-gray-300" : ""
+              isBold ? "tbx-active" : ""
             }`}
             onClick={handleClick}
           >

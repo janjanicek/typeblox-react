@@ -1,12 +1,10 @@
 import {
   useFloating,
-  inline,
   offset,
   flip,
   shift,
-  autoPlacement,
 } from "@floating-ui/react";
-import React, { useEffect, useRef, FC, useState, useCallback } from "react";
+import React, { useEffect, FC, useState, useCallback, ReactNode } from "react";
 import Icon from "../Icon";
 
 interface ContextualMenuProps {
@@ -21,6 +19,7 @@ interface ContextualMenuProps {
     onClick?: () => void;
     style?: React.CSSProperties; // Add support for inline styles
     icon?: string;
+    iconElement?: ReactNode;
     description?: string;
   }[];
   onOpen?: () => void;
@@ -173,7 +172,7 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
       style={floatingStyles}
     >
       {sectionName && (
-        <h5 className="font-bold text-slate-500 text-sm">{sectionName}</h5>
+        <h5 className="font-bold text-sm">{sectionName}</h5>
       )}
       {content && <>{content}</>}
       {options &&
@@ -185,7 +184,7 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
               href="#"
               key={index}
               className={`flex cursor-pointer p-2 ${
-                activeIndex === index ? "bg-gray-200" : "hover:bg-gray-100"
+                activeIndex === index ? "tbx-active" : ""
               }`}
               // className={`flex cursor-pointer p-2`}
               style={option.style}
@@ -196,15 +195,15 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
               }}
               onMouseEnter={() => setActiveIndex(index)}
             >
-              {option.icon && (
+              {(option.iconElement || option.icon) && (
                 <span className="mr-3">
-                  <Icon name={option.icon} />
+                  {option.iconElement ?? <Icon name={option.icon!} />}
                 </span>
               )}
               <span className="flex flex-col">
                 {option.label}
                 {option.description && (
-                  <small className="text-gray-500">{option.description}</small>
+                  <small>{option.description}</small>
                 )}
               </span>
             </a>

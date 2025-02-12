@@ -1,9 +1,6 @@
-import Icon from "../../components/Icon";
-import React, { forwardRef, MouseEventHandler, useRef, useState } from "react";
-import useBlockStore from "../../stores/BlockStore";
+import React, { forwardRef, MouseEventHandler, useRef } from "react";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
-import { BLOCKS_SETTINGS } from "@typeblox/core/dist/constants";
-import Tooltip from "../../components/Tooltip";
+import { BLOCKS_SETTINGS } from "@typeblox/core/dist/blockTypes";
 
 interface CodeBloxProps {
   content: string | null;

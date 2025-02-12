@@ -5,7 +5,7 @@ import { EVENTS } from "@typeblox/core/dist/constants";
 import { useEffect, useState } from "react";
 import { EditorProvider, useTypebloxEditor } from "@typeblox/react";
 import "./App.css";
-import { codeToHtml, createHighlighter } from 'shiki'
+import { createHighlighter } from 'shiki'
 
 
 const MenuBar = ({style}) => {
@@ -174,6 +174,7 @@ const MenuBar = ({style}) => {
 function App() {
 
   const [activeTab, setActiveTab] = useState("editor");
+  const [theme, setTheme] = useState("light");
   const [activeCodeTab, setActiveCodeTab] = useState("react");
   const [highlightedCode, setHighlightedCode] = useState("");
   const [highlightedReactCode, setHighlightedReactCode] = useState("");
@@ -203,6 +204,39 @@ const onChange = () => {
 TypeBoxEditor.init({
   HTMLString: sampleContent,
   onUpdate: onChange,
+  extensions: [ // You can define your own modules
+      {
+        name: "newExtension",
+        onClick: () => {
+          (window as any).typebloxEditor?.blox().getCurrentBlock()?.toggleStyle('text-align', 'left');
+        },
+        isActive: () => (window as any).typebloxEditor?.style().getStyle().textAlign === "left",
+        iconElement: (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round">
+            <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"></path>
+          </svg>
+        ),
+      },
+  ],
+  blocks: { // Apply some default styling to blocks
+      headline1: {
+        defaults: {
+          styles: "color: red;"
+        }
+      },
+      customBlock: { // Define custom block
+        tag: "div",
+        visibleName: "My block",
+        blockName: "customBlock",
+        description: "This is a sample block description",
+        placeholder: "Write your content",
+        iconElement: (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round">
+            <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"></path>
+          </svg>
+        ),
+      }
+  }
 });
 
 console.log(TypeBoxEditor.blox().getBlox()); // To see instances of blocks
@@ -257,27 +291,51 @@ function App() { // Sample App component
   return (
     <EditorProvider
       toolbars={{
-        text: 'add drag | bold italic underline strikethrough | font | color bgColor | newModule',
+        text: 'add drag | bold italic underline strikethrough | font | color bgColor | newExtension',
         image: 'replaceImage | align' 
         // If not specified, default settings is used
       }}
       menus={{
-        block: ["add", "drag"] // If not specified, default settings is used
+        block: ["add", "drag"] // Define actions visible on the left when hovering blocks
       }}
       slotBefore={<CustomToolbar />} // You can put above the editor your own toolbar
-      className="content"
+      className="content" // Add classes to the editor container
       content={String(sessionStorage.getItem("tempEditorContent") ?? sampleContent)}
       onChange={onChangeHandler}
+      theme="dark" // or light
       extensions={[ // You can define your own modules
         {
-          name: "newModule",
+          name: "newExtension",
           onClick: () => {
             (window as any).typebloxEditor?.blox().getCurrentBlock()?.toggleStyle('text-align', 'left');
           },
           isActive: () => (window as any).typebloxEditor?.style().getStyle().textAlign === "left",
-          iconName: "newModule",
+          iconElement: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round">
+              <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"></path>
+            </svg>
+          ),
         },
-    ]}>
+    ]}
+    blocks={{ // Apply some default styling to blocks
+        headline1: {
+          defaults: {
+            styles: "color: red;"
+          }
+        },
+        customBlock: { // Define custom block
+          tag: "div",
+          visibleName: "My block",
+          blockName: "customBlock",
+          description: "This is a sample block description",
+          placeholder: "Write your content",
+          iconElement: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round">
+              <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"></path>
+            </svg>
+          ),
+        }
+    }}>
     </EditorProvider>
   );
 }
@@ -347,7 +405,6 @@ function App() { // Sample App component
     sessionStorage.setItem("tempEditorContent", updatedHTMLString);
   };
 
-
   // const AlignLeft = () => {
   //   const { editor } = useTypebloxEditor();
   //   return (
@@ -358,13 +415,17 @@ function App() { // Sample App component
   // };
   
   return (
-    <div style={{padding: '20px'}}>
+    <div style={{padding: '20px'}} data-theme={theme}>
        <div style={{display: 'flex'}}>
       <div className="tabs">
         <button onClick={() => setActiveTab("editor")} className={`${activeTab === "editor" ? "active" : ""} button`}>
           Editor
         </button>
-        <button onClick={() => setActiveTab("preview")} className={`${activeTab === "preview" ? "active" : ""} button`}>
+        <button onClick={() => {
+          const currentContent = (window as any).typebloxEditor?.getCurrentDOM();
+          if(currentContent) onChangeHandler(currentContent);
+          setActiveTab("preview")
+        }} className={`${activeTab === "preview" ? "active" : ""} button`}>
           Preview
         </button>
         <button onClick={() => setActiveTab("code")} className={`${activeTab === "code" ? "active" : ""} button`}>
@@ -372,6 +433,18 @@ function App() { // Sample App component
         </button>
       </div>
       </div>
+
+      <div style={{display: 'flex', position: 'absolute', right: '20px', top: '20px'}}>
+      <div className="tabs small">
+        <button onClick={() => setTheme("light")} className={`${theme === "light" ? "active" : ""} button`}>
+          <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5"/><line x1="12" x2="12" y1="1" y2="3"/><line x1="12" x2="12" y1="21" y2="23"/><line x1="4.22" x2="5.64" y1="4.22" y2="5.64"/><line x1="18.36" x2="19.78" y1="18.36" y2="19.78"/><line x1="1" x2="3" y1="12" y2="12"/><line x1="21" x2="23" y1="12" y2="12"/><line x1="4.22" x2="5.64" y1="19.78" y2="18.36"/><line x1="18.36" x2="19.78" y1="5.64" y2="4.22"/></svg>
+        </button>
+        <button onClick={() => setTheme("dark")} className={`${theme === "dark" ? "active" : ""} button`}>
+          <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+      </div>
+
       {activeTab === "editor" && (  
         <EditorProvider
           // toolbars={{
@@ -385,6 +458,7 @@ function App() { // Sample App component
           className="content"
           content={String(sessionStorage.getItem("tempEditorContent") ?? sampleContent)}
           onChange={onChangeHandler}
+          theme={theme}
           extensions={[
             {
               name: "alignLeft",
@@ -392,7 +466,7 @@ function App() { // Sample App component
                 (window as any).typebloxEditor?.blox().getCurrentBlock()?.toggleStyle('text-align', 'left');
               },
               isActive: () => (window as any).typebloxEditor?.style().getStyle().textAlign === "left",
-              iconName: "alignLeft",
+              icon: "alignLeft",
             },
             {
               name: "alignCenter",
@@ -400,20 +474,46 @@ function App() { // Sample App component
                 (window as any).typebloxEditor?.blox().getCurrentBlock()?.toggleStyle('text-align', 'center');
               },
               isActive: () => (window as any).typebloxEditor?.style().getStyle().textAlign === "center",
-              iconName: "alignCenter",
+              icon: "alignCenter",
             },
             {
-              name: "alignRight",
+              name: "newModule",
               onClick: () => {
-                (window as any).typebloxEditor?.blox().getCurrentBlock()?.toggleStyle('text-align', 'right');
+                console.log("clicked");
               },
-              isActive: () => (window as any).typebloxEditor?.style().getStyle().textAlign === "right",
-              iconName: "alignRight",
+              isActive: () => {},
+              iconElement: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round">
+                  <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"></path>
+                </svg>
+              )
             },
           ]}
-          
-
-        ></EditorProvider>
+          // blocks={{
+          //   code: {
+          //     defaults: {
+          //       styles: 'color: red;'
+          //     }
+          //   },
+          //   headline1: {
+          //     defaults: {
+          //       styles: 'color: red;'
+          //     }
+          //   },
+          //   headline4: {
+          //     tag: "h4",
+          //     visibleName: "Headline 4",
+          //     blockName: "headline4",
+          //     description: "This is a sample block description",
+          //     placeholder: "Write your content",
+          //     iconElement: (
+          //       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3" strokeLinecap="round">
+          //         <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"></path>
+          //       </svg>
+          //     ),
+          //   }
+          // }}
+          ></EditorProvider>
       )}
       {activeTab === "preview" && (
         <div className="content" id="preview" dangerouslySetInnerHTML={{ __html: sessionStorage.getItem("tempEditorContent") }}></div>

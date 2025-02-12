@@ -2226,23 +2226,18 @@
   resolved "https://registry.npmjs.org/@trysound/sax/-/sax-0.2.0.tgz"
   integrity sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==
 
-"@typeblox/core@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@typeblox/core/-/core-0.2.2.tgz#04146e2c43a6c910b5109766bb93080f54ece7bc"
-  integrity sha512-xLOnon5aI51cpl1B4NQ0blZ9OlLfoTfCVanVMJuFAx9EaJF6fvW2Q1HCynCkYECmCHvcoN+qA3J37fzxfdKAVw==
-
-"@typeblox/core@^0.4.2":
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/@typeblox/core/-/core-0.4.2.tgz#360bab703bf6d7f4d50b7a9fe8edf8bf7d9f3ad5"
-  integrity sha512-GXTbtcOtoEZz7rlE0qqmx2dnhwmUEzF9wB2NUKIpjY+w4HOJzP8GykP8b6JD2kmBDq6SZRMB56Awg3qY4YtAzQ==
+"@typeblox/core@^0.4.3":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@typeblox/core/-/core-0.4.3.tgz#ebc1c67eedcdb054147af40d50ade2bd780ebca8"
+  integrity sha512-ZKNAPG29Nkxwrv7ZAgmlqsK0kOkCfYuCyx4lsW1LLLpa5JKSpleJq1paFwYI/PqCiAM8qXTo9sR6Pi8Ll0nkIA==
 
 "@typeblox/react@file:react":
-  version "0.4.0"
+  version "0.4.1"
   dependencies:
     "@dnd-kit/core" "^6.3.1"
     "@dnd-kit/sortable" "^10.0.0"
     "@floating-ui/react" "^0.27.2"
-    "@typeblox/core" "^0.4.2"
+    "@typeblox/core" "^0.4.3"
     tabler-icons-react "^1.56.0"
     zustand "^5.0.2"
 

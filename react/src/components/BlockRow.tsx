@@ -1,14 +1,14 @@
-import { useState, useRef, useEffect, FC, useCallback } from "react";
+import { useState, useRef, useEffect, FC, useCallback, ReactNode } from "react";
 import Toolbar from "./Toolbar";
 import { useTypebloxEditor } from "../context/EditorContext";
 import { BlockType } from "@typeblox/core/dist/types";
 import React from "react";
 import BlockMenu from "./menus/BlockMenu";
 import {
-  AVAILABLE_BLOCKS,
-  BLOCKS_SETTINGS,
+  getAvailableBlocks,
+  getBlockSettings,
   BLOCK_TYPES,
-} from "@typeblox/core/dist/constants";
+} from "@typeblox/core/dist/blockTypes";
 import ContextualMenu from "./menus/ContextualMenu";
 import type { Blox } from "@typeblox/core/dist/classes/Blox";
 import { Image } from "./blox/Image";
@@ -42,6 +42,7 @@ const BlockRow: FC<BlockRowProps> = ({
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   const { editor } = useTypebloxEditor();
+  const blockSettings = getBlockSettings();
 
   useEffect(() => {
     if (
@@ -157,7 +158,7 @@ const BlockRow: FC<BlockRowProps> = ({
   };
 
   const getWrapperType = () => {
-    const tagName = BLOCKS_SETTINGS[type].tag;
+    const tagName = blockSettings[type].tag;
     if (tagName) return tagName;
     return "div";
   };
@@ -214,7 +215,7 @@ const BlockRow: FC<BlockRowProps> = ({
       ref: contentRef,
       "data-typeblox-editor": "block",
       "data-typeblox-id": block.id,
-      placeholder: BLOCKS_SETTINGS[type].placeholder,
+      placeholder: blockSettings[type].placeholder,
       contentEditable: true,
       suppressContentEditableWarning: true,
       className: `typeblox outline-none ${block.getClasses().join(" ")}`,
@@ -256,10 +257,10 @@ const BlockRow: FC<BlockRowProps> = ({
           referenceElement={contentRef.current}
           isVisible={showContentSuggestor}
           sectionName="Turn into"
-          options={AVAILABLE_BLOCKS.map((item: BlockType) => {
+          options={getAvailableBlocks().map((item: BlockType) => {
             return {
-              label: BLOCKS_SETTINGS[item].visibleName,
-              description: BLOCKS_SETTINGS[item].description,
+              label: blockSettings[item]?.visibleName,
+              description: blockSettings[item]?.description,
               onClick: () => {
                 onUpdate({
                   id: block.id,
@@ -268,7 +269,8 @@ const BlockRow: FC<BlockRowProps> = ({
                 });
                 setTimeout(() => editor.elements().focusBlock(block.id), 100);
               },
-              icon: BLOCKS_SETTINGS[item].icon,
+              icon: blockSettings[item]?.icon,
+              idonElement: (blockSettings[item]?.iconElement as ReactNode)           
             };
           })}
           onClose={() => setShowContentSuggestor(false)}

@@ -1,5 +1,5 @@
 // Editor.jsx
-import React, { useCallback, useEffect, useState, useReducer, useRef } from "react";
+import React, { useCallback, useEffect, useState, useReducer, useRef, useMemo } from "react";
 // dnd-kit imports
 import {
   DndContext,
@@ -20,13 +20,12 @@ import { BlockType, Extension } from "@typeblox/core/dist/types";
 import useEditorStore from "../stores/EditorStore";
 import "../styles/editor.scss";
 import {
-  BLOCK_TYPES,
-  DEFAULT_TOOLBARS,
   EVENTS,
 } from "@typeblox/core/dist/constants";
 import { useTypebloxEditor } from "../context/EditorContext";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
 import { DEFAULT_MENUS } from "../utils/constants";
+import { BLOCK_TYPES, getToolbars } from "@typeblox/core/dist/blockTypes";
 
 interface EditorProps {
   toolbars?: Partial<Record<BlockType, string>>;
@@ -34,6 +33,7 @@ interface EditorProps {
   extensions?: Extension[];
   height?: number;
   className?: string;
+  theme?: string;
 }
 
 type BlockAction =
@@ -62,8 +62,9 @@ type BlockAction =
   };
 
 const Editor: React.FC<EditorProps> = ({
-  toolbars = DEFAULT_TOOLBARS,
+  toolbars,
   menus = DEFAULT_MENUS,
+  theme = "light",
   className,
 }) => {
   const { editor, onChange } = useTypebloxEditor();
@@ -72,21 +73,29 @@ const Editor: React.FC<EditorProps> = ({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
-  let debounceTimeout: NodeJS.Timeout;
+  const defaultToolbars = useMemo( () => getToolbars(), [getToolbars]);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Handle content updates with debounce
   const updateContent = useCallback(() => {
-    clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(() => {
-      editor.blox().update({onChange, blocks});
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+    
+    debounceTimeout.current = setTimeout(() => {
+      editor.blox().update({ onChange, blocks, calledFromEditor: true });
     }, 300);
   }, [editor, onChange, blocks]);
 
   // Update content whenever blocks change
   useEffect(() => {
     updateContent();
-    return () => clearTimeout(debounceTimeout);
-  }, [blocks, updateContent]);
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, [blocks]); 
 
   const handleBlocksChange = (newBlocks: Blox[]) => {
     dispatch({ type: 'SET_BLOCKS', payload: newBlocks });
@@ -106,34 +115,39 @@ const Editor: React.FC<EditorProps> = ({
     };
   }, [editor]);
 
-  useEffect(() => {
-    if (!toolbars || typeof toolbars !== "object") return;
-
-    const mergedToolbars = {
-      ...DEFAULT_TOOLBARS,
+  const mergedToolbars = useMemo(() => {
+    if (!toolbars || typeof toolbars !== "object") return defaultToolbars;
+  
+    return {
+      ...defaultToolbars,
       ...toolbars,
     };
-
-    const mergedMenus = {
+  }, [toolbars]);
+  
+  const mergedMenus = useMemo(() => {
+    return {
       ...DEFAULT_MENUS,
       ...menus,
     };
+  }, [menus]);
 
+  useEffect(() => {
     const updatedToolbar: Record<BlockType, string> = Object.fromEntries(
       Object.entries(mergedToolbars).map(([key, value]) => [
         key,
-        value.replace(/\|/g, "divider"),
+        typeof value === 'string' ? value.replace(/\|/g, "divider") : value, // Check if value is a string
       ]),
     ) as Record<BlockType, string>;
-
+  
     Object.entries(updatedToolbar).forEach(([blockType, tools]) => {
       setToolbarSettings(blockType as BlockType, tools.split(" ") ?? []);
     });
-
+  
     Object.entries(mergedMenus).forEach(([menuName, modules]) => {
       setMenuSettings(menuName, modules ?? []);
     });
-  }, [toolbars, setToolbarSettings, menus, setMenuSettings]);
+  }, [mergedToolbars, mergedMenus, setToolbarSettings, setMenuSettings]);
+  
 
   // Handle drag-and-drop reordering
   const handleDragEnd = (event: any) => {
@@ -213,7 +227,7 @@ const Editor: React.FC<EditorProps> = ({
   const sensors = useSensors(mouseSensor, keyboardSensor);
 
   return (
-    <div className="tbx-editor-container"><div id="typeblox-editor" className={className}>
+    <div className="tbx-editor-container"><div id="typeblox-editor" className={className} data-theme={theme}>
       <DndContext
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}

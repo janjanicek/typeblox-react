@@ -3,19 +3,22 @@ import Typeblox from "@typeblox/core";
 import { EditorContext } from "../context/EditorContext";
 import Editor from "../components/Editor";
 import { imageUploadFunction } from "./types";
-import { Extension } from "@typeblox/core/dist/types";
+import { BlockType, Extension, BlockSettings} from "@typeblox/core/dist/types";
+
 
 interface EditorProviderProps {
   content: string;
   onChange: (updatedHTMLString: string) => void;
   onImageUpload?: imageUploadFunction;
   toolbars?: Record<string, string>;
+  theme?: string;
   menus?: Record<string, Array<string>>;
   extensions?: Extension[];
   className?: string;
   height?: number;
   children?: ReactNode;
   slotBefore?: ReactNode;
+  blocks?: Record<BlockType, Partial<BlockSettings>>
 }
 
 declare global {
@@ -34,6 +37,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   children,
   className,
   slotBefore,
+  blocks,
+  theme
 }) => {
   const [typeBoxEditor, setTypeBoxEditor] = useState<Typeblox | null>(null);
   const editorRef = useRef<Typeblox | null>(null);
@@ -62,6 +67,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         onUpdate: onChange,
         onImageUpload,
         extensions,
+        blocks,
       });
 
       // Set both the ref and the state
@@ -82,7 +88,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 
   return (
     <EditorContext.Provider
-      value={{ editor: typeBoxEditor, onChange, onImageUpload }}
+      value={{ editor: typeBoxEditor, onChange, onImageUpload, theme }}
     >
       <div>
         {slotBefore && <div>{slotBefore}</div>}
@@ -91,6 +97,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           extensions={extensions}
           menus={menus}
           className={className}
+          theme={theme}
         />
         {children}
       </div>

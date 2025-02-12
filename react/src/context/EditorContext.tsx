@@ -9,6 +9,7 @@ interface EditorContextProps {
   editor: Typeblox;
   onChange: onChangeFunction;
   onImageUpload?: imageUploadFunction;
+  theme?: string;
 }
 
 // Create the context

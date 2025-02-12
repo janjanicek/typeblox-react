@@ -36,8 +36,9 @@ export const Drag: React.FC<DragProps> = ({
           }}
           {...dragListeners}
           className={`border-0 rounded hover:bg-gray-100 flex items-center justify-center ${
-            showDragMenu ? "bg-gray-300 text-white" : ""
-          }`}
+            showDragMenu ? "tbx-active" : ""
+          }
+          ${isToolbar ? " px-2 py-1" : ""}`}
         >
           <Icon name="GripVertical" color="black" />
         </button>

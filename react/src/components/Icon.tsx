@@ -32,6 +32,7 @@ import {
   Blockquote,
   Settings,
 } from "tabler-icons-react";
+import { useTypebloxEditor } from "../context/EditorContext";
 
 interface IconProps {
   name: string;
@@ -50,74 +51,78 @@ const Icon: React.FC<IconProps> = ({
   color = "black",
   ...props
 }) => {
+
+  const { theme } = useTypebloxEditor();
+  const themeColor = theme === "light" ? "black" : "white";
+
   const getIconByName = () => {
     switch (name) {
       case "x":
-        return <X color={color} />;
+        return <X color={themeColor} />;
       case "AlignLeft":
-        return <AlignLeft color={color} />;
+        return <AlignLeft color={themeColor} />;
       case "AlignCenter":
-        return <AlignCenter color={color} />;
+        return <AlignCenter color={themeColor} />;
       case "AlignRight":
-        return <AlignRight color={color} />;
+        return <AlignRight color={themeColor} />;
       case "Article":
-        return <Article color={color} />;
+        return <Article color={themeColor} />;
       case "Bold":
-        return <Bold color={color} />;
+        return <Bold color={themeColor} />;
       case "ClearFormatting":
-        return <ClearFormatting color={color} />;
+        return <ClearFormatting color={themeColor} />;
       case "Code":
-        return <Code color={color} />;
+        return <Code color={themeColor} />;
       case "Code":
-        return <Code color={color} />;
+        return <Code color={themeColor} />;
       case "H1":
-        return <H1 color={color} />;
+        return <H1 color={themeColor} />;
       case "H2":
-        return <H2 color={color} />;
+        return <H2 color={themeColor} />;
       case "H3":
-        return <H3 color={color} />;
+        return <H3 color={themeColor} />;
       case "Highlight":
-        return <Highlight color={color} />;
+        return <Highlight color={themeColor} />;
       case "Italic":
-        return <Italic color={color} />;
+        return <Italic color={themeColor} />;
       case "LetterA":
-        return <LetterA color={color} />;
+        return <LetterA color={themeColor} />;
       case "Photo":
-        return <Photo color={color} />;
+        return <Photo color={themeColor} />;
       case "Plus":
-        return <Plus color={color} />;
+        return <Plus color={themeColor} />;
       case "Strike":
-        return <Strikethrough color={color} />;
+        return <Strikethrough color={themeColor} />;
       case "TextSize":
-        return <TextSize color={color} />;
+        return <TextSize color={themeColor} />;
       case "Trash":
-        return <Trash color={color} />;
+        return <Trash color={themeColor} />;
       case "Underline":
-        return <Underline color={color} />;
+        return <Underline color={themeColor} />;
       case "Refresh":
-        return <Refresh color={color} />;
+        return <Refresh color={themeColor} />;
       case "ArrowUp":
-        return <ArrowUp color={color} />;
+        return <ArrowUp color={themeColor} />;
       case "ArrowDown":
-        return <ArrowDown color={color} />;
+        return <ArrowDown color={themeColor} />;
       case "GripVertical":
-        return <GripVertical color={color} />;
+        return <GripVertical color={themeColor} />;
       case "DotsVertical":
-        return <DotsVertical color={color} />;
+        return <DotsVertical color={themeColor} />;
       case "List":
-        return <List color={color} />;
+        return <List color={themeColor} />;
       case "ListNumbers":
-        return <ListNumbers color={color} />;
+        return <ListNumbers color={themeColor} />;
       case "Copy":
-        return <Copy color={color} />;
+        return <Copy color={themeColor} />;
       case "Link":
-        return <Link color={color} />;
+        return <Link color={themeColor} />;
       case "Blockquote":
-        return <Blockquote color={color} />;
+        return <Blockquote color={themeColor} />;
       case "Settings":
-        return <Settings color={color} />;
+        return <Settings color={themeColor} />;
       default:
-        return <X />;
+        return <X color={themeColor} />;
     }
   };
 

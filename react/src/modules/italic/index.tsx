@@ -37,7 +37,7 @@ export const Italic: React.FC<ModuleProps> = ({ isMenu }) => {
       {isMenu ? (
         <button
           className={`p-2 border-0 rounded hover:bg-gray-100 ${
-            isItalic ? "bg-gray-300" : ""
+            isItalic ? "tbx-active" : ""
           } flex justify-between`}
           onClick={handleClick}
         >
@@ -53,7 +53,7 @@ export const Italic: React.FC<ModuleProps> = ({ isMenu }) => {
         <Tooltip content={`Italic (${shortcut})`}>
           <button
             className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-              isItalic ? "bg-gray-300" : ""
+              isItalic ? "tbx-active" : ""
             }`}
             onClick={handleClick}
           >

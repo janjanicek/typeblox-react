@@ -27,7 +27,7 @@ export const Strikethrough: React.FC<ModuleProps> = ({ isMenu }) => {
       {isMenu ? (
         <button
           className={`p-2 border-0 rounded hover:bg-gray-100 ${
-            isStrikethrough ? "bg-gray-300" : ""
+            isStrikethrough ? "tbx-active" : ""
           } flex`}
           onClick={handleClick}
         >
@@ -40,7 +40,7 @@ export const Strikethrough: React.FC<ModuleProps> = ({ isMenu }) => {
         <Tooltip content={`Strike-through`}>
           <button
             className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-              isStrikethrough ? "bg-gray-300" : ""
+              isStrikethrough ? "tbx-active" : ""
             }`}
             onClick={handleClick}
           >

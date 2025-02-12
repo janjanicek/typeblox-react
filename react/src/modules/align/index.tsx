@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import Icon from "../../components/Icon";
 import Tooltip from "../../components/Tooltip";
-import { BLOCK_TYPES } from "@typeblox/core/dist/constants";
+import { BLOCK_TYPES } from "@typeblox/core/dist/blockTypes";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
 import ContextualMenu from "../../components/menus/ContextualMenu";
 
@@ -44,7 +44,7 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
         <button
           key={alignment}
           className={`p-2 flex ${
-            activeAlignment === alignment ? "bg-gray-300" : "hover:bg-gray-100"
+            activeAlignment === alignment ? "tbx-active" : ""
           }`}
           onClick={() => {
             toggleAlignment(alignment);
@@ -90,10 +90,10 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
     <div className="flex space-x-2">
       <Tooltip content="Align left">
         <button
-          className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
+          className={`px-2 py-1 border-0 rounded ${
             activeAlignment === "left"
-              ? "bg-gray-300 text-white"
-              : "hover:bg-gray-100"
+              ? "tbx-active"
+              : ""
           }`}
           onClick={() => toggleAlignment("left")}
         >
@@ -102,10 +102,10 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
       </Tooltip>
       <Tooltip content="Align center">
         <button
-          className={`px-2 py-1 border-0 rounded hover:bg-gray-100  ${
+          className={`px-2 py-1 border-0 rounded ${
             activeAlignment === "center"
-              ? "bg-gray-300 text-white"
-              : "hover:bg-gray-100"
+              ? "tbx-active"
+              : ""
           }`}
           onClick={() => toggleAlignment("center")}
         >
@@ -114,10 +114,10 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
       </Tooltip>
       <Tooltip content="Align right">
         <button
-          className={`px-2 py-1 border-0 rounded hover:bg-gray-100  ${
+          className={`px-2 py-1 border-0 rounded ${
             activeAlignment === "right"
-              ? "bg-gray-300 text-white"
-              : "hover:bg-gray-100"
+              ? "tbx-active"
+              : ""
           }`}
           onClick={() => toggleAlignment("right")}
         >

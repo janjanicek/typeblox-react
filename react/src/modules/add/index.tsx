@@ -1,11 +1,11 @@
-import React, { useRef, useState } from "react";
+import React, { ReactNode, useRef, useState } from "react";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import Icon from "../../components/Icon";
 import ContextualMenu from "../../components/menus/ContextualMenu";
 import {
-  AVAILABLE_BLOCKS,
-  BLOCKS_SETTINGS,
-} from "@typeblox/core/dist/constants";
+  getAvailableBlocks,
+  getBlockSettings,
+} from "@typeblox/core/dist/blockTypes";
 import { BlockType } from "@typeblox/core/dist/types";
 import Tooltip from "../../components/Tooltip";
 
@@ -23,6 +23,7 @@ export const Add: React.FC<AddProps> = ({
   const [showPlusMenu, setShowPlusMenu] = useState(false);
   const { editor } = useTypebloxEditor();
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const blockSettings = getBlockSettings();
 
   return (
     <>
@@ -34,8 +35,9 @@ export const Add: React.FC<AddProps> = ({
             if (!isToolbar) setShowToolbar(false);
           }}
           className={`border-0 rounded hover:bg-gray-100 flex items-center justify-center ${
-            showPlusMenu ? "bg-gray-300 text-white" : ""
-          }`}
+            showPlusMenu ? "tbx-active" : ""
+          }
+          ${isToolbar ? " px-2 py-1" : ""}`}
         >
           <Icon name="Plus" color="black" />
         </button>
@@ -45,14 +47,15 @@ export const Add: React.FC<AddProps> = ({
         referenceElement={buttonRef.current}
         isVisible={showPlusMenu}
         sectionName="Add new block"
-        options={AVAILABLE_BLOCKS.map((item: BlockType) => {
+        options={getAvailableBlocks().map((item: BlockType) => {
           return {
-            label: BLOCKS_SETTINGS[item].visibleName,
-            description: BLOCKS_SETTINGS[item].description,
+            label: blockSettings[item]?.visibleName,
+            description: blockSettings[item]?.description,
             onClick: () => {
               editor.blox().addBlockAfter(blockId, item);
             },
-            icon: BLOCKS_SETTINGS[item].icon,
+            icon: blockSettings[item]?.icon,
+            iconElement: blockSettings[item]?.iconElement as ReactNode,
           };
         })}
         onClose={() => setShowPlusMenu(false)}

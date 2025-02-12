@@ -25,7 +25,7 @@ interface ToolbarProps {
 const Toolbar: React.FC<ToolbarProps> = ({ block }) => {
   const { setSelectedColor, setSelectedBgColor } = useBlockStore();
   const { toolbarSettings } = useEditorStore();
-  const { editor } = useTypebloxEditor();
+  const { editor, theme } = useTypebloxEditor();
   const { getComponent } = useBlock();
 
   const { floatingStyles, refs, update } = useFloating({
@@ -60,7 +60,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ block }) => {
       const hexBgColor = rgbToHex(backgroundColor);
       setSelectedBgColor(hexBgColor);
     } else {
-      setSelectedBgColor("#ffffff");
+      setSelectedBgColor(theme === "light" ? "#ffffff": "#000000");
     }
 
     editor.on(EVENTS.selectionChange, handleSelectionChange);

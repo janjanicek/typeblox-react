@@ -11,14 +11,14 @@ export const Extension: React.FC<ExtensionProps> = ({ name }) => {
 
   const registeredExtension = editor.extensions().getExtension(name);
   if (!registeredExtension) return null;
-  const { isActive, onClick, iconName, component } = registeredExtension;
+  const { isActive, onClick, icon, iconElement, component } = registeredExtension;
 
   return component ? (
     <>{component()}</>
   ) : (
     <button
       className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
-        isActive() ? "bg-gray-300 text-white" : ""
+        isActive() ? "tbx-active" : ""
       }`}
       onClick={() => {
         if (typeof onClick === "function") {
@@ -30,7 +30,7 @@ export const Extension: React.FC<ExtensionProps> = ({ name }) => {
         }
       }}
     >
-      <Icon name={iconName} />
+      {iconElement ?? <Icon name={icon} />}
     </button>
   );
 };
