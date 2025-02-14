@@ -26,6 +26,7 @@ const UploadMenu: React.FC<UploadMenuProps> = ({ onChange, onUrlSubmit }) => {
         blobInfo,
         (url: string) => {
           console.log("Image uploaded successfully:", url);
+          onUrlSubmit(url);
         },
         (error: string) => {
           console.error("Image upload failed:", error);
