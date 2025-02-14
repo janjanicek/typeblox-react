@@ -10,13 +10,16 @@ const ImageSettingsMenu: React.FC<ImageSettingsMenuProps> = ({
   onClose,
   block,
 }) => {
-
   const getParsedValue = (value: string | undefined) => {
     return value && value !== "auto" ? value : ""; // Return empty string if value is empty or 'auto'
   };
 
-  const [height, setLocalHeight] = useState(getParsedValue(block.getStyles().height));
-  const [width, setLocalWidth] = useState(getParsedValue(block.getStyles().width));
+  const [height, setLocalHeight] = useState(
+    getParsedValue(block.getStyles().height),
+  );
+  const [width, setLocalWidth] = useState(
+    getParsedValue(block.getStyles().width),
+  );
   const [alt, setLocalAlt] = useState(block.getAttributes().alt);
 
   const handleDimensionChange = (width: string, height: string) => {
@@ -24,7 +27,7 @@ const ImageSettingsMenu: React.FC<ImageSettingsMenuProps> = ({
       width: width ? `${width}px` : "auto",
       height: height ? `${height}px` : "auto",
     });
-    block.setAttribute("alt", alt);
+    if (alt) block.setAttribute("alt", alt);
   };
 
   const handleSave = () => {

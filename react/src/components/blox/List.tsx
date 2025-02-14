@@ -19,10 +19,7 @@ interface ListBloxProps {
 }
 
 export const List = forwardRef<HTMLDivElement, ListBloxProps>(
-  (
-    { content, block, onUpdate, handleMouseUp },
-    ref,
-  ) => {
+  ({ content, block, onUpdate, handleMouseUp }, ref) => {
     const [isMenuVisible, setIsMenuVisible] = useState(false);
     const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -51,7 +48,7 @@ export const List = forwardRef<HTMLDivElement, ListBloxProps>(
           onUpdate({
             id: block.id,
             content: listRef.current?.innerHTML || "",
-          })
+          });
         },
       },
       content,

@@ -11,8 +11,8 @@ import { EditorProvider, useTypebloxEditor } from "@typeblox/react";
 
 const sampleContent = `
 <h1>Welcome to Typeblox Editor 👋</h1>
-<p><a href="https://www.typeblox.com">Typeblox</a> is a <i>powerful</i> and <b>flexible</b> headless editor built with TypeScript. 
-Designed to integrate seamlessly with any JavaScript framework, Typeblox empowers developers to create rich, 
+<p><a href="https://www.typeblox.com">Typeblox</a> is a <i>powerful</i> and <b>flexible</b> headless editor built with TypeScript.
+Designed to integrate seamlessly with any JavaScript framework, Typeblox empowers developers to create rich,
 content-driven applications with ease.</p>
 
 <h2>Key Features</h2>
@@ -48,7 +48,7 @@ function App() { // Sample App component
     <EditorProvider
       toolbars={{
         text: 'add drag | bold italic underline strikethrough | font | color bgColor | newExtension',
-        image: 'replaceImage | align' 
+        image: 'replaceImage | align'
         // If not specified, default settings is used
       }}
       menus={{

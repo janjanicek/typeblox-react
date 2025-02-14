@@ -270,7 +270,7 @@ const BlockRow: FC<BlockRowProps> = ({
                 setTimeout(() => editor.elements().focusBlock(block.id), 100);
               },
               icon: blockSettings[item]?.icon,
-              idonElement: (blockSettings[item]?.iconElement as ReactNode)           
+              idonElement: blockSettings[item]?.iconElement as ReactNode,
             };
           })}
           onClose={() => setShowContentSuggestor(false)}

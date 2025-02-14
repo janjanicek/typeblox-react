@@ -2231,13 +2231,18 @@
   resolved "https://registry.yarnpkg.com/@typeblox/core/-/core-0.4.3.tgz#ebc1c67eedcdb054147af40d50ade2bd780ebca8"
   integrity sha512-ZKNAPG29Nkxwrv7ZAgmlqsK0kOkCfYuCyx4lsW1LLLpa5JKSpleJq1paFwYI/PqCiAM8qXTo9sR6Pi8Ll0nkIA==
 
+"@typeblox/core@^0.4.6":
+  version "0.4.6"
+  resolved "https://registry.yarnpkg.com/@typeblox/core/-/core-0.4.6.tgz#6a52a180787109d8c09fc56fe9ac4b1951d2489d"
+  integrity sha512-0lS/RJFPNN5FSdNc+WHqhFUCG7YpfAiNR0Wr1o4AMbg912k47CQPq87t2kbAI8BPcLO6h11rlVh/8N7uDgIr+Q==
+
 "@typeblox/react@file:react":
-  version "0.4.1"
+  version "0.4.2"
   dependencies:
     "@dnd-kit/core" "^6.3.1"
     "@dnd-kit/sortable" "^10.0.0"
     "@floating-ui/react" "^0.27.2"
-    "@typeblox/core" "^0.4.3"
+    "@typeblox/core" "^0.4.6"
     tabler-icons-react "^1.56.0"
     zustand "^5.0.2"
 

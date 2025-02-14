@@ -1,9 +1,4 @@
-import {
-  useFloating,
-  offset,
-  flip,
-  shift,
-} from "@floating-ui/react";
+import { useFloating, offset, flip, shift } from "@floating-ui/react";
 import React, { useEffect, FC, useState, useCallback, ReactNode } from "react";
 import Icon from "../Icon";
 
@@ -171,9 +166,7 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
       className={`tbx-contextual-menu bg-white border border-gray-300 shadow-lg p-2 z-10 rounded-md ${className}`}
       style={floatingStyles}
     >
-      {sectionName && (
-        <h5 className="font-bold text-sm">{sectionName}</h5>
-      )}
+      {sectionName && <h5 className="font-bold text-sm">{sectionName}</h5>}
       {content && <>{content}</>}
       {options &&
         options.map((option, index) =>
@@ -202,9 +195,7 @@ const ContextualMenu: FC<ContextualMenuProps> = ({
               )}
               <span className="flex flex-col">
                 {option.label}
-                {option.description && (
-                  <small>{option.description}</small>
-                )}
+                {option.description && <small>{option.description}</small>}
               </span>
             </a>
           ),

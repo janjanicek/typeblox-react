@@ -46,17 +46,13 @@ const UploadMenu: React.FC<UploadMenuProps> = ({ onChange, onUrlSubmit }) => {
     <div className="rounded-md">
       <div className="flex mb-4 tbx-tabs">
         <button
-          className={`px-3 py-1 ${
-            activeTab === "upload" ? "tbx-active" : ""
-          }`}
+          className={`px-3 py-1 ${activeTab === "upload" ? "tbx-active" : ""}`}
           onClick={() => setActiveTab("upload")}
         >
           Upload File
         </button>
         <button
-          className={`px-3 py-1 ${
-            activeTab === "url" ? "tbx-active" : ""
-          }`}
+          className={`px-3 py-1 ${activeTab === "url" ? "tbx-active" : ""}`}
           onClick={() => setActiveTab("url")}
         >
           Paste URL

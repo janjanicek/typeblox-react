@@ -91,9 +91,7 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
       <Tooltip content="Align left">
         <button
           className={`px-2 py-1 border-0 rounded ${
-            activeAlignment === "left"
-              ? "tbx-active"
-              : ""
+            activeAlignment === "left" ? "tbx-active" : ""
           }`}
           onClick={() => toggleAlignment("left")}
         >
@@ -103,9 +101,7 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
       <Tooltip content="Align center">
         <button
           className={`px-2 py-1 border-0 rounded ${
-            activeAlignment === "center"
-              ? "tbx-active"
-              : ""
+            activeAlignment === "center" ? "tbx-active" : ""
           }`}
           onClick={() => toggleAlignment("center")}
         >
@@ -115,9 +111,7 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
       <Tooltip content="Align right">
         <button
           className={`px-2 py-1 border-0 rounded ${
-            activeAlignment === "right"
-              ? "tbx-active"
-              : ""
+            activeAlignment === "right" ? "tbx-active" : ""
           }`}
           onClick={() => toggleAlignment("right")}
         >

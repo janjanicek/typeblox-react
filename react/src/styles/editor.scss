@@ -4,7 +4,7 @@
   --color-selected-blue: #d6e7fa;
   --color-secondary: #dde7d1;
   --color-gray-1: #eee; /* Light Grey */
-  --color-gray-2: #C1C1C1; /* Medium Grey */
+  --color-gray-2: #c1c1c1; /* Medium Grey */
   --color-gray-3: #898989; /* Dark Grey */
   --color-black: #000;
   --color-white: #fff;
@@ -23,7 +23,6 @@
   --color-white: #2a2a2a;
 }
 
-
 // Editor Styles
 .tbx-editor-container {
   container: editor / inline-size;
@@ -41,7 +40,7 @@
   .tbx-toolbar .tbx-contextual-menu button {
     background: none;
     border: 0;
-    padding: .5rem 1rem;
+    padding: 0.5rem 1rem;
 
     &:hover,
     &:focus {
@@ -54,7 +53,7 @@
     &.tbx-bg-primary {
       background-color: var(--color-primary);
       color: white;
-  
+
       &:hover {
         background-color: var(--color-primary);
         filter: brightness(1.2);
@@ -62,7 +61,8 @@
     }
   }
 
-  input, textarea {
+  input,
+  textarea {
     background-color: var(--color-white);
     color: var(--color-black);
     border: 1px solid var(--color-gray-2);
@@ -98,7 +98,8 @@
       z-index: 3;
 
       button {
-        padding: .2rem;
+        padding: 0.2rem;
+        background-color: var(--color-white);
       }
     }
 
@@ -106,10 +107,14 @@
       opacity: 1;
     }
 
-    .image-block {
+    .tbx-image-block {
       width: 100%;
       position: relative;
       cursor: pointer;
+
+      .tbx-image-wrapper {
+        max-width: 100%;
+      }
 
       &[data-focused="true"] {
         img {
@@ -186,15 +191,15 @@
     z-index: 4;
     border: 1px solid var(--color-gray-2);
     background-color: var(--color-white);
-    padding: .5rem;
+    padding: 0.5rem;
 
     &:has(h5) {
-      padding: 0 .5rem .5rem .5rem;
+      padding: 0 0.5rem 0.5rem 0.5rem;
     }
 
     h5 {
       margin: 0;
-      padding: 1rem .5rem .5rem;
+      padding: 1rem 0.5rem 0.5rem;
       position: sticky;
       background-color: var(--color-white);
       top: 0;
@@ -214,11 +219,24 @@
       min-width: 400px;
       max-width: 100%;
     }
+
+    // Tabs
+    .tbx-tabs {
+      button {
+        background: none;
+        border: 0;
+      }
+
+      button.tbx-active {
+        font-weight: 600;
+        background-color: transparent;
+        border-bottom: 2px solid var(--color-black);
+      }
+    }
   }
 
   .tbx-toolbar {
     max-height: 350px;
-    min-width: 250px;
     z-index: 4;
     border: 1px solid var(--color-gray-2);
     background-color: var(--color-white);
@@ -226,27 +244,13 @@
     button {
       display: flex;
       align-items: center;
-      padding: .3rem .5rem;
+      padding: 0.3rem 0.5rem;
     }
   }
 
   // Menu Container
   .tbx-menu-container {
     z-index: 4;
-  }
-
-  // Tabs
-  .tbx-tabs {
-
-    button {
-      background: none;
-      border: 0;
-    }
-
-    button.tbx-active {
-      font-weight: 600;
-      border-bottom: 2px solid var(--color-black);
-    }
   }
 
   // Alignment Utilities
@@ -292,7 +296,7 @@
     .tbx-block {
       .tbx-actions {
         flex-direction: column;
-        
+
         button {
           padding: 0;
         }

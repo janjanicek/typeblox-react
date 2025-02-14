@@ -98,12 +98,7 @@ export const BlockProvider: FC<BlockProviderProps> = ({
           />
         );
       case "imageSettings":
-        return (
-          <ImageSettings
-            setShowToolbar={setShowToolbar}
-            block={block}
-          />
-        );
+        return <ImageSettings setShowToolbar={setShowToolbar} block={block} />;
       case "align":
         return <Align block={block} isMenu={isMenuComponent} />;
 

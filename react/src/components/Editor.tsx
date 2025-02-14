@@ -1,5 +1,12 @@
 // Editor.jsx
-import React, { useCallback, useEffect, useState, useReducer, useRef, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useReducer,
+  useRef,
+  useMemo,
+} from "react";
 // dnd-kit imports
 import {
   DndContext,
@@ -19,9 +26,7 @@ import SortableItem from "./SortableItem";
 import { BlockType, Extension } from "@typeblox/core/dist/types";
 import useEditorStore from "../stores/EditorStore";
 import "../styles/editor.scss";
-import {
-  EVENTS,
-} from "@typeblox/core/dist/constants";
+import { EVENTS } from "@typeblox/core/dist/constants";
 import { useTypebloxEditor } from "../context/EditorContext";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
 import { DEFAULT_MENUS } from "../utils/constants";
@@ -37,29 +42,28 @@ interface EditorProps {
 }
 
 type BlockAction =
-  | { type: 'SET_BLOCKS'; payload: Blox[] }
-  | { type: 'UPDATE_STYLE'; payload: Blox };
+  | { type: "SET_BLOCKS"; payload: Blox[] }
+  | { type: "UPDATE_STYLE"; payload: Blox };
 
-
-  const blockReducer = (state: Blox[], action: BlockAction): Blox[] => {
-    switch (action.type) {
-      case 'SET_BLOCKS':
-        return action.payload;
-      case 'UPDATE_STYLE':
-        return state.map(block =>
-          block.id === action.payload.id
-            ? Object.assign(new Blox(block), {
+const blockReducer = (state: Blox[], action: BlockAction): Blox[] => {
+  switch (action.type) {
+    case "SET_BLOCKS":
+      return action.payload;
+    case "UPDATE_STYLE":
+      return state.map((block) =>
+        block.id === action.payload.id
+          ? Object.assign(new Blox(block), {
               styles: action.payload.styles,
               content: action.payload.content,
               classes: action.payload.classes,
-              attributes: action.payload.attributes
+              attributes: action.payload.attributes,
             })
-            : block
-        );
-      default:
-        return state;
-    }
-  };
+          : block,
+      );
+    default:
+      return state;
+  }
+};
 
 const Editor: React.FC<EditorProps> = ({
   toolbars,
@@ -68,12 +72,16 @@ const Editor: React.FC<EditorProps> = ({
   className,
 }) => {
   const { editor, onChange } = useTypebloxEditor();
-  const [blocks, dispatch] = useReducer(blockReducer, [], () => editor.blox()?.getBlox() ?? []);
+  const [blocks, dispatch] = useReducer(
+    blockReducer,
+    [],
+    () => editor.blox()?.getBlox() ?? [],
+  );
   const { setToolbarSettings, setMenuSettings } = useEditorStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
-  const defaultToolbars = useMemo( () => getToolbars(), [getToolbars]);
+  const defaultToolbars = useMemo(() => getToolbars(), [getToolbars]);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Handle content updates with debounce
@@ -81,7 +89,7 @@ const Editor: React.FC<EditorProps> = ({
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
-    
+
     debounceTimeout.current = setTimeout(() => {
       editor.blox().update({ onChange, blocks, calledFromEditor: true });
     }, 300);
@@ -95,15 +103,15 @@ const Editor: React.FC<EditorProps> = ({
         clearTimeout(debounceTimeout.current);
       }
     };
-  }, [blocks]); 
+  }, [blocks]);
 
   const handleBlocksChange = (newBlocks: Blox[]) => {
-    dispatch({ type: 'SET_BLOCKS', payload: newBlocks });
+    dispatch({ type: "SET_BLOCKS", payload: newBlocks });
   };
 
   const handleStyleChange = (updatedBlock: Blox): void => {
     if (!updatedBlock) return;
-    dispatch({ type: 'UPDATE_STYLE', payload: updatedBlock });
+    dispatch({ type: "UPDATE_STYLE", payload: updatedBlock });
   };
 
   useEffect(() => {
@@ -117,13 +125,13 @@ const Editor: React.FC<EditorProps> = ({
 
   const mergedToolbars = useMemo(() => {
     if (!toolbars || typeof toolbars !== "object") return defaultToolbars;
-  
+
     return {
       ...defaultToolbars,
       ...toolbars,
     };
   }, [toolbars]);
-  
+
   const mergedMenus = useMemo(() => {
     return {
       ...DEFAULT_MENUS,
@@ -135,19 +143,18 @@ const Editor: React.FC<EditorProps> = ({
     const updatedToolbar: Record<BlockType, string> = Object.fromEntries(
       Object.entries(mergedToolbars).map(([key, value]) => [
         key,
-        typeof value === 'string' ? value.replace(/\|/g, "divider") : value, // Check if value is a string
+        typeof value === "string" ? value.replace(/\|/g, "divider") : value, // Check if value is a string
       ]),
     ) as Record<BlockType, string>;
-  
+
     Object.entries(updatedToolbar).forEach(([blockType, tools]) => {
       setToolbarSettings(blockType as BlockType, tools.split(" ") ?? []);
     });
-  
+
     Object.entries(mergedMenus).forEach(([menuName, modules]) => {
       setMenuSettings(menuName, modules ?? []);
     });
   }, [mergedToolbars, mergedMenus, setToolbarSettings, setMenuSettings]);
-  
 
   // Handle drag-and-drop reordering
   const handleDragEnd = (event: any) => {
@@ -208,14 +215,23 @@ const Editor: React.FC<EditorProps> = ({
     type?: BlockType;
   }) => {
     const currentBlock = editor.blox().getBlockById(update.id);
+    const containsSelecton = update.content?.includes(
+      'class="typeblox-selected"',
+    );
     if (!currentBlock) return;
-    if (update.content?.includes('class="typeblox-selected"')) return;
-    if (update.content && update.content !== currentBlock.content)
+    if (
+      !containsSelecton &&
+      update.content &&
+      update.content !== currentBlock.content
+    )
       currentBlock.setContent(update.content);
 
     if (update.type && update.type !== currentBlock.type)
       currentBlock?.toggleType(update.type);
-    onChange(editor.elements().getCurrentDOM());
+
+    setTimeout(() => {
+      onChange(editor.elements().getCurrentDOM());
+    }, 0);
   };
 
   const mouseSensor = useSensor(MouseSensor, {
@@ -227,56 +243,58 @@ const Editor: React.FC<EditorProps> = ({
   const sensors = useSensors(mouseSensor, keyboardSensor);
 
   return (
-    <div className="tbx-editor-container"><div id="typeblox-editor" className={className} data-theme={theme}>
-      <DndContext
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-        onDragStart={handleDragStart}
-        onDragCancel={handleDragCancel}
-        onDragOver={handleDragOver}
-        sensors={sensors}
-      >
-        {/* Sortable context for the blocks */}
-        <SortableContext
-          items={blocks.map((b) => b.id)}
-          strategy={verticalListSortingStrategy}
+    <div className="tbx-editor-container">
+      <div id="typeblox-editor" className={className} data-theme={theme}>
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+          onDragStart={handleDragStart}
+          onDragCancel={handleDragCancel}
+          onDragOver={handleDragOver}
+          sensors={sensors}
         >
-          {blocks.map((block) => (
-            <SortableItem
-              key={block.id}
-              block={block}
-              onUpdateBlock={handleUpdateBlock}
-              isOver={block.id === overId}
-            />
-          ))}
-        </SortableContext>
-        <DragOverlay>
-          {activeId &&
-            (() => {
-              const activeBlock = blocks.find((item) => item.id === activeId);
+          {/* Sortable context for the blocks */}
+          <SortableContext
+            items={blocks.map((b) => b.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {blocks.map((block) => (
+              <SortableItem
+                key={block.id}
+                block={block}
+                onUpdateBlock={handleUpdateBlock}
+                isOver={block.id === overId}
+              />
+            ))}
+          </SortableContext>
+          <DragOverlay>
+            {activeId &&
+              (() => {
+                const activeBlock = blocks.find((item) => item.id === activeId);
 
-              return activeBlock ? (
-                <div
-                  style={{
-                    height: "50px",
-                    maxWidth:
-                      activeBlock.type === BLOCK_TYPES.image ? "50%" : "auto",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <SortableItem
-                    key={activeBlock.id}
-                    block={activeBlock}
-                    onUpdateBlock={handleUpdateBlock}
-                    isDragging={true}
-                  />
-                </div>
-              ) : null;
-            })()}
-        </DragOverlay>
-      </DndContext>
-    </div></div>
+                return activeBlock ? (
+                  <div
+                    style={{
+                      height: "50px",
+                      maxWidth:
+                        activeBlock.type === BLOCK_TYPES.image ? "50%" : "auto",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <SortableItem
+                      key={activeBlock.id}
+                      block={activeBlock}
+                      onUpdateBlock={handleUpdateBlock}
+                      isDragging={true}
+                    />
+                  </div>
+                ) : null;
+              })()}
+          </DragOverlay>
+        </DndContext>
+      </div>
+    </div>
   );
 };
 

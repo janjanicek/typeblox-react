@@ -10,9 +10,7 @@ interface ImageSettingsProps {
   block: Blox;
 }
 
-export const ImageSettings: React.FC<ImageSettingsProps> = ({
-  block,
-}) => {
+export const ImageSettings: React.FC<ImageSettingsProps> = ({ block }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const closeModal = () => setIsModalOpen(false);

@@ -11,7 +11,8 @@ export const Extension: React.FC<ExtensionProps> = ({ name }) => {
 
   const registeredExtension = editor.extensions().getExtension(name);
   if (!registeredExtension) return null;
-  const { isActive, onClick, icon, iconElement, component } = registeredExtension;
+  const { isActive, onClick, icon, iconElement, component } =
+    registeredExtension;
 
   return component ? (
     <>{component()}</>

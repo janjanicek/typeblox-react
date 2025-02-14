@@ -51,7 +51,6 @@ const Icon: React.FC<IconProps> = ({
   color = "black",
   ...props
 }) => {
-
   const { theme } = useTypebloxEditor();
   const themeColor = theme === "light" ? "black" : "white";
 

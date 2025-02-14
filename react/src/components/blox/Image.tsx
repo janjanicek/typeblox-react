@@ -113,14 +113,14 @@ export const Image = forwardRef<HTMLDivElement, ImageBloxProps>(
     return (
       <div
         ref={ref}
-        className={`image-block ${block.getClasses().join(" ")}`}
+        className={`tbx-image-block ${block.getClasses().join(" ")}`}
         onClick={toggleToolbar}
         data-typeblox-id={block.id}
         data-typeblox-editor="block"
         data-focused={showToolbar}
       >
         {content ? (
-          <span className="relative inline-block">
+          <span className="tbx-image-wrapper relative inline-block">
             <img
               src={content}
               alt="Uploaded"

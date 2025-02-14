@@ -60,7 +60,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ block }) => {
       const hexBgColor = rgbToHex(backgroundColor);
       setSelectedBgColor(hexBgColor);
     } else {
-      setSelectedBgColor(theme === "light" ? "#ffffff": "#000000");
+      setSelectedBgColor(theme === "light" ? "#ffffff" : "#000000");
     }
 
     editor.on(EVENTS.selectionChange, handleSelectionChange);

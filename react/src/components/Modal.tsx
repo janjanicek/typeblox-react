@@ -33,20 +33,14 @@ const Modal: React.FC<ModalProps> = ({
           >
             <div className="flex justify-between">
               <h2 className="text-xl font-semibold">{title}</h2>
-              <button
-                className="px-2 py-2 rounded"
-                onClick={onClose}
-              >
+              <button className="px-2 py-2 rounded" onClick={onClose}>
                 <Icon name="X" />
               </button>
             </div>
             <div className="mt-2">{children}</div>
             {showCloseButton && (
               <div className="mt-4 flex justify-end">
-                <button
-                  className="px-4 py-2 rounded"
-                  onClick={onClose}
-                >
+                <button className="px-4 py-2 rounded" onClick={onClose}>
                   Close
                 </button>
               </div>

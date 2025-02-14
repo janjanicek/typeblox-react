@@ -42,9 +42,10 @@ export const TypeChange: React.FC<TypeChangeProps> = ({ block, onUpdate }) => {
           onClick={toggleBlockSelection}
         >
           {typeof BLOCKS_SETTINGS[block.type].icon === "string" && (
-          <span className="mr-2">
-            <Icon name={BLOCKS_SETTINGS[block.type].icon as string} />
-          </span>)}
+            <span className="mr-2">
+              <Icon name={BLOCKS_SETTINGS[block.type].icon as string} />
+            </span>
+          )}
           {BLOCKS_SETTINGS[block.type].visibleName}
         </button>
       </Tooltip>

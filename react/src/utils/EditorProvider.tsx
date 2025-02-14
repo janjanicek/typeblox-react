@@ -3,8 +3,7 @@ import Typeblox from "@typeblox/core";
 import { EditorContext } from "../context/EditorContext";
 import Editor from "../components/Editor";
 import { imageUploadFunction } from "./types";
-import { BlockType, Extension, BlockSettings} from "@typeblox/core/dist/types";
-
+import { BlockType, Extension, BlockSettings } from "@typeblox/core/dist/types";
 
 interface EditorProviderProps {
   content: string;
@@ -18,7 +17,7 @@ interface EditorProviderProps {
   height?: number;
   children?: ReactNode;
   slotBefore?: ReactNode;
-  blocks?: Record<BlockType, Partial<BlockSettings>>
+  blocks?: Record<BlockType, Partial<BlockSettings>>;
 }
 
 declare global {
@@ -38,7 +37,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   className,
   slotBefore,
   blocks,
-  theme
+  theme = "light",
 }) => {
   const [typeBoxEditor, setTypeBoxEditor] = useState<Typeblox | null>(null);
   const editorRef = useRef<Typeblox | null>(null);
