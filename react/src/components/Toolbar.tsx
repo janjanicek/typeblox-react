@@ -19,33 +19,33 @@ import { useBlock } from "../context/BlockContext";
 interface ToolbarProps {
   block: Blox;
   setShowToolbar: Function;
-  dragListeners: any;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({ block }) => {
   const { setSelectedColor, setSelectedBgColor } = useBlockStore();
   const { toolbarSettings } = useEditorStore();
-  const { editor, theme } = useTypebloxEditor();
+  const { editor, editorSettings } = useTypebloxEditor();
   const { getComponent } = useBlock();
 
-  const { floatingStyles, refs, update } = useFloating({
-    placement: "top", // Position the toolbar above the selection
-    middleware: [
-      inline(),
-      offset(10), // Add a 10px gap between the toolbar and selection
-      shift(), // Ensure the toolbar stays within the viewport
-      flip(), // Flip the toolbar to the opposite side if there's no space
-    ],
-    whileElementsMounted: autoUpdate, // Dynamically reposition as needed
-  });
+  const isInlineToolbar = editorSettings?.toolbarType === "inline";
+
+  const floatingData = isInlineToolbar
+    ? useFloating({
+        placement: editorSettings?.toolbarPosition,
+        middleware: [inline(), offset(10), shift(), flip()],
+        whileElementsMounted: autoUpdate,
+      })
+    : null;
+
+  const { floatingStyles, refs, update } = floatingData || {};
 
   // Update color pickers when the detected style changes
   useEffect(() => {
     const handleSelectionChange = () => {
       const selectedElement = editor.getSelectionElement();
-      if (selectedElement) {
+      if (selectedElement && refs?.setReference) {
         refs.setReference(selectedElement);
-        update();
+        update?.();
       }
     };
 
@@ -60,7 +60,9 @@ const Toolbar: React.FC<ToolbarProps> = ({ block }) => {
       const hexBgColor = rgbToHex(backgroundColor);
       setSelectedBgColor(hexBgColor);
     } else {
-      setSelectedBgColor(theme === "light" ? "#ffffff" : "#000000");
+      setSelectedBgColor(
+        editorSettings?.theme === "light" ? "#ffffff" : "#000000",
+      );
     }
 
     editor.on(EVENTS.selectionChange, handleSelectionChange);
@@ -75,9 +77,18 @@ const Toolbar: React.FC<ToolbarProps> = ({ block }) => {
     <>
       {toolbarSettings[block.type]?.length > 0 && (
         <div
-          className="tbx-toolbar flex gap-1 absolute bg-white border border-gray-300 shadow-lg rounded p-2 w-max"
-          ref={refs.setFloating} // Floating UI uses this ref for positioning
-          style={{ ...floatingStyles, zIndex: 49, whiteSpace: "nowrap" }}
+          className={`tbx-toolbar ${isInlineToolbar ? "tbx-toolbar-inline" : "tbx-toolbar-block"} flex gap-1 ${isInlineToolbar ? "absolute bg-white border border-gray-300 shadow-lg rounded" : ""} w-max`}
+          ref={isInlineToolbar ? refs?.setFloating : undefined} // Apply ref only if Floating UI is enabled
+          style={
+            isInlineToolbar
+              ? {
+                  ...floatingStyles,
+                  ...editorSettings?.toolbarStyle,
+                  zIndex: 49,
+                  whiteSpace: "nowrap",
+                }
+              : { ...editorSettings?.toolbarStyle }
+          }
         >
           {toolbarSettings[block.type].map((moduleName, index) => {
             const component = getComponent({

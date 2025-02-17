@@ -51,8 +51,8 @@ const Icon: React.FC<IconProps> = ({
   color = "black",
   ...props
 }) => {
-  const { theme } = useTypebloxEditor();
-  const themeColor = theme === "light" ? "black" : "white";
+  const { editorSettings } = useTypebloxEditor();
+  const themeColor = editorSettings?.theme === "light" ? "black" : "white";
 
   const getIconByName = () => {
     switch (name) {

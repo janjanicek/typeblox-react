@@ -13,7 +13,7 @@ const BlockMenu: FC<BlockMenuProps> = ({ referenceElement }) => {
 
   const { refs, floatingStyles } = useFloating({
     placement: "left-start", // Position the menu to the left
-    middleware: [offset(10), shift()], // Ensure positioning stays in bounds
+    middleware: [offset(2), shift()], // Ensure positioning stays in bounds
     elements: {
       reference: referenceElement.current, // Use the passed external reference
     },

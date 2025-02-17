@@ -68,10 +68,12 @@ const Tooltip: React.FC<TooltipsProps> = ({
     ? {
         visibility: "visible",
         opacity: 1,
+        zIndex: 5,
       }
     : {
         visibility: "hidden",
         opacity: 0,
+        zIndex: 1,
       };
 
   if (!isValidElement(children)) {

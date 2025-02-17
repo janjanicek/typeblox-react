@@ -3,6 +3,7 @@ import { Blox } from "@typeblox/core/dist/classes/Blox";
 import ContextualMenu from "../menus/ContextualMenu";
 import Icon from "../Icon";
 import UploadMenu from "../menus/UploadMenu";
+import useEditorStore from "../../stores/EditorStore";
 
 interface ImageBloxProps {
   content: string | null;
@@ -20,6 +21,7 @@ export const Image = forwardRef<HTMLDivElement, ImageBloxProps>(
       height: block.getStyles().height || "auto",
     });
 
+    const { setCurrentBlock } = useEditorStore();
     const dimensionsRef = useRef(dimensions);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -37,6 +39,7 @@ export const Image = forwardRef<HTMLDivElement, ImageBloxProps>(
     }, [JSON.stringify(block.getStyles())]);
 
     const toggleToolbar = (event: React.MouseEvent<HTMLDivElement>) => {
+      setCurrentBlock(block);
       const isInsideMenu = (event.target as HTMLElement).closest(
         ".tbx-contextual-menu",
       );
@@ -99,6 +102,7 @@ export const Image = forwardRef<HTMLDivElement, ImageBloxProps>(
       };
 
       const handleMouseUp = () => {
+        setCurrentBlock(block);
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
 

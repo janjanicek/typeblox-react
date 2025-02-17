@@ -4,12 +4,13 @@ import {
   imageUploadFunction,
   onChangeFunction,
 } from "@typeblox/core/dist/types";
+import { editorSettingsProps } from "../utils/types";
 
 interface EditorContextProps {
   editor: Typeblox;
   onChange: onChangeFunction;
   onImageUpload?: imageUploadFunction;
-  theme?: string;
+  editorSettings?: editorSettingsProps;
 }
 
 // Create the context

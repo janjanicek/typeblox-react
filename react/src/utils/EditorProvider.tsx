@@ -2,7 +2,11 @@ import React, { ReactNode, useEffect, useRef, useState } from "react";
 import Typeblox from "@typeblox/core";
 import { EditorContext } from "../context/EditorContext";
 import Editor from "../components/Editor";
-import { imageUploadFunction } from "./types";
+import {
+  editorSettingsProps,
+  imageUploadFunction,
+  toolbarPositions,
+} from "./types";
 import { BlockType, Extension, BlockSettings } from "@typeblox/core/dist/types";
 
 interface EditorProviderProps {
@@ -18,6 +22,7 @@ interface EditorProviderProps {
   children?: ReactNode;
   slotBefore?: ReactNode;
   blocks?: Record<BlockType, Partial<BlockSettings>>;
+  editorSettings?: editorSettingsProps;
 }
 
 declare global {
@@ -37,7 +42,12 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   className,
   slotBefore,
   blocks,
-  theme = "light",
+  editorSettings = {
+    theme: "light",
+    toolbarPosition: "top",
+    toolbarType: "inline",
+    toolbarStyle: {},
+  },
 }) => {
   const [typeBoxEditor, setTypeBoxEditor] = useState<Typeblox | null>(null);
   const editorRef = useRef<Typeblox | null>(null);
@@ -87,7 +97,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 
   return (
     <EditorContext.Provider
-      value={{ editor: typeBoxEditor, onChange, onImageUpload, theme }}
+      value={{ editor: typeBoxEditor, onChange, onImageUpload, editorSettings }}
     >
       <div>
         {slotBefore && <div>{slotBefore}</div>}
@@ -96,7 +106,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           extensions={extensions}
           menus={menus}
           className={className}
-          theme={theme}
         />
         {children}
       </div>

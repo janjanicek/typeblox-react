@@ -15,6 +15,7 @@ import { Image } from "./blox/Image";
 import { BlockProvider } from "../context/BlockContext";
 import { List } from "./blox/List";
 import { Code } from "./blox/Code";
+import useEditorStore from "../stores/EditorStore";
 
 interface BlockRowProps {
   block: Blox;
@@ -38,10 +39,12 @@ const BlockRow: FC<BlockRowProps> = ({
   const [showToolbar, setShowToolbar] = useState(false);
   const [showContentSuggestor, setShowContentSuggestor] = useState(false);
 
+  const { setCurrentBlock } = useEditorStore();
+
   const blockMenuReference = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  const { editor } = useTypebloxEditor();
+  const { editor, editorSettings } = useTypebloxEditor();
   const blockSettings = getBlockSettings();
 
   useEffect(() => {
@@ -87,6 +90,7 @@ const BlockRow: FC<BlockRowProps> = ({
   };
 
   const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
+    setCurrentBlock(block);
     editor.unselect(contentRef.current);
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
@@ -245,12 +249,8 @@ const BlockRow: FC<BlockRowProps> = ({
         ref={blockMenuReference}
       >
         <BlockMenu referenceElement={blockMenuReference} />
-        {showToolbar && (
-          <Toolbar
-            block={block}
-            setShowToolbar={setShowToolbar}
-            dragListeners={dragListeners}
-          />
+        {editorSettings?.toolbarType === "inline" && showToolbar && (
+          <Toolbar block={block} setShowToolbar={setShowToolbar} />
         )}
         {renderContent()}
         <ContextualMenu

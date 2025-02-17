@@ -1,3 +1,4 @@
+import { Blox } from "@typeblox/core/dist/classes/Blox";
 import { BlockType } from "@typeblox/core/dist/types";
 import { create } from "zustand";
 
@@ -6,6 +7,8 @@ interface EditorStore {
   menuSettings: Record<string, string[]>;
   setToolbarSettings: (blockType: BlockType, tools: string[]) => void;
   setMenuSettings: (menuName: string, modules: string[]) => void;
+  currentBlock: Blox | null;
+  setCurrentBlock: (currentBlock: Blox) => void;
 }
 
 const useEditorStore = create<EditorStore>((set) => ({
@@ -37,6 +40,11 @@ const useEditorStore = create<EditorStore>((set) => ({
         ...state.menuSettings,
         [menuName]: modules, // Update only the specified block type
       },
+    })),
+  currentBlock: null,
+  setCurrentBlock: (currentBlock: Blox) =>
+    set(() => ({
+      currentBlock,
     })),
 }));
 

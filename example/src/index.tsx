@@ -1,7 +1,9 @@
 import React from "react";
-import ReactDOM from "react-dom/client";
-import "./index.css";
+import * as ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router";
 import App from "./App";
+import "./App.css";
+import "./index.css";
 // import reportWebVitals from './reportWebVitals';
 
 // Get the root element and ensure TypeScript knows it cannot be null
@@ -15,7 +17,9 @@ const root = ReactDOM.createRoot(rootElement);
 // Render the application
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>,
 );
 
