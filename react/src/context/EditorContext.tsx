@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, RefObject, useContext } from "react";
 import Typeblox from "@typeblox/core";
 import {
   imageUploadFunction,

@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import useBlockStore from "../stores/BlockStore";
 import useEditorStore from "../stores/EditorStore";
 import { rgbToHex } from "@typeblox/core/dist/utils/colors";
-import { BlockType } from "@typeblox/core/dist/types";
 import { useTypebloxEditor } from "../context/EditorContext";
 import {
   useFloating,
@@ -12,26 +11,31 @@ import {
   flip,
   autoUpdate,
 } from "@floating-ui/react";
-import type { Blox } from "@typeblox/core/dist/classes/Blox";
 import { EVENTS } from "@typeblox/core/dist/constants";
 import { useBlock } from "../context/BlockContext";
+import { useToolbar } from "../context/ToolbarContext";
+import { BLOCK_TYPES } from "@typeblox/core/dist/blockTypes";
+import { getRange } from "../utils/helpers";
 
 interface ToolbarProps {
-  block: Blox;
-  setShowToolbar: Function;
+  showPermanently?: boolean;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ block }) => {
+const Toolbar: React.FC<ToolbarProps> = ({ showPermanently }) => {
   const { setSelectedColor, setSelectedBgColor } = useBlockStore();
-  const { toolbarSettings } = useEditorStore();
+  const { toolbarSettings, setCurrentStyle, editorRef, currentBlock } =
+    useEditorStore();
+  const { isToolbarActive, show, activeBlockId } = useToolbar();
   const { editor, editorSettings } = useTypebloxEditor();
-  const { getComponent } = useBlock();
+  const { getComponent, block } = useBlock();
 
   const isInlineToolbar = editorSettings?.toolbarType === "inline";
 
+  const [isPositioned, setIsPositioned] = useState(false);
+
   const floatingData = isInlineToolbar
     ? useFloating({
-        placement: editorSettings?.toolbarPosition,
+        placement: editorSettings?.toolbarPosition || "top",
         middleware: [inline(), offset(10), shift(), flip()],
         whileElementsMounted: autoUpdate,
       })
@@ -41,70 +45,125 @@ const Toolbar: React.FC<ToolbarProps> = ({ block }) => {
 
   // Update color pickers when the detected style changes
   useEffect(() => {
+    if (
+      showPermanently ||
+      (block.type === BLOCK_TYPES.image &&
+        currentBlock?.type === BLOCK_TYPES.image) ||
+      (block.type === BLOCK_TYPES.video &&
+        currentBlock?.type === BLOCK_TYPES.video &&
+        editor.blox().getCurrentBlock()?.id === block.id)
+    ) {
+      show(block.id);
+      setIsPositioned(true);
+    }
+
     const handleSelectionChange = () => {
-      const selectedElement = editor.getSelectionElement();
-      if (selectedElement && refs?.setReference) {
-        refs.setReference(selectedElement);
-        update?.();
+      const range = getRange();
+      const currentBlockId = editor.blox().getCurrentBlock()?.id;
+
+      if (currentBlockId !== block.id || currentBlockId === activeBlockId) {
+        return;
       }
-    };
 
-    const { color, backgroundColor } = editor.getSelectionStyle();
+      if (isInlineToolbar && range && refs) {
+        refs.setReference({
+          getBoundingClientRect: () => range.getBoundingClientRect(),
+          getClientRects: () => range.getClientRects(),
+        });
 
-    if (color) {
-      const hexColor = rgbToHex(color);
-      setSelectedColor(hexColor);
-    }
+        if (!isToolbarActive(block.id)) {
+          show(block.id);
+          setIsPositioned(true);
+          update?.();
+        }
+      }
 
-    if (backgroundColor) {
-      const hexBgColor = rgbToHex(backgroundColor);
-      setSelectedBgColor(hexBgColor);
-    } else {
-      setSelectedBgColor(
-        editorSettings?.theme === "light" ? "#ffffff" : "#000000",
+      const newStyle = editor.style().getStyle();
+      setCurrentStyle(newStyle);
+
+      setSelectedColor(
+        newStyle?.color
+          ? rgbToHex(newStyle.color)
+          : editorSettings?.theme === "light"
+            ? "#000000"
+            : "#ffffff",
       );
-    }
 
-    editor.on(EVENTS.selectionChange, handleSelectionChange);
-
-    // Cleanup listener on unmount
-    return () => {
-      editor.off(EVENTS.selectionChange, handleSelectionChange);
+      setSelectedBgColor(
+        newStyle?.backgroundColor
+          ? rgbToHex(newStyle.backgroundColor)
+          : editorSettings?.theme === "light"
+            ? "#ffffff"
+            : "#000000",
+      );
     };
-  }, [editor, setSelectedBgColor, setSelectedColor, refs, update]);
+
+    // Listeners for selection and mouse interactions
+    document.addEventListener("selectionchange", handleSelectionChange);
+    window.addEventListener("mouseup", handleSelectionChange);
+
+    return () => {
+      document.removeEventListener("selectionchange", handleSelectionChange);
+      window.removeEventListener("mouseup", handleSelectionChange);
+    };
+  }, [
+    editor,
+    setSelectedBgColor,
+    setSelectedColor,
+    refs,
+    update,
+    editorRef,
+    isInlineToolbar,
+    currentBlock,
+    show,
+    editorSettings?.theme,
+    showPermanently,
+  ]);
+
+  useEffect(() => {
+    const updateStyles = () => {
+      setCurrentStyle(editor.getSelectionStyle());
+    };
+    editor.on(EVENTS.styleChange, updateStyles);
+    return () => {
+      editor.off(EVENTS.styleChange, updateStyles);
+    };
+  }, [editor]);
 
   return (
     <>
-      {toolbarSettings[block.type]?.length > 0 && (
-        <div
-          className={`tbx-toolbar ${isInlineToolbar ? "tbx-toolbar-inline" : "tbx-toolbar-block"} flex gap-1 ${isInlineToolbar ? "absolute bg-white border border-gray-300 shadow-lg rounded" : ""} w-max`}
-          ref={isInlineToolbar ? refs?.setFloating : undefined} // Apply ref only if Floating UI is enabled
-          style={
-            isInlineToolbar
-              ? {
-                  ...floatingStyles,
-                  ...editorSettings?.toolbarStyle,
-                  zIndex: 49,
-                  whiteSpace: "nowrap",
-                }
-              : { ...editorSettings?.toolbarStyle }
-          }
-        >
-          {toolbarSettings[block.type].map((moduleName, index) => {
-            const component = getComponent({
-              name: moduleName,
-              isToolbar: true,
-            }); // Retrieve the component
-            return component ? (
-              React.cloneElement(component, {
-                key: `${moduleName}-${index}`,
-              })
-            ) : (
-              <div key={`${moduleName}-${index}`}></div>
-            );
-          })}
-        </div>
-      )}
+      {isToolbarActive(block.id) &&
+        isPositioned &&
+        toolbarSettings[block.type]?.length > 0 && (
+          <div
+            className={`tbx-toolbar ${isInlineToolbar ? "tbx-toolbar-inline" : "tbx-toolbar-block"} flex gap-1 ${isInlineToolbar ? "bg-white border border-gray-300 shadow-lg rounded" : ""} w-max`}
+            ref={isInlineToolbar ? refs?.setFloating : undefined} // Apply ref only if Floating UI is enabled
+            style={
+              isInlineToolbar
+                ? {
+                    ...floatingStyles,
+                    ...editorSettings?.toolbarStyle,
+                    zIndex: 49,
+                    whiteSpace: "nowrap",
+                  }
+                : { ...editorSettings?.toolbarStyle }
+            }
+          >
+            {toolbarSettings[block.type].map((moduleName, index) => {
+              const component = getComponent({
+                name: moduleName,
+                isToolbar: true,
+              }); // Retrieve the component
+              return component ? (
+                React.cloneElement(component, {
+                  key: `${moduleName}-${index}`,
+                })
+              ) : (
+                <div key={`${moduleName}-${index}`}></div>
+              );
+            })}
+          </div>
+        )}
     </>
   );
 };

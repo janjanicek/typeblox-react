@@ -2226,10 +2226,10 @@
   resolved "https://registry.npmjs.org/@trysound/sax/-/sax-0.2.0.tgz"
   integrity sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==
 
-"@typeblox/core@^0.4.7":
-  version "0.4.7"
-  resolved "https://registry.yarnpkg.com/@typeblox/core/-/core-0.4.7.tgz#c777dd539d76cc9a6db7b031061a7b5422715eaa"
-  integrity sha512-OOsUpbKecamdjTrF142MbjdsPo6YOc33t7FB48HodVK/KjtSGqXpv4rDkFsjey4puoPXstCeB7/GHTDUNnU0dg==
+"@typeblox/core@^0.4.9":
+  version "0.4.9"
+  resolved "https://registry.yarnpkg.com/@typeblox/core/-/core-0.4.9.tgz#aea370286b01894f3ddb6586ae5978f80ea58723"
+  integrity sha512-OsxqiaMJtasVvZMrbOPU5TQWYK31Q/Z+5HhfIil8birOK/WijGWscX+g2gy2i0FvBmnt5q0TPLWp5+I/hJ5M2A==
 
 "@typeblox/react@file:react":
   version "0.4.4"
@@ -2237,7 +2237,7 @@
     "@dnd-kit/core" "^6.3.1"
     "@dnd-kit/sortable" "^10.0.0"
     "@floating-ui/react" "^0.27.2"
-    "@typeblox/core" "^0.4.7"
+    "@typeblox/core" "^0.4.9"
     tabler-icons-react "^1.56.0"
     zustand "^5.0.2"
 

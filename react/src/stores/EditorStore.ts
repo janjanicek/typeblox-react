@@ -1,5 +1,6 @@
 import { Blox } from "@typeblox/core/dist/classes/Blox";
-import { BlockType } from "@typeblox/core/dist/types";
+import { BlockType, detectedStyles } from "@typeblox/core/dist/types";
+import { DEFAULT_STYLES } from "@typeblox/core/dist/constants";
 import { create } from "zustand";
 
 interface EditorStore {
@@ -9,6 +10,10 @@ interface EditorStore {
   setMenuSettings: (menuName: string, modules: string[]) => void;
   currentBlock: Blox | null;
   setCurrentBlock: (currentBlock: Blox) => void;
+  currentStyle: detectedStyles | null;
+  setCurrentStyle: (currentStyle: detectedStyles) => void;
+  editorRef: React.RefObject<HTMLDivElement> | null;
+  setEditorRef: (ref: React.RefObject<HTMLDivElement> | null) => void;
 }
 
 const useEditorStore = create<EditorStore>((set) => ({
@@ -46,6 +51,18 @@ const useEditorStore = create<EditorStore>((set) => ({
     set(() => ({
       currentBlock,
     })),
+  currentStyle: { ...DEFAULT_STYLES },
+  setCurrentStyle: (currentStyle: detectedStyles) => {
+    set(() => ({
+      currentStyle,
+    }));
+  },
+  editorRef: null,
+  setEditorRef: (ref: React.RefObject<HTMLDivElement> | null) => {
+    set(() => ({
+      editorRef: ref,
+    }));
+  },
 }));
 
 export default useEditorStore;

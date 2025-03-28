@@ -64,6 +64,7 @@ const Topbar: React.FC<TopbarProps> = ({theme}) => {
               bulettedList: 'add | type | bold italic underline strikethrough | font fontSize | color bgColor | link clearFormatting viewCode',
               numberedList: 'add | type | bold italic underline strikethrough | font fontSize | color bgColor | link clearFormatting viewCode',
               image: 'add | type | replaceImage imageSettings | align',
+              video: 'add | type | replaceVideo videoSettings | align',
             }}
             menus={{
               block: ["drag"]
@@ -76,6 +77,7 @@ const Topbar: React.FC<TopbarProps> = ({theme}) => {
               toolbarPosition: 'top',
               toolbarType: 'bar',
               toolbarStyle: {borderTopRightRadius: '5px', borderTopLeftRadius: '5px'},
+              toolbarShowPermanently: true,
               containerStyle: { border: "1px solid #c1c1c1", borderRadius: "6px" }
             }}
             extensions={[

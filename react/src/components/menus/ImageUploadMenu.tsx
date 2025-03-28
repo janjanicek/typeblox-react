@@ -6,7 +6,10 @@ interface UploadMenuProps {
   onUrlSubmit: (url: string) => void;
 }
 
-const UploadMenu: React.FC<UploadMenuProps> = ({ onChange, onUrlSubmit }) => {
+const ImageUploadMenu: React.FC<UploadMenuProps> = ({
+  onChange,
+  onUrlSubmit,
+}) => {
   const [activeTab, setActiveTab] = useState("upload");
   const [imageUrl, setImageUrl] = useState("");
 
@@ -92,4 +95,4 @@ const UploadMenu: React.FC<UploadMenuProps> = ({ onChange, onUrlSubmit }) => {
   );
 };
 
-export default UploadMenu;
+export default ImageUploadMenu;

@@ -1,22 +1,22 @@
 import { Blox } from "@typeblox/core/dist/classes/Blox";
 import React, { useRef, useState } from "react";
 import Icon from "../../components/Icon";
-import ImageSettingsMenu from "../../components/modals/ImageSettings"; // Fixed incorrect import
 import Tooltip from "../../components/Tooltip";
 import Modal from "../../components/Modal";
+import VideoSettingsMenu from "../../components/modals/VideoSettings";
 
-interface ImageSettingsProps {
+interface VideoSettingProps {
   block: Blox;
 }
 
-export const ImageSettings: React.FC<ImageSettingsProps> = ({ block }) => {
+export const VideoSettings: React.FC<VideoSettingProps> = ({ block }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="relative">
-      <Tooltip content="Image settings">
+      <Tooltip content="Video settings">
         <button
           ref={buttonRef}
           className="px-2 py-1 border-0 rounded hover:bg-gray-100"
@@ -27,8 +27,8 @@ export const ImageSettings: React.FC<ImageSettingsProps> = ({ block }) => {
       </Tooltip>
 
       <Modal
-        title="Image Settings"
-        children={<ImageSettingsMenu block={block} onClose={closeModal} />}
+        title="Video Settings"
+        children={<VideoSettingsMenu block={block} onClose={closeModal} />}
         onClose={closeModal}
         isOpen={isModalOpen}
         className="size-s"
@@ -37,4 +37,4 @@ export const ImageSettings: React.FC<ImageSettingsProps> = ({ block }) => {
   );
 };
 
-export default ImageSettings;
+export default VideoSettings;

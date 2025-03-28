@@ -6,16 +6,11 @@ interface CodeBloxProps {
   content: string | null;
   block: Blox;
   onUpdate: (update: { id: string; content: string }) => void;
-  setShowToolbar: (visible: boolean) => void;
-  showToolbar: boolean;
   handleMouseUp: MouseEventHandler<HTMLDivElement>;
 }
 
 export const Code = forwardRef<HTMLDivElement, CodeBloxProps>(
-  (
-    { content, block, onUpdate, showToolbar, setShowToolbar, handleMouseUp },
-    ref,
-  ) => {
+  ({ content, block, onUpdate, handleMouseUp }, ref) => {
     const codeRef = useRef<HTMLDivElement | null>(null);
 
     // Attach the forwarded ref to the div element

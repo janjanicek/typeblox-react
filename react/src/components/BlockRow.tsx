@@ -1,4 +1,12 @@
-import { useState, useRef, useEffect, FC, useCallback, ReactNode } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  FC,
+  useCallback,
+  ReactNode,
+  RefObject,
+} from "react";
 import Toolbar from "./Toolbar";
 import { useTypebloxEditor } from "../context/EditorContext";
 import { BlockType } from "@typeblox/core/dist/types";
@@ -12,10 +20,13 @@ import {
 import ContextualMenu from "./menus/ContextualMenu";
 import type { Blox } from "@typeblox/core/dist/classes/Blox";
 import { Image } from "./blox/Image";
+import { Video } from "./blox/Video";
 import { BlockProvider } from "../context/BlockContext";
 import { List } from "./blox/List";
 import { Code } from "./blox/Code";
 import useEditorStore from "../stores/EditorStore";
+import { useToolbar } from "../context/ToolbarContext";
+import { getRange } from "../utils/helpers";
 
 interface BlockRowProps {
   block: Blox;
@@ -36,10 +47,10 @@ const BlockRow: FC<BlockRowProps> = ({
   dragListeners,
   onUpdate,
 }) => {
-  const [showToolbar, setShowToolbar] = useState(false);
   const [showContentSuggestor, setShowContentSuggestor] = useState(false);
 
-  const { setCurrentBlock } = useEditorStore();
+  const { setCurrentBlock, setCurrentStyle } = useEditorStore();
+  const { activeBlockId, hide, show } = useToolbar();
 
   const blockMenuReference = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -51,7 +62,8 @@ const BlockRow: FC<BlockRowProps> = ({
     if (
       content &&
       contentRef.current &&
-      type !== "image" &&
+      type !== BLOCK_TYPES.image &&
+      type !== BLOCK_TYPES.video &&
       contentRef.current.innerHTML !== content
     ) {
       contentRef.current.innerHTML = content;
@@ -91,19 +103,19 @@ const BlockRow: FC<BlockRowProps> = ({
 
   const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
     setCurrentBlock(block);
-    editor.unselect(contentRef.current);
+    setCurrentStyle(editor.getSelectionStyle());
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
-
       const parentNode = range.commonAncestorContainer.parentNode;
       if (parentNode && !selection.isCollapsed) {
         editor.select(range);
-        setShowToolbar(true);
+        show(block.id);
         return;
       }
-
-      setShowToolbar(false);
+    }
+    if (editorSettings?.toolbarShowPermanently) {
+      show(block.id);
     }
   };
 
@@ -111,13 +123,23 @@ const BlockRow: FC<BlockRowProps> = ({
     (e: MouseEvent) => {
       const target = e.target as Node;
 
-      const isInsideBlock = contentRef.current?.contains(target);
+      const isInsideEditor = (target as HTMLElement).closest(
+        "#typeblox-editor",
+      );
+      const isInsideBlock =
+        contentRef.current === target || contentRef.current?.contains(target);
       const isInsideMenu = (e.target as HTMLElement).closest(
         ".tbx-contextual-menu",
       );
       const isInsideToolbar = (e.target as HTMLElement).closest(".tbx-toolbar");
       const isInsideModal = (e.target as HTMLElement).closest(".tbx-modal");
-      if (isInsideBlock || isInsideMenu || isInsideToolbar || isInsideModal) {
+      if (
+        isInsideBlock ||
+        isInsideMenu ||
+        isInsideToolbar ||
+        isInsideModal ||
+        editorSettings?.toolbarShowPermanently
+      ) {
         return;
       }
 
@@ -125,25 +147,14 @@ const BlockRow: FC<BlockRowProps> = ({
       if (editor.blox().isAllSelected()) editor.blox().selectAllBlox(false);
       if (editor.getBlockById(block.id)?.isSelected)
         editor.getBlockById(block.id)?.setIsSelected(false);
-      setShowToolbar(false);
 
-      const blockElement = (e.target as HTMLElement).closest(
-        "[data-typeblox-id]",
-      );
-      if (!blockElement) return;
+      const range = getRange();
 
-      const blockId = blockElement.getAttribute("data-typeblox-id");
-      const selectedBlock = editor.blox().getCurrentBlock();
-      const currentBlock = editor.getBlockElementById(blockId ?? undefined);
-
-      const selection = window.getSelection();
-      const hasNoSelection =
-        !selection ||
-        selection.isCollapsed ||
-        selectedBlock?.getContentElement() !== currentBlock;
-
-      if (hasNoSelection) {
-        editor.unselect(contentRef.current);
+      if (
+        (!isInsideEditor && activeBlockId !== block.id) ||
+        (!isInsideMenu && !range)
+      ) {
+        hide();
       }
     },
     [editor],
@@ -177,8 +188,17 @@ const BlockRow: FC<BlockRowProps> = ({
           block={block}
           content={content}
           onUpdate={onUpdate}
-          setShowToolbar={setShowToolbar}
-          showToolbar={showToolbar}
+        />
+      );
+    }
+
+    if (type === BLOCK_TYPES.video) {
+      return (
+        <Video
+          ref={contentRef}
+          block={block}
+          content={content}
+          onUpdate={onUpdate}
         />
       );
     }
@@ -193,8 +213,6 @@ const BlockRow: FC<BlockRowProps> = ({
           block={block}
           content={content}
           onUpdate={onUpdate}
-          setShowToolbar={setShowToolbar}
-          showToolbar={showToolbar}
           handleMouseUp={handleMouseUp}
         />
       );
@@ -207,8 +225,6 @@ const BlockRow: FC<BlockRowProps> = ({
           block={block}
           content={content}
           onUpdate={onUpdate}
-          setShowToolbar={setShowToolbar}
-          showToolbar={showToolbar}
           handleMouseUp={handleMouseUp}
         />
       );
@@ -239,7 +255,6 @@ const BlockRow: FC<BlockRowProps> = ({
   return (
     <BlockProvider
       block={block}
-      setShowToolbar={setShowToolbar}
       onUpdate={onUpdate}
       dragListeners={dragListeners}
     >
@@ -249,9 +264,7 @@ const BlockRow: FC<BlockRowProps> = ({
         ref={blockMenuReference}
       >
         <BlockMenu referenceElement={blockMenuReference} />
-        {editorSettings?.toolbarType === "inline" && showToolbar && (
-          <Toolbar block={block} setShowToolbar={setShowToolbar} />
-        )}
+        {editorSettings?.toolbarType === "inline" && <Toolbar />}
         {renderContent()}
         <ContextualMenu
           referenceElement={contentRef.current}

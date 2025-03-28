@@ -37,9 +37,9 @@ const DemoPage: React.FC<DemoPageProps> = ({demoType}) => {
         <button onClick={() => window.open('/topbar', "_self") } className={`${demoType === "topbar" ? "active" : ""} button`}>
         Menu bar
         </button>
-        <button onClick={() => window.open('/headless', "_self") } className={`${demoType === "headless" ? "active" : ""} button`}>
+        {/* <button onClick={() => window.open('/headless', "_self") } className={`${demoType === "headless" ? "active" : ""} button`}>
         Headless
-        </button>
+        </button> */}
     </div>
       <div style={{padding: '0px 20px'}}>
          <div style={{display: 'flex', justifyContent: 'space-between'}}>
@@ -49,7 +49,7 @@ const DemoPage: React.FC<DemoPageProps> = ({demoType}) => {
             Editor
           </button>
           <button onClick={() => {
-            const currentContent = (window as any).typebloxEditor?.getCurrentDOM();
+            const currentContent = (window as any).typebloxEditor?.elements().getCurrentDOM();
             if(currentContent) onChangeHandler(currentContent);
             setActiveTab("preview")
           }} className={`${activeTab === "preview" ? "active" : ""} button`}>

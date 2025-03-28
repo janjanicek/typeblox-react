@@ -3,32 +3,32 @@ import React, { useRef, useState } from "react";
 import ContextualMenu from "../../components/menus/ContextualMenu";
 import Icon from "../../components/Icon";
 import Tooltip from "../../components/Tooltip";
-import ImageUploadMenu from "../../components/menus/ImageUploadMenu";
+import VideoUploadMenu from "../../components/menus/VideoUploadMenu";
+import { extractYouTubeVideoId } from "../../utils/helpers";
 
-interface ReplaceImageProps {
+interface ReplaceVideoProps {
   onUpdate: Function;
   block: Blox;
 }
 
-export const ReplaceImage: React.FC<ReplaceImageProps> = ({
+export const ReplaceVideo: React.FC<ReplaceVideoProps> = ({
   onUpdate,
   block,
 }) => {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      onUpdate({
-        id: block.id,
-        content: URL.createObjectURL(event.target.files[0]),
-      });
-    }
+  const handleUrlSubmit = (url: string) => {
+    const id = extractYouTubeVideoId(url);
+    if (!id) return console.error("Invalid YouTube URL");
+
+    onUpdate({ id: block.id, content: `https://www.youtube.com/embed/${id}` });
+    setIsMenuVisible(false);
   };
 
   return (
     <div className="relative">
-      <Tooltip content="Replace image">
+      <Tooltip content="Replace video">
         <button
           ref={buttonRef}
           className={`px-2 py-1 border-0 rounded hover:bg-gray-100`}
@@ -44,21 +44,7 @@ export const ReplaceImage: React.FC<ReplaceImageProps> = ({
         referenceElement={buttonRef.current}
         isVisible={isMenuVisible}
         className="tbx-size-medium"
-        content={
-          <ImageUploadMenu
-            onChange={(e) => {
-              handleFileChange(e);
-              setIsMenuVisible(false);
-            }}
-            onUrlSubmit={(url) => {
-              onUpdate({
-                id: block.id,
-                content: url,
-              });
-              setIsMenuVisible(false);
-            }}
-          />
-        }
+        content={<VideoUploadMenu handleUrlSubmit={handleUrlSubmit} />}
       />
     </div>
   );

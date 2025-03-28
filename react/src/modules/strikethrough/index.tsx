@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import { useBlock } from "../../context/BlockContext";
 import Icon from "../../components/Icon";
 import Tooltip from "../../components/Tooltip";
+import useEditorStore from "../../stores/EditorStore";
 
 interface ModuleProps {
   isMenu?: boolean;
@@ -11,14 +12,19 @@ interface ModuleProps {
 export const Strikethrough: React.FC<ModuleProps> = ({ isMenu }) => {
   const { editor } = useTypebloxEditor();
   const { getShortcut } = useBlock();
+  const { currentStyle } = useEditorStore();
   const [isStrikethrough, setIsStrikethrough] = useState(
-    editor.isStyle("strikethrough"),
+    currentStyle?.isStrikeout,
   );
 
   const handleClick = () => {
     const newStyle = editor.blox().getCurrentBlock()?.toggleStrike();
     setIsStrikethrough(newStyle ?? false);
   };
+
+  useEffect(() => {
+    setIsStrikethrough(currentStyle?.isStrikeout ?? false);
+  }, [currentStyle]);
 
   const shortcut = getShortcut("strikethrough");
 

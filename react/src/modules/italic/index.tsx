@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import { useBlock } from "../../context/BlockContext";
 import Tooltip from "../../components/Tooltip";
-import { EVENTS } from "@typeblox/core/dist/constants";
+import useEditorStore from "../../stores/EditorStore";
 
 interface ModuleProps {
   isMenu?: boolean;
@@ -12,7 +12,8 @@ interface ModuleProps {
 export const Italic: React.FC<ModuleProps> = ({ isMenu }) => {
   const { editor } = useTypebloxEditor();
   const { getShortcut } = useBlock();
-  const [isItalic, setIsItalic] = useState(editor.isStyle("italic"));
+  const { currentStyle } = useEditorStore();
+  const [isItalic, setIsItalic] = useState(currentStyle?.isItalic);
 
   const handleClick = () => {
     const newStyle = editor.blox().getCurrentBlock()?.toggleItalic();
@@ -20,15 +21,8 @@ export const Italic: React.FC<ModuleProps> = ({ isMenu }) => {
   };
 
   useEffect(() => {
-    const checkItalic = () => {
-      setIsItalic(editor.isStyle("italic"));
-    };
-    checkItalic();
-    editor.on(EVENTS.styleChange, checkItalic);
-    return () => {
-      editor.off(EVENTS.styleChange, checkItalic);
-    };
-  }, [editor]);
+    setIsItalic(currentStyle?.isItalic ?? false);
+  }, [currentStyle]);
 
   const shortcut = getShortcut("italic");
 

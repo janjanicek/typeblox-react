@@ -23,7 +23,6 @@ const Modal: React.FC<ModalProps> = ({
 
   return createPortal(
     <>
-      {/* Modal */}
       {isOpen && (
         <div
           className={`tbx-modal fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-50`}

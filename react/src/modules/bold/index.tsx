@@ -4,6 +4,7 @@ import Icon from "../../components/Icon";
 import { useBlock } from "../../context/BlockContext";
 import Tooltip from "../../components/Tooltip";
 import { EVENTS } from "@typeblox/core/dist/constants";
+import useEditorStore from "../../stores/EditorStore";
 
 interface ModuleProps {
   isMenu?: boolean;
@@ -12,7 +13,8 @@ interface ModuleProps {
 export const Bold: React.FC<ModuleProps> = ({ isMenu = false }) => {
   const { editor } = useTypebloxEditor();
   const { getShortcut } = useBlock();
-  const [isBold, setIsBold] = useState(editor.isStyle("bold"));
+  const { currentStyle } = useEditorStore();
+  const [isBold, setIsBold] = useState(currentStyle?.isBold);
 
   const handleClick = () => {
     const newStyle = editor.blox().getCurrentBlock()?.toggleBold();
@@ -20,15 +22,8 @@ export const Bold: React.FC<ModuleProps> = ({ isMenu = false }) => {
   };
 
   useEffect(() => {
-    const checkBold = () => {
-      setIsBold(editor.isStyle("bold"));
-    };
-    checkBold();
-    editor.on(EVENTS.styleChange, checkBold);
-    return () => {
-      editor.off(EVENTS.styleChange, checkBold);
-    };
-  }, [editor]);
+    setIsBold(currentStyle?.isBold ?? false);
+  }, [currentStyle]);
 
   return (
     <>

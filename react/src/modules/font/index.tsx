@@ -1,18 +1,21 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ContextualMenu from "../../components/menus/ContextualMenu";
 import useBlockStore from "../../stores/BlockStore";
 import { AVAILABLE_FONTS } from "@typeblox/core/dist/constants";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import Tooltip from "../../components/Tooltip";
+import useEditorStore from "../../stores/EditorStore";
 
 export const Font: React.FC = () => {
   const { showSelectFont, setShowSelectFont } = useBlockStore();
   const { editor } = useTypebloxEditor();
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const { currentStyle } = useEditorStore();
+  const [selectedFont, setSelectedFont] = useState(currentStyle?.fontFamily);
 
   const handleFontChange = (font: string) => {
-    // setSelectedFont(font);
     editor.blox().getCurrentBlock()?.applyStyle("span", { fontFamily: font });
+    setSelectedFont(font);
   };
 
   const fontOptions = AVAILABLE_FONTS.map((font: string) => ({
@@ -25,7 +28,9 @@ export const Font: React.FC = () => {
     setShowSelectFont(!showSelectFont);
   };
 
-  const selectedFont = editor.getStyle("fontFamily") ?? "Arial";
+  useEffect(() => {
+    setSelectedFont(currentStyle?.fontFamily ?? "Arial");
+  }, [currentStyle]);
 
   return (
     <div className="relative flex items-stretch">
@@ -43,7 +48,7 @@ export const Font: React.FC = () => {
         isVisible={showSelectFont}
         options={fontOptions}
         onClose={() => setShowSelectFont(false)}
-        selectedValue={editor.getStyle("fontFamily")}
+        selectedValue={selectedFont ?? "arial"}
       />
     </div>
   );

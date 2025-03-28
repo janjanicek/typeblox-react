@@ -1,17 +1,24 @@
 import Icon from "../../components/Icon";
-import React from "react";
+import React, { useEffect } from "react";
 import useBlockStore from "../../stores/BlockStore";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import Tooltip from "../../components/Tooltip";
+import useEditorStore from "../../stores/EditorStore";
+import { rgbToHex } from "@typeblox/core/dist/utils/colors";
 
 export const Color: React.FC = () => {
   const { selectedColor, setSelectedColor } = useBlockStore();
+  const { currentStyle } = useEditorStore();
   const { editor } = useTypebloxEditor();
 
   const handleColorChange = (color: string) => {
     setSelectedColor(color);
     editor.blox().getCurrentBlock()?.applyStyle("span", { color });
   };
+
+  useEffect(() => {
+    if (currentStyle?.color) setSelectedColor(rgbToHex(currentStyle?.color));
+  }, [currentStyle]);
 
   return (
     <Tooltip content={`Text color`}>

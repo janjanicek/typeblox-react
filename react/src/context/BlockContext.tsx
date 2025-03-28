@@ -1,3 +1,4 @@
+import { Blox } from "@typeblox/core/dist/classes/Blox";
 import React, { createContext, useContext, ReactNode, FC } from "react";
 import {
   Divider,
@@ -20,6 +21,8 @@ import ImageSettings from "../modules/imageSettings";
 import { Link } from "../modules/link";
 import { Menu } from "../modules/menu";
 import { ReplaceImage } from "../modules/replaceImage";
+import { ReplaceVideo } from "../modules/replaceVideo";
+import VideoSettings from "../modules/videoSettings";
 
 interface ComponentProps {
   name: string;
@@ -31,12 +34,12 @@ interface ComponentProps {
 interface BlockContextProps {
   getComponent: (props: ComponentProps) => JSX.Element | undefined;
   getShortcut: (name: string) => string | undefined;
+  block: Blox;
 }
 
 interface BlockProviderProps {
   children: ReactNode;
   block?: any;
-  setShowToolbar?: (show: boolean) => void;
   onUpdate?: (update: any) => void;
   dragListeners?: any;
 }
@@ -46,7 +49,6 @@ const BlockContext = createContext<BlockContextProps | null>(null);
 export const BlockProvider: FC<BlockProviderProps> = ({
   children,
   block,
-  setShowToolbar = () => {},
   onUpdate = () => {},
   dragListeners,
 }) => {
@@ -90,15 +92,13 @@ export const BlockProvider: FC<BlockProviderProps> = ({
       case "viewCode":
         return <ViewAsCode block={block} />;
       case "replaceImage":
-        return (
-          <ReplaceImage
-            setShowToolbar={setShowToolbar}
-            block={block}
-            onUpdate={onUpdate}
-          />
-        );
+        return <ReplaceImage block={block} onUpdate={onUpdate} />;
+      case "replaceVideo":
+        return <ReplaceVideo block={block} onUpdate={onUpdate} />;
       case "imageSettings":
-        return <ImageSettings setShowToolbar={setShowToolbar} block={block} />;
+        return <ImageSettings block={block} />;
+      case "videoSettings":
+        return <VideoSettings block={block} />;
       case "align":
         return <Align block={block} isMenu={isMenuComponent} />;
 
@@ -110,20 +110,13 @@ export const BlockProvider: FC<BlockProviderProps> = ({
       case "type":
         return <TypeChange block={block} onUpdate={onUpdate} />;
       case "add":
-        return (
-          <Add
-            blockId={block?.id}
-            isToolbar={isToolbar}
-            setShowToolbar={setShowToolbar}
-          />
-        );
+        return <Add blockId={block?.id} isToolbar={isToolbar} />;
       case "drag":
         return (
           <Drag
             blockId={block?.id}
             dragListeners={dragListeners}
             isToolbar={isToolbar}
-            setShowToolbar={setShowToolbar}
             setIsBlockSelected={() => {}}
           />
         );
@@ -168,7 +161,7 @@ export const BlockProvider: FC<BlockProviderProps> = ({
   };
 
   return (
-    <BlockContext.Provider value={{ getComponent, getShortcut }}>
+    <BlockContext.Provider value={{ getComponent, getShortcut, block }}>
       {children}
     </BlockContext.Provider>
   );

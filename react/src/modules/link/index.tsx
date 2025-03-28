@@ -4,6 +4,7 @@ import Icon from "../../components/Icon";
 import ContextualMenu from "../../components/menus/ContextualMenu";
 import LinkMenu from "../../components/menus/LinkMenu";
 import Tooltip from "../../components/Tooltip";
+import useEditorStore from "../../stores/EditorStore";
 
 interface ModuleProps {
   isMenu?: boolean;
@@ -11,12 +12,13 @@ interface ModuleProps {
 
 export const Link: React.FC<ModuleProps> = ({ isMenu = false }) => {
   const { editor } = useTypebloxEditor();
-  const [isLink, setIsLink] = useState(editor.style().getStyle().isLink);
+  const { currentStyle } = useEditorStore();
+  const [isLink, setIsLink] = useState(currentStyle?.isLink);
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   const handleLinkChange = (url: string, target: string) => {
-    editor.selection().restoreSelectionRange();
+    editor.selection().restoreSelection();
 
     if (url) {
       editor.link().updateLink({ href: url, target });
@@ -28,6 +30,10 @@ export const Link: React.FC<ModuleProps> = ({ isMenu = false }) => {
     setShowMenu(false);
   };
 
+  useEffect(() => {
+    setIsLink(currentStyle?.isLink ?? false);
+  }, [currentStyle]);
+
   return (
     <>
       {isMenu ? (
@@ -38,7 +44,7 @@ export const Link: React.FC<ModuleProps> = ({ isMenu = false }) => {
           }`}
           onMouseDown={(e) => {
             e.preventDefault(); // Prevents losing focus before saving selection
-            editor.selection().saveSelectionRange();
+            editor.selection().saveSelection();
             setShowMenu(!showMenu);
           }}
         >
@@ -56,7 +62,7 @@ export const Link: React.FC<ModuleProps> = ({ isMenu = false }) => {
             }`}
             onMouseDown={(e) => {
               e.preventDefault(); // Prevents losing focus before saving selection
-              editor.selection().saveSelectionRange();
+              editor.selection().saveSelection();
               setShowMenu(!showMenu);
             }}
           >

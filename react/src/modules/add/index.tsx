@@ -8,22 +8,19 @@ import {
 } from "@typeblox/core/dist/blockTypes";
 import { BlockType } from "@typeblox/core/dist/types";
 import Tooltip from "../../components/Tooltip";
+import { useToolbar } from "../../context/ToolbarContext";
 
 interface AddProps {
-  setShowToolbar: Function;
   blockId: string;
   isToolbar?: boolean;
 }
 
-export const Add: React.FC<AddProps> = ({
-  setShowToolbar,
-  blockId,
-  isToolbar = false,
-}) => {
+export const Add: React.FC<AddProps> = ({ blockId, isToolbar = false }) => {
   const [showPlusMenu, setShowPlusMenu] = useState(false);
   const { editor } = useTypebloxEditor();
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const blockSettings = getBlockSettings();
+  const { hide } = useToolbar();
 
   return (
     <>
@@ -32,7 +29,7 @@ export const Add: React.FC<AddProps> = ({
           ref={buttonRef}
           onClick={() => {
             setShowPlusMenu(!showPlusMenu);
-            if (!isToolbar) setShowToolbar(false);
+            if (!isToolbar) hide();
           }}
           className={`border-0 rounded hover:bg-gray-100 flex items-center justify-center ${
             showPlusMenu ? "tbx-active" : ""

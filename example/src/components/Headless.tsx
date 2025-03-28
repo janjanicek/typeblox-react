@@ -1,6 +1,7 @@
 import { EVENTS } from "@typeblox/core/dist/constants";
 import { EditorProvider, useTypebloxEditor } from "@typeblox/react";
 import React, { useEffect, useState } from "react";
+import HeadlessEditorProvider from "./HeadlessEditorProvider";
 
 const MenuBar = ({style}) => {
   // State to track the current styles
@@ -217,7 +218,10 @@ const MenuBar = ({style}) => {
     
     return (
       <>
-          <EditorProvider
+          <HeadlessEditorProvider content={String(sessionStorage.getItem("tempEditorContent-headless") ?? sampleContent)}
+            onChange={onChangeHandler} extensions={[]}/>
+
+          {/* <EditorProvider
             // toolbars={{
             //   text: 'add drag | bold italic underline strikethrough | font | color bgColor | newModule',
             //   image: 'replaceImage | align'
@@ -288,7 +292,7 @@ const MenuBar = ({style}) => {
             //     ),
             //   }
             // }}
-            ></EditorProvider>
+            ></EditorProvider> */}
             </>
     );
 };

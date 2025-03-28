@@ -2,6 +2,8 @@ import React from "react";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import Icon from "../../components/Icon";
 import Tooltip from "../../components/Tooltip";
+import useEditorStore from "../../stores/EditorStore";
+import { DEFAULT_STYLES } from "@typeblox/core/dist/constants";
 
 interface ModuleProps {
   isMenu?: boolean;
@@ -9,9 +11,12 @@ interface ModuleProps {
 
 export const ClearFormatting: React.FC<ModuleProps> = ({ isMenu = false }) => {
   const { editor } = useTypebloxEditor();
+  const { setCurrentStyle } = useEditorStore();
 
   const handleClick = () => {
-    const newStyle = editor.style().clearFormat();
+    // editor.style().clearFormat();
+    editor.blox().getCurrentBlock()?.clearStyle();
+    setCurrentStyle({ ...DEFAULT_STYLES });
   };
 
   return (

@@ -3,7 +3,7 @@ import Icon from "../../components/Icon";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import { useBlock } from "../../context/BlockContext";
 import Tooltip from "../../components/Tooltip";
-import { EVENTS } from "@typeblox/core/dist/constants";
+import useEditorStore from "../../stores/EditorStore";
 
 interface ModuleProps {
   isMenu?: boolean;
@@ -12,7 +12,8 @@ interface ModuleProps {
 export const Underline: React.FC<ModuleProps> = ({ isMenu = false }) => {
   const { editor } = useTypebloxEditor();
   const { getShortcut } = useBlock();
-  const [isUnderline, setIsUnderline] = useState(editor.isStyle("underline"));
+  const { currentStyle } = useEditorStore();
+  const [isUnderline, setIsUnderline] = useState(currentStyle?.isUnderline);
 
   const handleClick = () => {
     const newStyle = editor.blox().getCurrentBlock()?.toggleUnderline();
@@ -20,15 +21,8 @@ export const Underline: React.FC<ModuleProps> = ({ isMenu = false }) => {
   };
 
   useEffect(() => {
-    const checkUnderline = () => {
-      setIsUnderline(editor.isStyle("underline"));
-    };
-    checkUnderline();
-    editor.on(EVENTS.styleChange, checkUnderline);
-    return () => {
-      editor.off(EVENTS.styleChange, checkUnderline);
-    };
-  }, [editor]);
+    setIsUnderline(currentStyle?.isUnderline ?? false);
+  }, [currentStyle]);
 
   const shortcut = getShortcut("underline");
 

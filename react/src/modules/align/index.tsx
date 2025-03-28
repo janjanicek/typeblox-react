@@ -26,7 +26,7 @@ export const Align: React.FC<AlignProps> = ({ block, isMenu = false }) => {
   }, [editor]);
 
   const toggleAlignment = (alignment: string) => {
-    if (block.type === BLOCK_TYPES.image) {
+    if (block.type === BLOCK_TYPES.image || block.type === BLOCK_TYPES.video) {
       block.removeStyle("margin");
       if (alignment === "center") block.setStyle("margin", "auto");
       block.setAttribute("data-tbx-alignment", alignment);

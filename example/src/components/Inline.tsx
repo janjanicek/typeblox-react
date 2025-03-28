@@ -69,7 +69,8 @@ const Inline: React.FC<InlineProps> = ({theme}) => {
             editorSettings={{
               theme,
               toolbarPosition: 'top',
-              toolbarType: 'inline'
+              toolbarType: 'inline',
+              toolbarTarget: 'editor',
             }}
             extensions={[
               {

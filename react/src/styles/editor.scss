@@ -111,7 +111,8 @@
       opacity: 1;
     }
 
-    .tbx-image-block {
+    .tbx-image-block,
+    .tbx-video-block {
       width: 100%;
       position: relative;
       cursor: pointer;
@@ -121,7 +122,8 @@
       }
 
       &[data-focused="true"] {
-        img {
+        img,
+        iframe {
           border: 1px solid var(--color-primary);
         }
 
@@ -241,10 +243,12 @@
 
   .tbx-toolbar {
     max-height: 350px;
+    max-width: 100%;
     z-index: 4;
     border: 1px solid var(--color-gray-2);
     background-color: var(--color-white);
     padding: 0.5rem;
+    flex-wrap: wrap;
 
     &-block {
       padding: 0.5rem;
@@ -271,11 +275,13 @@
 
   // Alignment Utilities
   .tbx-block {
-    &:has(img[data-tbx-alignment="center"]) {
+    &:has(img[data-tbx-alignment="center"]),
+    &:has(iframe[data-tbx-alignment="center"]) {
       text-align: center;
     }
 
-    &:has(img[data-tbx-alignment="right"]) {
+    &:has(img[data-tbx-alignment="right"]),
+    &:has(iframe[data-tbx-alignment="right"]) {
       float: right;
     }
   }

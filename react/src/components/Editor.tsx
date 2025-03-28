@@ -34,6 +34,7 @@ import { BLOCK_TYPES, getToolbars } from "@typeblox/core/dist/blockTypes";
 import Toolbar from "./Toolbar";
 import { BlockProvider } from "../context/BlockContext";
 import Watermark from "./Watermark";
+import { ToolbarProvider } from "../context/ToolbarContext";
 
 interface EditorProps {
   toolbars?: Partial<Record<BlockType, string>>;
@@ -78,13 +79,14 @@ const Editor: React.FC<EditorProps> = ({
     [],
     () => editor.blox()?.getBlox() ?? [],
   );
-  const { setToolbarSettings, setMenuSettings, currentBlock } =
+  const { setToolbarSettings, setMenuSettings, currentBlock, setEditorRef } =
     useEditorStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
   const defaultToolbars = useMemo(() => getToolbars(), [getToolbars]);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   // Handle content updates with debounce
   const updateContent = useCallback(() => {
@@ -124,6 +126,16 @@ const Editor: React.FC<EditorProps> = ({
       editor.off(EVENTS.styleChange, handleStyleChange);
     };
   }, [editor]);
+
+  // Store editorRef into the store
+
+  useEffect(() => {
+    if (editorRef.current) {
+      setEditorRef(editorRef);
+    }
+
+    return () => setEditorRef(null);
+  }, [editorRef, setEditorRef, editorSettings]);
 
   const mergedToolbars = useMemo(() => {
     if (!toolbars || typeof toolbars !== "object") return defaultToolbars;
@@ -217,15 +229,8 @@ const Editor: React.FC<EditorProps> = ({
     type?: BlockType;
   }) => {
     const currentBlock = editor.blox().getBlockById(update.id);
-    const containsSelecton = update.content?.includes(
-      'class="typeblox-selected"',
-    );
     if (!currentBlock) return;
-    if (
-      !containsSelecton &&
-      update.content &&
-      update.content !== currentBlock.content
-    )
+    if (update.content && update.content !== currentBlock.content)
       currentBlock.setContent(update.content);
 
     if (update.type && update.type !== currentBlock.type)
@@ -251,78 +256,78 @@ const Editor: React.FC<EditorProps> = ({
     >
       <div
         id="typeblox-editor"
+        ref={editorRef}
         className={className}
         data-theme={editorSettings?.theme}
       >
-        <BlockProvider
-          block={currentBlock ?? blocks[0]}
-          setShowToolbar={() => {}}
-          onUpdate={handleUpdateBlock}
-          dragListeners={""}
-        >
-          {editorSettings?.toolbarType === "bar" &&
-            editorSettings?.toolbarPosition === "top" && (
-              <Toolbar
-                block={currentBlock ?? blocks[0]}
-                setShowToolbar={() => {}}
-              />
-            )}
-        </BlockProvider>
-        <div id="tbx-content" style={editorSettings?.contentStyle}>
-          <DndContext
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-            onDragStart={handleDragStart}
-            onDragCancel={handleDragCancel}
-            onDragOver={handleDragOver}
-            sensors={sensors}
+        <ToolbarProvider>
+          <BlockProvider
+            block={currentBlock ?? blocks[0]}
+            onUpdate={handleUpdateBlock}
+            dragListeners={""}
           >
-            {/* Sortable context for the blocks */}
-            <SortableContext
-              items={blocks.map((b) => b.id)}
-              strategy={verticalListSortingStrategy}
+            {editorSettings?.toolbarType === "bar" &&
+              editorSettings?.toolbarPosition === "top" && (
+                <Toolbar showPermanently={true} />
+              )}
+          </BlockProvider>
+          <div id="tbx-content" style={editorSettings?.contentStyle}>
+            <DndContext
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              onDragStart={handleDragStart}
+              onDragCancel={handleDragCancel}
+              onDragOver={handleDragOver}
+              sensors={sensors}
             >
-              {blocks.map((block) => (
-                <SortableItem
-                  key={block.id}
-                  block={block}
-                  onUpdateBlock={handleUpdateBlock}
-                  isOver={block.id === overId}
-                />
-              ))}
-            </SortableContext>
-            <DragOverlay>
-              {activeId &&
-                (() => {
-                  const activeBlock = blocks.find(
-                    (item) => item.id === activeId,
-                  );
+              {/* Sortable context for the blocks */}
+              <SortableContext
+                items={blocks.map((b) => b.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {blocks.map((block) => (
+                  <SortableItem
+                    key={block.id}
+                    block={block}
+                    onUpdateBlock={handleUpdateBlock}
+                    isOver={block.id === overId}
+                  />
+                ))}
+              </SortableContext>
+              <DragOverlay>
+                {activeId &&
+                  (() => {
+                    const activeBlock = blocks.find(
+                      (item) => item.id === activeId,
+                    );
 
-                  return activeBlock ? (
-                    <div
-                      style={{
-                        height: "50px",
-                        maxWidth:
-                          activeBlock.type === BLOCK_TYPES.image
-                            ? "50%"
-                            : "auto",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <SortableItem
-                        key={activeBlock.id}
-                        block={activeBlock}
-                        onUpdateBlock={handleUpdateBlock}
-                        isDragging={true}
-                      />
-                    </div>
-                  ) : null;
-                })()}
-            </DragOverlay>
-          </DndContext>
-        </div>
-        <Watermark />
+                    return activeBlock ? (
+                      <div
+                        style={{
+                          height: "50px",
+                          maxWidth:
+                            activeBlock.type === BLOCK_TYPES.image ||
+                            activeBlock.type === BLOCK_TYPES.video
+                              ? "50%"
+                              : "auto",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <SortableItem
+                          key={activeBlock.id}
+                          block={activeBlock}
+                          onUpdateBlock={handleUpdateBlock}
+                          isDragging={true}
+                        />
+                      </div>
+                    ) : null;
+                  })()}
+              </DragOverlay>
+            </DndContext>
+          </div>
+          <Watermark />
+        </ToolbarProvider>
       </div>
     </div>
   );

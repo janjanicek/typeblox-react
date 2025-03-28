@@ -3,9 +3,9 @@ import { useTypebloxEditor } from "../../context/EditorContext";
 import Icon from "../../components/Icon";
 import ContextualMenu from "../../components/menus/ContextualMenu";
 import Tooltip from "../../components/Tooltip";
+import { useToolbar } from "../../context/ToolbarContext";
 
 interface DragProps {
-  setShowToolbar: Function;
   setIsBlockSelected: Function;
   blockId: string;
   dragListeners?: any;
@@ -14,13 +14,13 @@ interface DragProps {
 
 export const Drag: React.FC<DragProps> = ({
   setIsBlockSelected,
-  setShowToolbar,
   blockId,
   dragListeners,
   isToolbar = false,
 }) => {
   const [showDragMenu, setShowDragMenu] = useState(false);
   const { editor } = useTypebloxEditor();
+  const { hide } = useToolbar();
   const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   return (
@@ -30,7 +30,7 @@ export const Drag: React.FC<DragProps> = ({
           ref={buttonRef}
           onClick={() => {
             setTimeout(() => {
-              if (!isToolbar) setShowToolbar(false);
+              if (!isToolbar) hide();
               setShowDragMenu(!showDragMenu);
             }, 100);
           }}
