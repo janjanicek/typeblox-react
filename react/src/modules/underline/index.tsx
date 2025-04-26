@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Icon from "../../components/Icon";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import { useBlock } from "../../context/BlockContext";
@@ -12,28 +12,29 @@ interface ModuleProps {
 export const Underline: React.FC<ModuleProps> = ({ isMenu = false }) => {
   const { editor } = useTypebloxEditor();
   const { getShortcut } = useBlock();
+
   const { currentStyle } = useEditorStore();
-  const [isUnderline, setIsUnderline] = useState(currentStyle?.isUnderline);
+  const isUnderline = currentStyle?.isUnderline;
 
   const handleClick = () => {
-    const newStyle = editor.blox().getCurrentBlock()?.toggleUnderline();
-    setIsUnderline(newStyle ?? false);
+    const block = editor.blox().getCurrentBlock();
+    if (!block) return;
+    editor.blox().getCurrentBlock()?.toggleUnderline();
   };
 
-  useEffect(() => {
-    setIsUnderline(currentStyle?.isUnderline ?? false);
-  }, [currentStyle]);
-
-  const shortcut = getShortcut("underline");
+  const commonProps = {
+    onClick: handleClick,
+    "data-test": "underline" as const,
+  } as const;
 
   return (
     <>
       {isMenu ? (
         <button
+          {...commonProps}
           className={`p-2 border-0 rounded hover:bg-gray-100 ${
             isUnderline ? "tbx-active" : ""
           } flex justify-between`}
-          onClick={handleClick}
         >
           <span className="flex items-center">
             <span className="mr-2">
@@ -41,15 +42,15 @@ export const Underline: React.FC<ModuleProps> = ({ isMenu = false }) => {
             </span>
             <span>Underline</span>
           </span>
-          <span>{shortcut}</span>
+          <span>{getShortcut("underline")}</span>
         </button>
       ) : (
-        <Tooltip content={`Underline (${shortcut})`}>
+        <Tooltip content={`Underline (${getShortcut("underline")})`}>
           <button
+            {...commonProps}
             className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
               isUnderline ? "tbx-active" : ""
             }`}
-            onClick={handleClick}
           >
             <Icon name="Underline" />
           </button>

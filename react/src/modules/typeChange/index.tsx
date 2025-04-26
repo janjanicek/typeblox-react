@@ -40,6 +40,7 @@ export const TypeChange: React.FC<TypeChangeProps> = ({ block, onUpdate }) => {
           ref={buttonRef}
           className="px-2 py-1 border-0 rounded hover:bg-gray-100 flex items-center"
           onClick={toggleBlockSelection}
+          data-test="type"
         >
           {typeof BLOCKS_SETTINGS[block.type].icon === "string" && (
             <span className="mr-2">

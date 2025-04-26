@@ -29,7 +29,7 @@ import "../styles/editor.scss";
 import { EVENTS } from "@typeblox/core/dist/constants";
 import { useTypebloxEditor } from "../context/EditorContext";
 import { Blox } from "@typeblox/core/dist/classes/Blox";
-import { DEFAULT_MENUS } from "../utils/constants";
+import { DEFAULT_MENUS, INNER_EVENTS } from "../utils/constants";
 import { BLOCK_TYPES, getToolbars } from "@typeblox/core/dist/blockTypes";
 import Toolbar from "./Toolbar";
 import { BlockProvider } from "../context/BlockContext";
@@ -79,8 +79,13 @@ const Editor: React.FC<EditorProps> = ({
     [],
     () => editor.blox()?.getBlox() ?? [],
   );
-  const { setToolbarSettings, setMenuSettings, currentBlock, setEditorRef } =
-    useEditorStore();
+  const {
+    setToolbarSettings,
+    setMenuSettings,
+    currentBlock,
+    setEditorRef,
+    setCurrentStyle,
+  } = useEditorStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
@@ -116,13 +121,21 @@ const Editor: React.FC<EditorProps> = ({
   const handleStyleChange = (updatedBlock: Blox): void => {
     if (!updatedBlock) return;
     dispatch({ type: "UPDATE_STYLE", payload: updatedBlock });
+    setCurrentStyle(editor.getSelectionStyle());
+  };
+
+  const handleSelectionChange = (): void => {
+    const event = new Event(INNER_EVENTS.toolbarSelectionChange);
+    window.dispatchEvent(event);
   };
 
   useEffect(() => {
     editor.on(EVENTS.blocksChanged, handleBlocksChange);
+    editor.on(EVENTS.selectionChange, handleSelectionChange);
     editor.on(EVENTS.styleChange, handleStyleChange);
     return () => {
       editor.off(EVENTS.blocksChanged, handleBlocksChange);
+      editor.off(EVENTS.selectionChange, handleSelectionChange);
       editor.off(EVENTS.styleChange, handleStyleChange);
     };
   }, [editor]);

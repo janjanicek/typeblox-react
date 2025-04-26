@@ -28,6 +28,7 @@ export const Drag: React.FC<DragProps> = ({
       <Tooltip content="Drag block">
         <button
           ref={buttonRef}
+          data-test="drag"
           onClick={() => {
             setTimeout(() => {
               if (!isToolbar) hide();

@@ -22,7 +22,6 @@ import type { Blox } from "@typeblox/core/dist/classes/Blox";
 import { Image } from "./blox/Image";
 import { Video } from "./blox/Video";
 import { BlockProvider } from "../context/BlockContext";
-import { List } from "./blox/List";
 import { Code } from "./blox/Code";
 import useEditorStore from "../stores/EditorStore";
 import { useToolbar } from "../context/ToolbarContext";
@@ -49,7 +48,7 @@ const BlockRow: FC<BlockRowProps> = ({
 }) => {
   const [showContentSuggestor, setShowContentSuggestor] = useState(false);
 
-  const { setCurrentBlock, setCurrentStyle } = useEditorStore();
+  const { setCurrentBlock } = useEditorStore();
   const { activeBlockId, hide, show } = useToolbar();
 
   const blockMenuReference = useRef<HTMLDivElement | null>(null);
@@ -103,7 +102,12 @@ const BlockRow: FC<BlockRowProps> = ({
 
   const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
     setCurrentBlock(block);
-    setCurrentStyle(editor.getSelectionStyle());
+    const blockElement = (event.target as HTMLElement).closest(
+      "[data-typeblox-id]",
+    ) as HTMLElement;
+    const blockId = blockElement?.dataset.typebloxId;
+    if (block.id !== blockId) return;
+
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
@@ -199,21 +203,6 @@ const BlockRow: FC<BlockRowProps> = ({
           block={block}
           content={content}
           onUpdate={onUpdate}
-        />
-      );
-    }
-
-    if (
-      type === BLOCK_TYPES.numberedList ||
-      type === BLOCK_TYPES.bulletedList
-    ) {
-      return (
-        <List
-          ref={contentRef}
-          block={block}
-          content={content}
-          onUpdate={onUpdate}
-          handleMouseUp={handleMouseUp}
         />
       );
     }

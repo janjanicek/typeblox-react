@@ -31,6 +31,7 @@ export const Add: React.FC<AddProps> = ({ blockId, isToolbar = false }) => {
             setShowPlusMenu(!showPlusMenu);
             if (!isToolbar) hide();
           }}
+          data-test="add"
           className={`border-0 rounded hover:bg-gray-100 flex items-center justify-center ${
             showPlusMenu ? "tbx-active" : ""
           }

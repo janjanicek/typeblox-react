@@ -82,8 +82,6 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       // Set both the ref and the state
       editorRef.current = editor;
       setTypeBoxEditor(editor);
-
-      console.log("TypeBlox editor initialized:", editor.blox().getBlox());
     } catch (error) {
       console.error("Failed to initialize Typeblox editor:", error);
     }

@@ -7,7 +7,9 @@
     ],
     "scripts": {
         "rebuild": "cd react && yarn reinstall && yarn build && yarn link && cd .. && cd example && yarn reinstall && yarn build && yarn start",
-        "build": "cd react && yarn build && cd .. && cd example && yarn reinstall && yarn build && yarn start"
+        "build": "cd react && yarn build && cd .. && cd example && yarn reinstall && yarn build && yarn start",
+        "test": "yarn workspace example run test",
+        "kill": "cd example && lsof -i tcp:3000 -t 2>/dev/null | xargs --no-run-if-empty kill -9"
     },
     "license": "SEE LICENSE IN LICENSE"
 }

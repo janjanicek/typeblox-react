@@ -1,5 +1,5 @@
 import Icon from "../../components/Icon";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import { useBlock } from "../../context/BlockContext";
 import Tooltip from "../../components/Tooltip";
@@ -13,27 +13,27 @@ export const Italic: React.FC<ModuleProps> = ({ isMenu }) => {
   const { editor } = useTypebloxEditor();
   const { getShortcut } = useBlock();
   const { currentStyle } = useEditorStore();
-  const [isItalic, setIsItalic] = useState(currentStyle?.isItalic);
+  const isItalic = currentStyle?.isItalic;
 
   const handleClick = () => {
-    const newStyle = editor.blox().getCurrentBlock()?.toggleItalic();
-    setIsItalic(newStyle ?? false);
+    const block = editor.blox().getCurrentBlock();
+    if (!block) return;
+    editor.blox().getCurrentBlock()?.toggleItalic();
   };
 
-  useEffect(() => {
-    setIsItalic(currentStyle?.isItalic ?? false);
-  }, [currentStyle]);
-
-  const shortcut = getShortcut("italic");
+  const commonProps = {
+    onClick: handleClick,
+    "data-test": "italic" as const,
+  } as const;
 
   return (
     <>
       {isMenu ? (
         <button
+          {...commonProps}
           className={`p-2 border-0 rounded hover:bg-gray-100 ${
             isItalic ? "tbx-active" : ""
           } flex justify-between`}
-          onClick={handleClick}
         >
           <span className="flex items-center">
             <span className="mr-2">
@@ -41,15 +41,15 @@ export const Italic: React.FC<ModuleProps> = ({ isMenu }) => {
             </span>
             <span>Italicize</span>
           </span>
-          <span>{shortcut}</span>
+          <span>{getShortcut("italic")}</span>
         </button>
       ) : (
-        <Tooltip content={`Italic (${shortcut})`}>
+        <Tooltip content={`Italic (${getShortcut("italic")})`}>
           <button
+            {...commonProps}
             className={`px-2 py-1 border-0 rounded hover:bg-gray-100 ${
               isItalic ? "tbx-active" : ""
             }`}
-            onClick={handleClick}
           >
             <Icon name="Italic" />
           </button>

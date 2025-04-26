@@ -10,12 +10,12 @@ export const Font: React.FC = () => {
   const { showSelectFont, setShowSelectFont } = useBlockStore();
   const { editor } = useTypebloxEditor();
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+
   const { currentStyle } = useEditorStore();
-  const [selectedFont, setSelectedFont] = useState(currentStyle?.fontFamily);
+  const selectedFont = currentStyle?.fontFamily || "arial";
 
   const handleFontChange = (font: string) => {
     editor.blox().getCurrentBlock()?.applyStyle("span", { fontFamily: font });
-    setSelectedFont(font);
   };
 
   const fontOptions = AVAILABLE_FONTS.map((font: string) => ({
@@ -28,10 +28,6 @@ export const Font: React.FC = () => {
     setShowSelectFont(!showSelectFont);
   };
 
-  useEffect(() => {
-    setSelectedFont(currentStyle?.fontFamily ?? "Arial");
-  }, [currentStyle]);
-
   return (
     <div className="relative flex items-stretch">
       <Tooltip content={`Font ${selectedFont}`}>
@@ -39,6 +35,7 @@ export const Font: React.FC = () => {
           ref={buttonRef}
           className="px-2 py-1 border-0 rounded hover:bg-gray-100"
           onClick={toggleFontSelectionPicker}
+          data-test="font"
         >
           <span style={{ textTransform: "capitalize" }}>{selectedFont}</span>
         </button>

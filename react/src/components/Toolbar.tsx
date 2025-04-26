@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import useBlockStore from "../stores/BlockStore";
 import useEditorStore from "../stores/EditorStore";
 import { rgbToHex } from "@typeblox/core/dist/utils/colors";
@@ -11,11 +11,11 @@ import {
   flip,
   autoUpdate,
 } from "@floating-ui/react";
-import { EVENTS } from "@typeblox/core/dist/constants";
 import { useBlock } from "../context/BlockContext";
 import { useToolbar } from "../context/ToolbarContext";
 import { BLOCK_TYPES } from "@typeblox/core/dist/blockTypes";
 import { getRange } from "../utils/helpers";
+import { INNER_EVENTS } from "../utils/constants";
 
 interface ToolbarProps {
   showPermanently?: boolean;
@@ -43,6 +43,11 @@ const Toolbar: React.FC<ToolbarProps> = ({ showPermanently }) => {
 
   const { floatingStyles, refs, update } = floatingData || {};
 
+  const isCurrentBlock = useCallback(() => {
+    const currentBlockId = editor.blox().getCurrentBlock()?.id;
+    return currentBlockId === block.id;
+  }, [block.id, editor]);
+
   // Update color pickers when the detected style changes
   useEffect(() => {
     if (
@@ -51,7 +56,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ showPermanently }) => {
         currentBlock?.type === BLOCK_TYPES.image) ||
       (block.type === BLOCK_TYPES.video &&
         currentBlock?.type === BLOCK_TYPES.video &&
-        editor.blox().getCurrentBlock()?.id === block.id)
+        isCurrentBlock())
     ) {
       show(block.id);
       setIsPositioned(true);
@@ -61,7 +66,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ showPermanently }) => {
       const range = getRange();
       const currentBlockId = editor.blox().getCurrentBlock()?.id;
 
-      if (currentBlockId !== block.id || currentBlockId === activeBlockId) {
+      if (currentBlockId !== block.id) {
         return;
       }
 
@@ -98,13 +103,16 @@ const Toolbar: React.FC<ToolbarProps> = ({ showPermanently }) => {
       );
     };
 
-    // Listeners for selection and mouse interactions
-    document.addEventListener("selectionchange", handleSelectionChange);
-    window.addEventListener("mouseup", handleSelectionChange);
+    window.addEventListener(
+      INNER_EVENTS.toolbarSelectionChange,
+      handleSelectionChange,
+    );
 
     return () => {
-      document.removeEventListener("selectionchange", handleSelectionChange);
-      window.removeEventListener("mouseup", handleSelectionChange);
+      window.removeEventListener(
+        INNER_EVENTS.toolbarSelectionChange,
+        handleSelectionChange,
+      );
     };
   }, [
     editor,
@@ -119,16 +127,6 @@ const Toolbar: React.FC<ToolbarProps> = ({ showPermanently }) => {
     editorSettings?.theme,
     showPermanently,
   ]);
-
-  useEffect(() => {
-    const updateStyles = () => {
-      setCurrentStyle(editor.getSelectionStyle());
-    };
-    editor.on(EVENTS.styleChange, updateStyles);
-    return () => {
-      editor.off(EVENTS.styleChange, updateStyles);
-    };
-  }, [editor]);
 
   return (
     <>

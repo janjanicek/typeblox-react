@@ -85,7 +85,6 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
 
       // Get initial dimensions
       const startWidth = dimensions.width || iframeElement.clientWidth;
-      const startHeight = dimensions.height || iframeElement.clientHeight;
 
       // Calculate the original aspect ratio (16:9 for YouTube videos)
       const aspectRatio = 16 / 9;
@@ -130,7 +129,7 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
         {content ? (
           <span className="tbx-video-wrapper relative inline-block">
             <div
-              className="absolute inset-0 cursor-pointer z-10"
+              className="absolute inset-0 cursor-pointer z-2"
               onClick={toggleToolbar}
             />
             <iframe
@@ -140,12 +139,12 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className={["", ...block.getClasses()].join(" ")}
+              {...block.getAttributes()}
               width={dimensions.width}
               height={dimensions.height}
               style={{
                 ...block.getStyles(),
               }}
-              {...block.getAttributes()}
             />
             {isToolbarActive(block.id) && (
               <div className="resize-handle" onMouseDown={handleResizeStart} />

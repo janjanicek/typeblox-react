@@ -29,6 +29,7 @@ export const Color: React.FC = () => {
           value={selectedColor}
           onChange={(e) => handleColorChange(e.target.value)}
           style={{ width: "24px", border: 0, background: "none" }}
+          data-test="color"
         />
       </button>
     </Tooltip>
