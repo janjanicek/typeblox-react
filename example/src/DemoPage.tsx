@@ -31,10 +31,10 @@ const DemoPage: React.FC<DemoPageProps> = ({demoType}) => {
     return (
     <div data-theme={theme}>
     <div className="tabs simple">
-        <button onClick={() => window.open('/inline', "_self") } className={`${demoType === "inline" ? "active" : ""} button`}>
+        <button onClick={() => window.open('/', "_self") } className={`${demoType === "inline" ? "active" : ""} button`}>
         Inline
         </button>
-        <button onClick={() => window.open('/topbar', "_self") } className={`${demoType === "topbar" ? "active" : ""} button`}>
+        <button onClick={() => window.open('/#/topbar', "_self") } className={`${demoType === "topbar" ? "active" : ""} button`}>
         Menu bar
         </button>
         {/* <button onClick={() => window.open('/headless', "_self") } className={`${demoType === "headless" ? "active" : ""} button`}>

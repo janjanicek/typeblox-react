@@ -28,7 +28,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "reinstall": "rm -rf node_modules package-lock.json yarn.lock && yarn install",
+    "reinstall": "rm -rf node_modules package-lock.json yarn.lock build && yarn install && yarn build",
     "test": "playwright test --ui"
   },
   "browserslist": {
