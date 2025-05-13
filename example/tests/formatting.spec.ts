@@ -33,7 +33,7 @@ test('Test toggle bold in inline editor', async ({ page }) => {
 });
 
 test('Test toggle italic in block editor', async ({ page }) => {
-  await page.goto('http://localhost:3000/topbar');
+  await page.goto('http://localhost:3000/#/topbar');
   const paragraph = page
     .locator('p[data-typeblox-editor="block"]')
     .first();

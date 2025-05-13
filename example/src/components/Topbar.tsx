@@ -38,6 +38,28 @@ const Topbar: React.FC<TopbarProps> = ({theme}) => {
     </code>
     
     <p>As demonstrated, Typeblox provides a robust set of features that cater to diverse content creation needs. Whether you're building a blog, a documentation site, or any content-rich application, Typeblox offers the flexibility and power you need.</p>
+
+<div data-tbx-block="columns" style="margin: 20px 0;" class="columns-wrapper">
+  <div class="tbx-columns">
+    <!-- first column -->
+    <div class="tbx-column">
+      <h2>Columns</h2>
+      <p>
+        Ancient columns are some of the most iconic symbols of architecture, often representing the strength and grandeur of ancient civilizations. These architectural marvels have withstood the test of time, standing tall for centuries and often found in temples, palaces, and other monumental buildings.
+      </p>
+      <p>
+        The most well-known columns in history are the Doric, Ionic, and Corinthian styles, each offering a unique look and feel. Doric columns are known for their simplicity and strength, while Ionic columns are more decorative with their elegant scrolls. Corinthian columns, on the other hand, are famous for their intricate and elaborate capitals adorned with acanthus leaves.
+      </p>
+      <p>
+        These columns not only served a structural purpose but also held great symbolic value, representing the ideals and aspirations of the cultures that built them. Today, they continue to inspire architects and are featured prominently in modern design.
+      </p>
+    </div>
+    <!-- second column with image -->
+    <div class="tbx-column">
+      <img src="https://images.unsplash.com/photo-1523292562811-8fa7962a78c8?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Ancient columns" style="width: 100%; border-radius: 8px;">
+    </div>
+  </div>
+</div>
     `;
     
   

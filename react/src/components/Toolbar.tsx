@@ -16,6 +16,7 @@ import { useToolbar } from "../context/ToolbarContext";
 import { BLOCK_TYPES } from "@typeblox/core/dist/blockTypes";
 import { getRange } from "../utils/helpers";
 import { INNER_EVENTS } from "../utils/constants";
+import { isParentOfCurrentBlock } from "../utils/blockUtils";
 
 interface ToolbarProps {
   showPermanently?: boolean;
@@ -25,7 +26,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ showPermanently }) => {
   const { setSelectedColor, setSelectedBgColor } = useBlockStore();
   const { toolbarSettings, setCurrentStyle, editorRef, currentBlock } =
     useEditorStore();
-  const { isToolbarActive, show, activeBlockId } = useToolbar();
+  const { isToolbarActive, show } = useToolbar();
   const { editor, editorSettings } = useTypebloxEditor();
   const { getComponent, block } = useBlock();
 
@@ -48,15 +49,16 @@ const Toolbar: React.FC<ToolbarProps> = ({ showPermanently }) => {
     return currentBlockId === block.id;
   }, [block.id, editor]);
 
-  // Update color pickers when the detected style changes
   useEffect(() => {
     if (
       showPermanently ||
-      (block.type === BLOCK_TYPES.image &&
-        currentBlock?.type === BLOCK_TYPES.image) ||
-      (block.type === BLOCK_TYPES.video &&
-        currentBlock?.type === BLOCK_TYPES.video &&
-        isCurrentBlock())
+      ((isParentOfCurrentBlock(editor, block) || isCurrentBlock()) &&
+        ((block.type === BLOCK_TYPES.image &&
+          currentBlock?.type === BLOCK_TYPES.image) ||
+          (block.type === BLOCK_TYPES.video &&
+            currentBlock?.type === BLOCK_TYPES.video) ||
+          (block.type === BLOCK_TYPES.columns &&
+            currentBlock?.type === BLOCK_TYPES.columns)))
     ) {
       show(block.id);
       setIsPositioned(true);

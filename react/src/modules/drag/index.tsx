@@ -33,6 +33,10 @@ export const Drag: React.FC<DragProps> = ({
             setTimeout(() => {
               if (!isToolbar) hide();
               setShowDragMenu(!showDragMenu);
+              const isSelected = editor
+                .blox()
+                .getBlockById(blockId)?.isSelected;
+              editor.blox().getBlockById(blockId)?.setIsSelected(!isSelected);
             }, 100);
           }}
           {...dragListeners}
@@ -51,12 +55,18 @@ export const Drag: React.FC<DragProps> = ({
         options={[
           {
             label: "Move up",
-            onClick: () => editor.blox().moveBlockUp(blockId),
+            onClick: () => {
+              editor.blox().moveBlockUp(blockId);
+              editor.blox().getBlockById(blockId)?.setIsSelected(false);
+            },
             icon: "ArrowUp",
           },
           {
             label: "Move down",
-            onClick: () => editor.blox().moveBlockDown(blockId),
+            onClick: () => {
+              editor.blox().moveBlockDown(blockId);
+              editor.blox().getBlockById(blockId)?.setIsSelected(false);
+            },
             icon: "ArrowDown",
           },
           {
@@ -69,6 +79,7 @@ export const Drag: React.FC<DragProps> = ({
         onClose={() => {
           setIsBlockSelected(false);
           setShowDragMenu(false);
+          editor.blox().getBlockById(blockId)?.setIsSelected(false);
         }}
       />
     </>

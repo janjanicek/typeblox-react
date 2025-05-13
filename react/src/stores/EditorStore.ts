@@ -14,6 +14,8 @@ interface EditorStore {
   setCurrentStyle: (currentStyle: detectedStyles) => void;
   editorRef: React.RefObject<HTMLDivElement> | null;
   setEditorRef: (ref: React.RefObject<HTMLDivElement> | null) => void;
+  overId: string | null;
+  setOverId: (id: string | null) => void;
 }
 
 const useEditorStore = create<EditorStore>((set) => ({
@@ -63,6 +65,11 @@ const useEditorStore = create<EditorStore>((set) => ({
       editorRef: ref,
     }));
   },
+  overId: null,
+  setOverId: (id) =>
+    set(() => ({
+      overId: id,
+    })),
 }));
 
 export default useEditorStore;

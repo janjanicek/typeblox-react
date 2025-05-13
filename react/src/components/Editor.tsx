@@ -16,6 +16,9 @@ import {
   useSensors,
   DragOverlay,
   closestCenter,
+  CollisionDetection,
+  rectIntersection,
+  pointerWithin,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -74,6 +77,7 @@ const Editor: React.FC<EditorProps> = ({
   className,
 }) => {
   const { editor, onChange, editorSettings } = useTypebloxEditor();
+  const { overId, setOverId } = useEditorStore();
   const [blocks, dispatch] = useReducer(
     blockReducer,
     [],
@@ -87,7 +91,6 @@ const Editor: React.FC<EditorProps> = ({
     setCurrentStyle,
   } = useEditorStore();
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [overId, setOverId] = useState<string | null>(null);
 
   const defaultToolbars = useMemo(() => getToolbars(), [getToolbars]);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -193,9 +196,8 @@ const Editor: React.FC<EditorProps> = ({
       return;
     }
 
-    // const oldIndex = blocks.findIndex((b) => b.id === active.id);
-    const newIndex = blocks.findIndex((b) => b.id === over.id);
-    editor.blox().moveBlock(active.id, newIndex);
+    const newIndex = editor.blox().getBlockIndex(over.id);
+    editor.blox().moveBlock(active.id, newIndex, over.id);
   };
 
   const handleDragOver = (event: any) => {
@@ -214,11 +216,10 @@ const Editor: React.FC<EditorProps> = ({
       return;
     }
 
-    const activeIndex = blocks.findIndex((block) => block.id === activeId);
-    const overIndex = blocks.findIndex((block) => block.id === overId);
+    const activeIndex = editor.blox().getBlockIndex(activeId);
+    const overIndex = editor.blox().getBlockIndex(overId);
 
     if (activeIndex > overIndex) {
-      // Move up if above half height
       setOverId(overId);
     } else {
       // Move down if below half height
@@ -228,6 +229,13 @@ const Editor: React.FC<EditorProps> = ({
   };
 
   const handleDragStart = (event: any) => {
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) {
+      // If there's a text selection, prevent the drag from starting
+      event.preventDefault();
+      return;
+    }
+
     setActiveId(event.active.id);
   };
 
@@ -262,6 +270,18 @@ const Editor: React.FC<EditorProps> = ({
   const keyboardSensor = useSensor(KeyboardSensor);
   const sensors = useSensors(mouseSensor, keyboardSensor);
 
+  const customCollisionDetection: CollisionDetection = (args) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+    const intersectionCollisions = rectIntersection(args);
+    if (intersectionCollisions.length > 0) {
+      return intersectionCollisions;
+    }
+    return closestCenter(args);
+  };
+
   return (
     <div
       className="tbx-editor-container"
@@ -286,7 +306,7 @@ const Editor: React.FC<EditorProps> = ({
           </BlockProvider>
           <div id="tbx-content" style={editorSettings?.contentStyle}>
             <DndContext
-              collisionDetection={closestCenter}
+              collisionDetection={customCollisionDetection}
               onDragEnd={handleDragEnd}
               onDragStart={handleDragStart}
               onDragCancel={handleDragCancel}
@@ -295,7 +315,10 @@ const Editor: React.FC<EditorProps> = ({
             >
               {/* Sortable context for the blocks */}
               <SortableContext
-                items={blocks.map((b) => b.id)}
+                items={editor
+                  .blox()
+                  .getBlox()
+                  .map((b) => b.id)}
                 strategy={verticalListSortingStrategy}
               >
                 {blocks.map((block) => (
@@ -310,9 +333,7 @@ const Editor: React.FC<EditorProps> = ({
               <DragOverlay>
                 {activeId &&
                   (() => {
-                    const activeBlock = blocks.find(
-                      (item) => item.id === activeId,
-                    );
+                    const activeBlock = editor.blox().getBlockById(activeId);
 
                     return activeBlock ? (
                       <div

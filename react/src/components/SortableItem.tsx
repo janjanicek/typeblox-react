@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { MouseEventHandler, useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import BlockRow from "./BlockRow";
 import { BlockType } from "@typeblox/core/dist/types";

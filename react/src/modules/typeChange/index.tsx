@@ -28,6 +28,7 @@ export const TypeChange: React.FC<TypeChangeProps> = ({ block, onUpdate }) => {
   };
 
   const toggleBlockSelection = () => {
+    if (BLOCKS_SETTINGS[block.type].availableTypes.length === 0) return;
     setShowTypeSelection(!showTypeSelection);
   };
 

@@ -91,7 +91,11 @@
     border-radius: 4px;
     cursor: text;
 
-    .tbx-actions {
+    &:has([data-tbx-block="columns"]) > .tbx-actions {
+      top: -1.5rem !important;
+    }
+
+    & > .tbx-actions {
       display: flex;
       position: absolute;
       opacity: 0;
@@ -107,7 +111,7 @@
       }
     }
 
-    &:hover .tbx-actions {
+    &:hover > .tbx-actions {
       opacity: 1;
     }
 
@@ -144,6 +148,19 @@
           }
         }
       }
+    }
+
+    .tbx-columns-wrapper {
+      display: block;
+      margin: 1em 0;
+    }
+    .tbx-columns {
+      display: flex;
+      gap: 1em;
+    }
+    .tbx-column {
+      flex: 1;
+      border: 1px dashed var(--color-gray-3);
     }
 
     .tbx-placeholder {
@@ -243,7 +260,7 @@
 
   .tbx-toolbar {
     max-height: 350px;
-    max-width: 100%;
+    max-width: 100vw;
     z-index: 4;
     border: 1px solid var(--color-gray-2);
     background-color: var(--color-white);
@@ -275,14 +292,14 @@
 
   // Alignment Utilities
   .tbx-block {
-    &:has(img[data-tbx-alignment="center"]),
-    &:has(iframe[data-tbx-alignment="center"]) {
+    &:has(> .tbx-image-block img[data-tbx-alignment="center"]),
+    &:has(> .tbx-video-block iframe[data-tbx-alignment="center"]) {
       text-align: center;
     }
 
-    &:has(img[data-tbx-alignment="right"]),
-    &:has(iframe[data-tbx-alignment="right"]) {
-      float: right;
+    &:has(> .tbx-image-block img[data-tbx-alignment="right"]),
+    &:has(> .tbx-video-block iframe[data-tbx-alignment="right"]) {
+      text-align: right;
     }
   }
 
@@ -317,7 +334,7 @@
     opacity: 0.7;
 
     a {
-      display: flex;
+      display: inline-flex;
       font-size: small;
       align-items: center;
       justify-content: end;

@@ -32,6 +32,7 @@ import {
   Blockquote,
   Settings,
   Video,
+  Columns,
 } from "tabler-icons-react";
 import { useTypebloxEditor } from "../context/EditorContext";
 
@@ -123,6 +124,8 @@ const Icon: React.FC<IconProps> = ({
         return <Settings color={themeColor} />;
       case "Video":
         return <Video color={themeColor} />;
+      case "Columns2":
+        return <Columns color={themeColor} />;
       default:
         return <X color={themeColor} />;
     }

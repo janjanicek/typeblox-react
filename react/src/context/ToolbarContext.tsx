@@ -1,15 +1,9 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 interface ToolbarContextProps {
   activeBlockId: string | null;
   show: (blockId: string) => void;
-  hide: () => void;
+  hide: (blockId?: string) => void;
   toggle: (blockId: string) => void;
   isToolbarActive: (blockId: string) => boolean;
 }
@@ -27,14 +21,19 @@ export const ToolbarProvider: React.FC<{ children: React.ReactNode }> = ({
     setActiveBlockId(blockId);
   }, []);
 
-  const hide = useCallback(() => {
-    setActiveBlockId(null);
+  const hide = useCallback((blockId?: string) => {
+    setActiveBlockId((prev) => {
+      if (blockId != null && prev !== blockId) {
+        return prev;
+      }
+      return null;
+    });
   }, []);
 
   const toggle = useCallback(
     (blockId: string) => {
       if (isToolbarActive(blockId)) {
-        hide();
+        hide(blockId);
       } else {
         show(blockId);
       }

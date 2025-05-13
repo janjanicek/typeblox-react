@@ -24,7 +24,7 @@ test('Toolbar to contain the right type', async ({ page }) => {
 });
 
 test('Add a new block and type into it', async ({ page }) => {
-  await page.goto('http://localhost:3000/topbar');
+  await page.goto('http://localhost:3000/#/topbar');
 
   const toolbar = page.locator('.tbx-toolbar.tbx-toolbar-block');
   await expect(toolbar).toBeVisible();
@@ -61,7 +61,7 @@ test('Remove block', async ({ page }) => {
   });
 
   const blocks = page.locator('.tbx-block');
-  await expect(blocks).toHaveCount(12);
+  await expect(blocks).toHaveCount(18);
 
   const firstBlock = blocks.first();
 
@@ -72,7 +72,7 @@ test('Remove block', async ({ page }) => {
   await expect(contextualMenu).toBeVisible();
   await contextualMenu.locator('a').nth(2).click();
   await expect(contextualMenu).toBeHidden();
-  await expect(blocks).toHaveCount(11);
+  await expect(blocks).toHaveCount(17);
   await expect(blocks.first()).toHaveText(/Typeblox is a powerful and flexible/);
 });
 
@@ -91,7 +91,7 @@ test('Move down the first block, then move up the 3rd block', async ({ page }) =
   });
 
   const blocks = page.locator('.tbx-block');
-  await expect(blocks).toHaveCount(12);
+  await expect(blocks).toHaveCount(18);
 
   const originalFirstText = await blocks.first().textContent();
   const firstDrag = blocks.first().locator('[data-test="drag"]');
@@ -103,7 +103,7 @@ test('Move down the first block, then move up the 3rd block', async ({ page }) =
   await menu.locator('a').filter({ hasText: /move down/i }).click();
   await expect(menu).toBeHidden();
 
-  await expect(blocks).toHaveCount(12);
+  await expect(blocks).toHaveCount(18);
   await expect(blocks.nth(1)).toHaveText(originalFirstText || '');
 
   const originalThirdText = await blocks.nth(2).textContent();
@@ -114,7 +114,7 @@ test('Move down the first block, then move up the 3rd block', async ({ page }) =
   await menu.locator('a').filter({ hasText: /move up/i }).click();
   await expect(menu).toBeHidden();
 
-  await expect(blocks).toHaveCount(12);
+  await expect(blocks).toHaveCount(18);
   await expect(blocks.nth(1)).toHaveText(originalThirdText || '');
 });
 

@@ -26,6 +26,7 @@ import { Code } from "./blox/Code";
 import useEditorStore from "../stores/EditorStore";
 import { useToolbar } from "../context/ToolbarContext";
 import { getRange } from "../utils/helpers";
+import Columns from "./blox/Columns";
 
 interface BlockRowProps {
   block: Blox;
@@ -101,6 +102,10 @@ const BlockRow: FC<BlockRowProps> = ({
   };
 
   const handleMouseUp = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (editor.blox().getCurrentBlock()?.id !== block.id) {
+      return;
+    }
+
     setCurrentBlock(block);
     const blockElement = (event.target as HTMLElement).closest(
       "[data-typeblox-id]",
@@ -158,7 +163,7 @@ const BlockRow: FC<BlockRowProps> = ({
         (!isInsideEditor && activeBlockId !== block.id) ||
         (!isInsideMenu && !range)
       ) {
-        hide();
+        hide(block.id);
       }
     },
     [editor],
@@ -203,6 +208,18 @@ const BlockRow: FC<BlockRowProps> = ({
           block={block}
           content={content}
           onUpdate={onUpdate}
+        />
+      );
+    }
+
+    if (type === BLOCK_TYPES.columns) {
+      return (
+        <Columns
+          ref={contentRef}
+          block={block}
+          onUpdate={onUpdate}
+          handleMouseUp={handleMouseUp}
+          dragListeners={dragListeners}
         />
       );
     }

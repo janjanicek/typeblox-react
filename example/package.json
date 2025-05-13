@@ -5,7 +5,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@playwright/test": "^1.51.1",
-    "@typeblox/core": "^0.5.0",
+    "@typeblox/core": "^0.6.0",
     "@typeblox/react": "file:../react",
     "@types/node": "^22.14.1",
     "@types/react": "^18.2.33",

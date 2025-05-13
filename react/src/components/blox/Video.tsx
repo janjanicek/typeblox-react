@@ -125,13 +125,11 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
         data-typeblox-id={block.id}
         data-typeblox-editor="block"
         data-focused={isToolbarActive(block.id)}
+        onClick={toggleToolbar}
       >
         {content ? (
           <span className="tbx-video-wrapper relative inline-block">
-            <div
-              className="absolute inset-0 cursor-pointer z-2"
-              onClick={toggleToolbar}
-            />
+            <div className="absolute inset-0 cursor-pointer z-2" />
             <iframe
               src={`https://www.youtube.com/embed/${videoId}`}
               title={title || "YouTube video player"}
