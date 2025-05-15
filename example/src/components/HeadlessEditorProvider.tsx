@@ -17,7 +17,6 @@ const HeadlessEditorProvider = ({ content, onChange, extensions }) => {
                     editorContainer: "#typeblox-editor",
                 });
 
-                window.typebloxEditor = typebloxEditor;
                 isEditorInitialized.current = true;
             } catch (error) {
                 console.error("Failed to initialize Typeblox editor:", error);
