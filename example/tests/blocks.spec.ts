@@ -118,4 +118,76 @@ test('Move down the first block, then move up the 3rd block', async ({ page }) =
   await expect(blocks.nth(1)).toHaveText(originalThirdText || '');
 });
 
+// --- Video embedding tests ---
+const videoCases = [
+  {
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    expectedSrc: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+  },
+  {
+    url: 'https://vimeo.com/123456789',
+    expectedSrc: 'https://player.vimeo.com/video/123456789',
+  },
+  {
+    url: 'https://www.veed.io/view/abc123-def456',
+    expectedSrc: 'https://www.veed.io/embed/abc123-def456',
+  },
+  {
+    url: 'https://www.loom.com/share/abcdef123456',
+    expectedSrc: 'https://www.loom.com/embed/abcdef123456',
+  },
+  {
+    url: 'https://www.dailymotion.com/video/x7tgczq',
+    expectedSrc: 'https://www.dailymotion.com/embed/video/x7tgczq',
+  },
+  {
+    url: 'https://support.wistia.com/medias/abcdefg123',
+    expectedSrc: 'https://fast.wistia.net/embed/iframe/abcdefg123',
+  },
+  {
+    url: 'https://www.facebook.com/somepage/videos/1234567890123456/',
+    expectedSrc: 'https://www.facebook.com/video/embed?video_id=1234567890123456',
+  },
+  {
+    url: 'https://www.twitch.tv/videos/123456789',
+    expectedSrc: `https://player.twitch.tv/?video=123456789&parent=localhost`, // adjust parent if needed
+  },
+  {
+    url: 'https://example.com/video.mp4',
+    expectedSrc: 'https://example.com/video.mp4',
+  },
+];
+
+test.describe('Video embedding', () => {
+  for (const { url, expectedSrc } of videoCases) {
+    test(`should embed video from ${url}`, async ({ page }) => {
+      await page.goto('http://localhost:3000/#/topbar');
+
+      // Add a new block
+      await page.locator('[data-test="add"]').click();
+      const contextualMenu = page.locator('.tbx-contextual-menu');
+      await expect(contextualMenu).toBeVisible();
+
+      // Select the "Video" block type (adjust selector/text as needed)
+      await contextualMenu.getByText(/video/i).click();
+
+      // Now fill in the video URL and embed
+      await page.getByPlaceholder('Paste video URL').fill(url);
+      await page.locator('.tbx-contextual-menu').getByRole('button', { name: /embed video/i }).click();
+
+      // Wait for the iframe to appear
+      const iframe = page.locator('.tbx-video-block iframe');
+      await expect(iframe).toBeVisible();
+
+      // Check the src attribute
+      const src = await iframe.getAttribute('src');
+      if (url.includes('twitch.tv')) {
+        expect(src).toContain('https://player.twitch.tv/?video=123456789');
+      } else {
+        expect(src).toBe(expectedSrc);
+      }
+    });
+  }
+});
+
 

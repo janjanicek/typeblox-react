@@ -4,7 +4,7 @@ import ContextualMenu from "../../components/menus/ContextualMenu";
 import Icon from "../../components/Icon";
 import Tooltip from "../../components/Tooltip";
 import VideoUploadMenu from "../../components/menus/VideoUploadMenu";
-import { extractYouTubeVideoId } from "../../utils/helpers";
+import { extractVideoEmbedInfo } from "../../utils/helpers";
 
 interface ReplaceVideoProps {
   onUpdate: Function;
@@ -19,10 +19,10 @@ export const ReplaceVideo: React.FC<ReplaceVideoProps> = ({
   const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   const handleUrlSubmit = (url: string) => {
-    const id = extractYouTubeVideoId(url);
-    if (!id) return console.error("Invalid YouTube URL");
+    const info = extractVideoEmbedInfo(url);
+    if (!info.embedUrl) return console.error("Invalid video URL");
 
-    onUpdate({ id: block.id, content: `https://www.youtube.com/embed/${id}` });
+    onUpdate({ id: block.id, content: url }); // Store original URL for future-proofing
     setIsMenuVisible(false);
   };
 

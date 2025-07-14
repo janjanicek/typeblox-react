@@ -6,7 +6,7 @@ import useEditorStore from "../../stores/EditorStore";
 import { useToolbar } from "../../context/ToolbarContext";
 import { useTypebloxEditor } from "../../context/EditorContext";
 import VideoUploadMenu from "../menus/VideoUploadMenu";
-import { extractYouTubeVideoId } from "../../utils/helpers";
+import { extractVideoEmbedInfo } from "../../utils/helpers";
 
 interface VideoBloxProps {
   content: string | null;
@@ -28,7 +28,9 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
     const { isToolbarActive, show } = useToolbar();
     const dimensionsRef = useRef(dimensions);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
-    const videoId = content ? extractYouTubeVideoId(content) : null;
+
+    // Extract embed info from content
+    const embedInfo = content ? extractVideoEmbedInfo(content) : null;
 
     useEffect(() => {
       if (!content) {
@@ -54,19 +56,18 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
 
       if (content) {
         show(block.id);
-        console.warn("isToolbarActive", isToolbarActive(block.id));
       } else {
         setIsMenuVisible(!isMenuVisible);
       }
     };
 
     const handleUrlSubmit = (url: string) => {
-      const id = extractYouTubeVideoId(url);
-      if (!id) return console.error("Invalid YouTube URL");
+      const info = extractVideoEmbedInfo(url);
+      if (!info.embedUrl) return console.error("Invalid video URL");
 
       onUpdate({
         id: block.id,
-        content: `https://www.youtube.com/embed/${id}`,
+        content: url, // Store the original URL for future-proofing
       });
       setIsMenuVisible(false);
     };
@@ -86,8 +87,8 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
       // Get initial dimensions
       const startWidth = dimensions.width || iframeElement.clientWidth;
 
-      // Calculate the original aspect ratio (16:9 for YouTube videos)
-      const aspectRatio = 16 / 9;
+      // Use aspect ratio from embedInfo if available
+      const aspectRatio = embedInfo?.aspectRatio || 16 / 9;
 
       const handleMouseMove = (moveEvent: MouseEvent) => {
         const deltaX = moveEvent.clientX - startX;
@@ -127,12 +128,12 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
         data-focused={isToolbarActive(block.id)}
         onClick={toggleToolbar}
       >
-        {content ? (
+        {embedInfo ? (
           <span className="tbx-video-wrapper relative inline-block">
             <div className="absolute inset-0 cursor-pointer z-2" />
             <iframe
-              src={`https://www.youtube.com/embed/${videoId}`}
-              title={title || "YouTube video player"}
+              src={embedInfo.embedUrl}
+              title={title || embedInfo.title}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -151,7 +152,7 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
         ) : (
           <button className="tbx-placeholder" ref={buttonRef}>
             <Icon name="Video" />
-            <span>Embed YouTube video</span>
+            <span>Embed video</span>
           </button>
         )}
         <ContextualMenu
@@ -162,5 +163,5 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
         />
       </div>
     );
-  },
+  }
 );

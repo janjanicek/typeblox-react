@@ -10,8 +10,8 @@ const VideoUploadMenu: React.FC<VideoUploadMenuProps> = ({
       <div className="text-center p-2">
         <input
           type="text"
-          id="youtube-url"
-          placeholder="Paste YouTube URL here"
+          id="video-url"
+          placeholder="Paste video URL here"
           className="border p-2 mb-2 block w-full"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -23,7 +23,7 @@ const VideoUploadMenu: React.FC<VideoUploadMenuProps> = ({
         <button
           onClick={() => {
             const input = document.getElementById(
-              "youtube-url",
+              "video-url",
             ) as HTMLInputElement;
             handleUrlSubmit(input.value);
           }}
