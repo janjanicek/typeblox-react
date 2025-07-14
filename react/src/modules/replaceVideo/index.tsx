@@ -22,7 +22,7 @@ export const ReplaceVideo: React.FC<ReplaceVideoProps> = ({
     const info = extractVideoEmbedInfo(url);
     if (!info.embedUrl) return console.error("Invalid video URL");
 
-    onUpdate({ id: block.id, content: url }); // Store original URL for future-proofing
+    onUpdate({ id: block.id, content: info.embedUrl }); // Store original URL for future-proofing
     setIsMenuVisible(false);
   };
 
