@@ -67,7 +67,7 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
 
       onUpdate({
         id: block.id,
-        content: url, // Store the original URL for future-proofing
+        content: info.embedUrl, // Store the original URL for future-proofing
       });
       setIsMenuVisible(false);
     };
