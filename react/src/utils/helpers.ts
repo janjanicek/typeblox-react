@@ -9,7 +9,7 @@ export const getRange = () => {
 export const extractVideoEmbedInfo = (url: string) => {
   // YouTube
   const ytMatch = url.match(
-    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/,
   );
   if (ytMatch) {
     return {
@@ -22,7 +22,7 @@ export const extractVideoEmbedInfo = (url: string) => {
 
   // Vimeo
   const vimeoMatch = url.match(
-    /(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)(\d+)/
+    /(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)(\d+)/,
   );
   if (vimeoMatch) {
     return {
@@ -34,9 +34,7 @@ export const extractVideoEmbedInfo = (url: string) => {
   }
 
   // Veed.io
-  const veedMatch = url.match(
-    /veed\.io\/(?:view|embed)\/([A-Za-z0-9-]+)/
-  );
+  const veedMatch = url.match(/veed\.io\/(?:view|embed)\/([A-Za-z0-9-]+)/);
   if (veedMatch) {
     return {
       provider: "veed",
@@ -47,9 +45,7 @@ export const extractVideoEmbedInfo = (url: string) => {
   }
 
   // Loom
-  const loomMatch = url.match(
-    /loom\.com\/share\/([A-Za-z0-9]+)/
-  );
+  const loomMatch = url.match(/loom\.com\/share\/([A-Za-z0-9]+)/);
   if (loomMatch) {
     return {
       provider: "loom",
@@ -60,9 +56,7 @@ export const extractVideoEmbedInfo = (url: string) => {
   }
 
   // Dailymotion
-  const dailymotionMatch = url.match(
-    /dailymotion\.com\/video\/([A-Za-z0-9]+)/
-  );
+  const dailymotionMatch = url.match(/dailymotion\.com\/video\/([A-Za-z0-9]+)/);
   if (dailymotionMatch) {
     return {
       provider: "dailymotion",
@@ -73,9 +67,7 @@ export const extractVideoEmbedInfo = (url: string) => {
   }
 
   // Wistia
-  const wistiaMatch = url.match(
-    /wistia\.com\/medias\/([a-zA-Z0-9]+)/
-  );
+  const wistiaMatch = url.match(/wistia\.com\/medias\/([a-zA-Z0-9]+)/);
   if (wistiaMatch) {
     return {
       provider: "wistia",
@@ -86,9 +78,7 @@ export const extractVideoEmbedInfo = (url: string) => {
   }
 
   // Facebook
-  const fbMatch = url.match(
-    /facebook\.com\/.*\/videos\/([0-9]+)/
-  );
+  const fbMatch = url.match(/facebook\.com\/.*\/videos\/([0-9]+)/);
   if (fbMatch) {
     return {
       provider: "facebook",
@@ -99,9 +89,7 @@ export const extractVideoEmbedInfo = (url: string) => {
   }
 
   // Twitch
-  const twitchMatch = url.match(
-    /twitch\.tv\/videos\/([0-9]+)/
-  );
+  const twitchMatch = url.match(/twitch\.tv\/videos\/([0-9]+)/);
   if (twitchMatch) {
     return {
       provider: "twitch",

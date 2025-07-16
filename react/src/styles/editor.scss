@@ -95,6 +95,11 @@
       top: -1.5rem !important;
     }
 
+    &.tbx-menu-highlighted {
+      background-color: var(--color-selected-blue);
+      border: 0;
+    }
+
     & > .tbx-actions {
       display: flex;
       position: absolute;
@@ -215,6 +220,7 @@
     border: 1px solid var(--color-gray-2);
     background-color: var(--color-white);
     padding: 0.5rem;
+    text-align: left;
 
     &:has(h5) {
       padding: 0 0.5rem 0.5rem 0.5rem;

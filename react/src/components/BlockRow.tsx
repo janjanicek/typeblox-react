@@ -48,6 +48,7 @@ const BlockRow: FC<BlockRowProps> = ({
   onUpdate,
 }) => {
   const [showContentSuggestor, setShowContentSuggestor] = useState(false);
+  const [isMenuHovered, setIsMenuHovered] = useState(false);
 
   const { setCurrentBlock } = useEditorStore();
   const { activeBlockId, hide, show } = useToolbar();
@@ -265,11 +266,14 @@ const BlockRow: FC<BlockRowProps> = ({
       dragListeners={dragListeners}
     >
       <div
-        className="tbx-block relative"
+        className={`tbx-block relative ${isMenuHovered ? "tbx-menu-highlighted" : ""}`}
         data-is-selected={block.isSelected}
         ref={blockMenuReference}
       >
-        <BlockMenu referenceElement={blockMenuReference} />
+        <BlockMenu
+          referenceElement={blockMenuReference}
+          onHoverChange={setIsMenuHovered}
+        />
         {editorSettings?.toolbarType === "inline" && <Toolbar />}
         {renderContent()}
         <ContextualMenu

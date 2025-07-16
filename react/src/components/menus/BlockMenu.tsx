@@ -5,9 +5,10 @@ import useEditorStore from "../../stores/EditorStore";
 
 interface BlockMenuProps {
   referenceElement: RefObject<HTMLElement>; // Accept external reference
+  onHoverChange?: (isHovered: boolean) => void; // Callback for hover state changes
 }
 
-const BlockMenu: FC<BlockMenuProps> = ({ referenceElement }) => {
+const BlockMenu: FC<BlockMenuProps> = ({ referenceElement, onHoverChange }) => {
   const { getComponent } = useBlock();
   const { menuSettings } = useEditorStore();
 
@@ -26,6 +27,8 @@ const BlockMenu: FC<BlockMenuProps> = ({ referenceElement }) => {
         ref={refs.setFloating}
         className="tbx-actions items-center flex"
         style={floatingStyles}
+        onMouseEnter={() => onHoverChange?.(true)}
+        onMouseLeave={() => onHoverChange?.(false)}
       >
         {menuSettings["block"].map((moduleName, index) => {
           const component = getComponent({ name: moduleName }); // Retrieve the component

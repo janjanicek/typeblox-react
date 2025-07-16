@@ -163,5 +163,5 @@ export const Video = forwardRef<HTMLDivElement, VideoBloxProps>(
         />
       </div>
     );
-  }
+  },
 );
